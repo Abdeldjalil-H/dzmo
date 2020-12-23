@@ -1,0 +1,61 @@
+{%extends 'control/base.html'%}
+
+{% block content %}
+
+<div class="container">
+	<div class="row" style="margin:0px; margin-top:25px;">
+		<div class="col-md-2 col-sm-3 col-xs-12">
+			<div class="list-group" role="tablist">
+				<h4 class="list-group-item-heading" style="margin-bottom: 20px;">الدروس</h4>
+				{% for lesson in chapter.lesson_set.all|dictsort:'order' %}
+					<a id="l{{lesson.pk}}" class="list-group-item list-group-item-action" href="{% url 'lessons:detail' chapter.topic chapter.slug lesson.slug%}" role="tab">{{lesson.title}}</a>
+				{%endfor%}
+			</div>
+			<div class="list-group" role="tablist">
+				<h4 class="list-group-item-heading" style="margin-top : 20px; margin-bottom: 20px;">التمارين</h4>
+				{% for ex in chapter.exercice_set.all|dictsort:'points' %}
+					<a id ="ex{{ex.pk}}" class="list-group-item list-group-item-action {%if ex in solved_exercices%}list-group-item-success{%elif ex in wrong_exercices%}list-group-item-danger{%endif%}" href="{% url 'lessons:exercice' chapter.topic chapter.slug ex.pk %}" role="tab">
+						تمرين {{forloop.counter}}</a>
+				{%endfor%}
+			</div>
+  	</div>
+			
+			
+		<div class="col-md-10 col-sm-9 col-xs-12">
+			{%block lesson_content%}
+			{%if lesson%}
+			<h1> {{ lesson.title }}</h1>
+			<p>
+    		{{ lesson.content }}
+			</p>
+			{%if lesson.get_links%}
+			<h3>روابط مفيدة</h3>
+				<ol class="list-unstyled">
+				{%for link in lesson.get_links%}
+					<li>
+						<a target="blank" href="{{link}}">الرابط {{forloop.counter}}</a>
+					</li>
+				{%endfor%}
+				</ol>
+			{%endif%}
+			{%if lesson.video%}
+			<div class="embed-responsive embed-responsive-16by9 my-5">
+				<iframe src="{{lesson.video}}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+			</div>
+			{%endif%}
+			<script>   
+				var v = document.getElementById("l{{lesson.pk}}"); 
+				v.className += " active"; 
+				</script>
+			{%else%}
+			<p>
+				لا يمكنك تصفح هذا الدرس، عليك بإكمال المحاور اللازمة.
+			</p>
+			{%endif%}
+			{%endblock%}
+		</div>
+		
+	</div>
+</div>
+
+{%endblock%}

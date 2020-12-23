@@ -1,0 +1,24 @@
+{%extends 'control/base.html' %}
+{%load crispy_forms_tags %}
+{%block content%}
+<div class="container col-lg-4 col-md-6 col-sm-9 p-4 mr-2 mr-sm-1">
+    <h1>
+        {%if profile%}
+        الملف الشخصي
+        {%else%}
+        تغير كلمة المرور
+        {%endif%}
+    </h1>
+
+    <form method='POST'>
+    {%csrf_token%}
+    {{form|crispy}}
+    <button type='submit' class="btn btn-outline-primary">{{btn}}</button>
+</form>
+{%if profile%}
+<a href="{%url 'accounts:password_change' %}" class="btn btn-outline-primary my-2">
+	تغير كلمة المرور
+</a>
+{%endif%}
+</div>
+{%endblock%}

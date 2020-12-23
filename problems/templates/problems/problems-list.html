@@ -1,0 +1,48 @@
+{% extends 'control/base.html' %}
+{% load mathfilters %}
+{%block content %}
+<div class="container my-4 my-md-5">
+    <h1>مسائل <span id="topic"></span></h1>
+{% for level in problems_list %}
+    <h3>المستوى {{ forloop.counter }}</h3>
+    <p> لكل مسألة {{ forloop.counter|mul:15 }} نقطة.</p>
+    {% for problem in level %}
+        <div class="card my-4">     
+        <div class="card-header" style="background-color:{%if problem in solved_problems%}#9ff99c{%elif problem in wrong_problems%}#ed969e{%else%}#f8ffb2{%endif%};">
+					<h3><a href="{% url 'problems:submit' problem.chapter.topic problem.pk%}">
+							مسألة {{problem.id}}
+					</a></h3>
+            </div>                 
+            <div class="card-body" style="background-color:{%if problem in solved_problems%}#bcffba{%elif problem in wrong_problems%}#f5c6cb{%else%}#feffba{%endif%};">
+                <p class="card-text">
+                {{problem.statement}}
+                </p>
+            </div>
+        </div>
+    {% endfor %}
+{% endfor %}
+</div>
+<script>
+    var str = window.location.pathname.replace('/problems/','').replace('/','')
+    var topic = ''
+    switch(str) {
+    case 'a':
+        topic = 'الجبر'
+        break;
+    case 'b':
+        topic = 'الأساسيات'
+        break;
+    case 'c':
+        topic = 'التوفيقات'
+        break;
+    case 'g':
+        topic = 'الهندسة'
+        break;
+    case 'nt':
+        topic = 'نظريات الأعداد'
+        break;
+    }
+    document.getElementById('topic').innerHTML = topic
+</script>
+{% endblock %}
+

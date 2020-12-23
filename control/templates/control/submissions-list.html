@@ -1,0 +1,38 @@
+{%extends 'control/base.html'%}
+{% block content %}
+<div>
+    {% for level in subs_list %}
+    <div class="container">
+        <h3>المستوى {{ forloop.counter }}</h3>
+        <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">المسألة</th>
+                <th scope="col">التلميذ</th>
+                <th scope="col">الحالة</th>
+              </tr>
+            </thead>
+            <tbody>
+        {% for sub in level %}
+            <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                <td class=" "><a href="{% url 'problems:submit' sub.problem.chapter.topic sub.problem.pk %}">
+                    {{sub.problem.chapter.topic}} {{sub.problem.pk}}
+                </a></td>
+                <td class=""><a href="">
+                    {{ sub.student.username }}
+                </a></td>
+                <td class=""><a href="{{sub.pk}}">
+                    {% if sub.status == 'submit' %} إجابة جديدة
+                    {% else %} تعليق جديد
+                    {% endif %}
+                </a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+    </div>
+    {% endfor %}
+</div>
+{%endblock%}

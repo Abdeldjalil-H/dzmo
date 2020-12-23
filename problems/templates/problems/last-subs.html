@@ -1,0 +1,30 @@
+{%extends 'control/base.html'%}
+{%block content%}
+<div class="container">
+<table class="table col-lg-9 my-4">
+    <thead>
+      <tr>
+        <th scope="col">تقييم المحاولة</th>
+        <th scope="col">تاريخ الإرسال</th>
+        <th scope="col">المسألة</th>
+      </tr>
+    </thead>
+    <tbody>
+{% for sub in user_subs%}
+       
+    <tr class="table-{% if sub.status == 'submit' %}warning{% elif sub.correct %}success{% else %}danger{%endif%}">
+        <td>
+            {% if sub.status == 'submit' %}
+            {% elif sub.correct %}صحيحة
+            {% else %}خاطئة{%endif%}
+        </td>
+        <td> {{ sub.submited_on}} </td>
+        {%with topic=sub.problem.chapter.topic pk=sub.problem.pk%}
+        <td><a href="{%url 'problems:submit' topic pk%}?sub={{sub.pk}}">{{topic}} {{pk}}</a></td>
+        {%endwith%}
+    </tr>
+{%endfor%}
+</tbody>
+</table>
+</div>
+{%endblock%}

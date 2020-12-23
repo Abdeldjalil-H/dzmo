@@ -1,0 +1,151 @@
+{% extends 'control/base.html' %}
+{% load crispy_forms_tags%}
+{% block content %}
+<div class="container my-4">
+    <h2>
+        مسألة 
+        {% if problem.chapter.topic == 'a' %} جبر
+        {% elif problem.chapter.topic == 'g'%} هندسة
+        {% elif problem.chapter.topic == 'c'%} توفيقات
+        {% elif problem.chapter.topic == 'nt'%} نظرية أعداد
+        {%endif%}
+        مستوى
+        {{ problem.level }}
+    </h2>
+<p class="my-4">
+    {{problem.statement}}
+</p>
+{%if show_btn %}
+<form >
+    <button type = 'submit' name = 'sub' value ='0' class="btn btn-outline-secondary" >{{btn}}</button>
+</form>
+{% endif%}
+</div>
+{% if not show_btn and form%}
+<div class="container">
+    <div id="MathOutput"></div>
+    <div>
+        <input class="my-3 btn btn-primary" type="button" value="معاينة" id="render" onclick="convert()"/>
+    </div>
+<div class="form-group">
+<form method='POST' enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form|crispy }}
+    
+    <button type='submit' name ='sub' value ='submit' class="btn btn-outline-success"> تقديم الحل</button>
+    <button type='submit' name ='sub' value ='draft' class="btn btn-outline-warning">حفظ كمسودة</button>
+    {% if show_del %}
+    <a href="{%url 'problems:delete-sub' problem.chapter.topic problem.pk%}" class="btn btn-outline-danger">حذف المسودة </button>
+    {%endif%}
+</form>
+</div>
+</div>
+{% endif%}
+{% if user_subs %}
+<div class = "container">
+    <h3>
+    محاولاتك في هذه المسألة
+    </h3>
+<table class="table col-lg-9 my-4">
+    <thead>
+      <tr>
+        <th scope="col">تقييم المحاولة</th>
+        <th scope="col">تاريخ الإرسال</th>
+        <th scope="col"></th>
+      </tr>
+    </thead>
+    <tbody>
+{% for sub in user_subs%}
+       
+    <tr class="table-{% if sub.status == 'submit' %}warning{% elif sub.correct %}success{% else %}danger{%endif%}">
+        <td>
+            {% if sub.status == 'submit' %}
+            {% elif sub.correct %}صحيحة
+            {% else %}خاطئة{%endif%}
+        </td>
+        <td> {{ sub.submited_on}} </td>
+        <td><a href="?sub={{sub.pk}}"> عرض </a></td>
+    </tr>
+
+{%endfor%}
+</tbody>
+</table>
+</div>
+{%endif%}
+
+{% if all_sols%}
+<div class="container">
+<h3>
+    إجابات التلاميذ الآخرين
+    </h3>
+<table class="table col-lg-9 my-4">
+    <thead>
+      <tr>
+        <th scope="col">التلميذ</th>
+        <th scope="col">تاريخ الإرسال</th>
+        <th scope="col"></th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for sol in all_sols%}
+        <tr>
+            <td><a href="">{{sol.student.username}}</a></td>
+            <td>{{ sol.submited_on}}</td>
+            <td><a href="{%url 'problems:submit' problem.chapter.topic problem.pk%}?sub={{sol.pk}}">عرض</a></td>
+        </tr>
+    {%endfor%}
+    </tbody>
+</table>
+</div>
+{%endif%}
+
+{% if this_sub%}
+<div class="container">
+    <h3>الإجابة</h3>
+<div class="card my-4">
+    <div class="card-header" style="background-color: rgb(253, 255, 163) ;">
+    {{this_sub.submited_on}}
+    <a class="card-link" href=""> {{this_sub.student.username}} </a>
+    </div>
+    <div class="card-body">
+        <p class="card-text">
+        {{ this_sub.solution }}
+        </p>
+        {%if this_sub.file%}
+            <iframe frameborder="0" src="{{this_sub.file.url}}" type="" width="100%"></iframe>
+        {%endif%}
+    </div>
+</div>
+</div>
+{% endif %}
+{%if comments%}
+<div class="container">
+<h2>التعليقات</h2>
+{% for comment in comments%}
+<div class="card my-4">
+    <div class="card-header" style="background-color: rgb(253, 255, 163) ;">
+        {{comment.date}}
+        <a href="">{{comment.user}}</a>
+    </div>
+    <div class="card-body">
+        <p class="card-text">
+        {{comment.content}}
+        </p>
+    </div>
+</div>
+{%endfor%}
+</div>
+{% endif %}
+{%if cmnt%}
+<div class="container">      
+<div class="form-group">
+<form method='POST'>
+    {% csrf_token %}
+     {{cmnt|crispy}}
+     <button type ='submit' class="btn btn-outline-secondary">تعليق</button>
+</form>
+</div>
+</div>
+{%endif%}
+
+{% endblock %}

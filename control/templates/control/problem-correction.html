@@ -1,0 +1,14 @@
+{% load crispy_forms_tags %}
+{% include 'problems/problem-submit.html' %}
+<div class="container my-4">
+<form method='POST'>
+    {% csrf_token %}
+    {{ correction_form|crispy }}
+    {% if judge %}
+    <button type = 'submit' name ='status' value = 'correct' class="btn btn-success">إجابة صحيحة</button>
+    <button type = 'submit' name ='status' value = 'wrong' class="btn btn-danger">إجابة خاطئة</button>
+    {% else %}
+    <button type = 'submit' class="btn btn-outline-secondary">إرسال التعليق</button>
+    {%endif%}
+</form>
+</div>

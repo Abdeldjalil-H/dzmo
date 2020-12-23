@@ -1,0 +1,23 @@
+{%extends 'control/base.html'%}
+{%block content%}
+<div class="container">
+	<table class="table">
+		<thead>
+			<tr>
+				<th scope="col">الرتبة</th>
+				<th scope="col">التلميذ</th>
+				<th scope="col">النقاط</th>
+				<th scope="col">تاريخ الإنضمام</th>
+			</tr>
+		</thead>
+		<tbody>
+			{%for student in students_list%}
+			<tr id="student{{student.pk}}">
+				<th scope="row">{{student.progress.rank}}</th>
+				<td>{{student.username}}</td>
+				<td>{{student.progress.points}}</td>
+				<td>{{student.join_date}}</td>
+			</tr>
+			{%endfor%}
+</div>
+{%endblock%}

@@ -1,0 +1,42 @@
+{% extends 'lessons/lesson-detail.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% block lesson_content %}
+<h2><span id="ex_num"></span> 
+    ({{exercice.points}} نقاط)</h2>
+<p> {{ exercice.content }}</p>
+{% if not correct %}
+<form method = 'POST' class="group-from col-sm-12 col-md-8 col-lg-4">
+    {% csrf_token %}
+    {{ form }}
+    <button type='submit' class="btn my-1">تقديم الإجابة</button>
+</form>
+{% else %}
+<h3>الإجابة</h3>
+{%if exercice.category != 'result' %}
+    <ul class="list-unstyled">
+    {% for choice in exercice.get_choices %}
+    {%if forloop.counter0 in answer%} <img src="{% static 'lessons/v.svg' %}" alt="V"/>
+    {%else%} <img src="{% static 'lessons/x.svg' %}" alt="X"/>
+    {%endif%}
+    <li>
+        {{choice}}
+    </li>
+    {% endfor %}
+</ul>
+    {%else%}
+    <p>
+        {{exercice.solution}}
+    </p>
+    {%endif%}
+<h3>الشرح</h3>
+<p>
+    {{exercice.explanation}}
+</p>
+{% endif %}
+<script>   
+    var v = document.getElementById("ex{{exercice.pk}}"); 
+    v.className += " active";
+    document.getElementById("ex_num").innerHTML = v.innerHTML; 
+</script>
+{%endblock%}

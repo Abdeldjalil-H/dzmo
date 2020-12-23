@@ -1,0 +1,19 @@
+{%extends 'lessons/lesson-detail.html'%}
+{%block lesson_content%}
+{%if chapter.prereq.all%}
+<h3>المكتسبات اللازمة</h3>
+<ol class="list-unstyled">
+	{% for ch in chapter.prereq_chapters %}
+		<li>
+			<a href="{% url 'lessons:chapter' ch.topic ch.slug %}">{{ch.name}}</a>
+		</li>
+	{%endfor%}
+</ol>
+{%endif%}
+<h1>
+	{{chapter.name}}
+</h1>
+<p>
+	{{chapter.descr}}
+</p>
+{%endblock%}
