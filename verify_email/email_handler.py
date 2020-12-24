@@ -26,7 +26,7 @@ class _VerifyEmail:
     def __make_verification_url(self, current_site, inactive_user, useremail):
         token = self.__get_hashed_token(inactive_user)
         email_enc = urlsafe_b64encode(str(useremail).encode('utf-8')).decode('utf-8')
-        link = f"http://127.0.0.1:8000/accounts/verification/user/verify-email/{email_enc}/{token}/"
+        link = f"http://{current_site}/accounts/verification/user/verify-email/{email_enc}/{token}/"
 
         return link
 
