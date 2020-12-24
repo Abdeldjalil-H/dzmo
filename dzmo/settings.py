@@ -25,7 +25,7 @@ AWS_ACCESS_KEY_ID='AKIAYGTGE2PPY2YR364N'
 AWS_SECRET_ACCESS_KEY='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'
 AWS_STORAGE_BUCKET_NAME='algeriamo'
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['dzmo.herokuapp.com']
 
