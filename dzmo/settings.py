@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY='c3431ee882033413b0d40835acb1bf5d6664cdddd0430dfead8738602c56'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['dzmo.herokuapp.com']
 
