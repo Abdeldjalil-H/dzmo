@@ -21,9 +21,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY='c3431ee882033413b0d40835acb1bf5d6664cdddd0430dfead8738602c56'
-
+AWS_ACCESS_KEY_ID='AKIAYGTGE2PPY2YR364N'
+AWS_SECRET_ACCESS_KEY='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'
+AWS_STORAGE_BUCKET_NAME='algeriamo'
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['dzmo.herokuapp.com']
 
@@ -46,6 +48,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'mathfilters',
     'verify_email',
+    'storages',
 ]
 
 AUTH_USER_MODEL = 'accounts.User' #changes the default user model to ours
@@ -153,3 +156,7 @@ LOGOUT_REDIRECT_URL = '/accounts/login/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 django_heroku.settings(locals())
+
+AWS_S3_FILE_OVERWRITE = False
+AWS_DEFAULT_ACL = None
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'

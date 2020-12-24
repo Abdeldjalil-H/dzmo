@@ -25,9 +25,9 @@
 			{%block lesson_content%}
 			{%if lesson%}
 			<h1> {{ lesson.title }}</h1>
-			<p>
-    		{{ lesson.content }}
-			</p>
+			<div>
+			{{ lesson.content|safe }}
+			</div>
 			{%if lesson.get_links%}
 			<h3>روابط مفيدة</h3>
 				<ol class="list-unstyled">
