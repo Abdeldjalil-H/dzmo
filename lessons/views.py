@@ -130,6 +130,6 @@ def exerciceview(request, pk, chapter_slug,**kwargs):
                     request.user.progress.completed_chapters.add(chapter)
             obj.add_try()
             obj.save()
-            return redirect(reverse('lessons:exercice', kwargs={'topic':chapter.topic, 'chapter':chapter.slug, 'pk': exercice.pk}))
+            return redirect(reverse('lessons:exercice', kwargs={'topic':chapter.topic, 'chapter_slug':chapter.slug, 'pk': exercice.pk}))
     
     return render(request, template_name, context)
