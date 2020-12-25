@@ -17,7 +17,7 @@
     <div class="d-flex justify-content-center py-2 py-sm-2"><h4>الدروس</h4></div>
     <div class="d-flex justify-content-center py-2 py-sm-2">
       
-        <ol class="list-unstyled">   
+        <ol class="list-unstyled px-0">   
             {% for lesson in chapter.lesson_set.all|dictsort:'order' %}
                 <li><a href="{% url 'lessons:detail' chapter.topic chapter.slug lesson.slug %}" class="card-link">
                     {{lesson.order}}-{{lesson.title}}</a></li>
@@ -31,7 +31,7 @@
     <div class="d-flex justify-content-center py-2 py-sm-2">
         <div dir ="ltr" class="btn-group" role="group" aria-label="First group">
             {% for ex in chapter.exercice_set.all %}
-            <a type="button" class="btn {%if ex in solved_exercices%}btn-success{%elif ex in wrong_exercices%}btn-danger" style="{%else%}background-color: #e0e6e1;{%endif%}" href="{% url 'lessons:exercice' topic=chapter.topic chapter=chapter.slug pk=ex.pk%}">
+            <a type="button" class="btn {%if ex in solved_exercices%}btn-success{%elif ex in wrong_exercices%}btn-danger" style="{%else%}background-color: #e0e6e1;{%endif%}" href="{% url 'lessons:exercice' chapter.topic chapter.slug ex.pk%}">
                 {{forloop.counter}} 
             </a>
             {%endfor%}
