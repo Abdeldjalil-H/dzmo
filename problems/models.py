@@ -59,7 +59,7 @@ class ProblemSubmission(models.Model):
     student     = models.ForeignKey(settings.AUTH_USER_MODEL,
                                     on_delete = models.CASCADE)
     file        = models.FileField(blank = True, null = True,
-                                    #upload_to = 'sumbittions'
+                                    upload_to = 'students_subs'
                                     )
                                     
     def __str__(self):

@@ -110,7 +110,7 @@ class StudentProgress(models.Model):
     completed_chapters  = models.ManyToManyField(Chapter, blank = True)
     solved_problems     = models.ManyToManyField(Problem,blank = True)
     solved_exercices    = models.ManyToManyField(Exercice, blank = True)
-    last_submissions    = models.ManyToManyField(ProblemSubmission)
+    last_submissions    = models.ManyToManyField(ProblemSubmission, blank = True)
     points              = models.IntegerField(default = 0, editable = False)
     
     @property
