@@ -29,7 +29,6 @@ AWS_S3_REGION_NAME = "eu-west-3"
 AWS_S3_SIGNATURE_VERSION = "s3v4"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
-
 ALLOWED_HOSTS = ['dzmo.herokuapp.com']
 
 

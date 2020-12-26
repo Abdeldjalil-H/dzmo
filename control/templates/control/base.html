@@ -55,6 +55,14 @@
               button.disabled = false;
             });
         }
+        // document.addEventListener('DOMContentLoaded', ()=> {
+        //   var v = document.getElementsByTagName("mjx-container");
+        //   var k = 0;
+        //   while (k < v.length){
+        //     v[k].className += " overflow-auto";
+        //     k++;
+        //   }
+        // });
       </script>
         <style>
             *{
@@ -62,7 +70,9 @@
                 text-align: right;
                 /*font-size: 20px;*/
             }
-      
+            mjx-container {
+              overflow-x: auto;
+            }
         .dropdown-menu {
 			text-align: right !important;
 			}
