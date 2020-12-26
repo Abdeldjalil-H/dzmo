@@ -65,7 +65,7 @@ class User(AbstractBaseUser):
     sex             = models.CharField(choices = SEX, max_length = 2, verbose_name='الجنس')
     wilaya          = models.IntegerField(choices = WILAYAS,null = True, verbose_name = 'ولاية الإقامة')
     join_date       = models.DateField(auto_now_add = True, verbose_name='تاريخ الانضمام')
-    username_abrv   = models.CharField(choices = USERNAME_ABRV, default='fl', max_length = 2)
+    username_abrv   = models.CharField(choices = USERNAME_ABRV,verbose_name='طريقة عرض الاسم', default='fl', max_length = 2)
     is_active       = models.BooleanField(default = True) #acitve = can login
     is_staff        = models.BooleanField(default = False)
     is_admin        = models.BooleanField(default = False)

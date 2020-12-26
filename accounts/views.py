@@ -47,6 +47,7 @@ class PersonalAccount(UpdateView):
     model               = User
     fields              = [ 'first_name',
                             'last_name',
+                            'username_abrv',
                             'email',
                             'date_of_birth',
                             'grade',
