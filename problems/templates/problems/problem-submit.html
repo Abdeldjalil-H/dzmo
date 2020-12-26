@@ -115,7 +115,7 @@
         {%if 'image' in this_sub.file.content_type%}
             <img src="{{this_sub.file.url}}" alt="{{this_sub.file.name}}" style="width:100%; max-width:100%"/>
         {%else%}
-            <iframe class="embed-responsive" src="{{this_sub.file.url}}" type="{{this_sub.file.content_type}}" width="100%" height="85vh"></iframe>
+            <iframe class="embed-responsive" src="{{this_sub.file.url}}" type="{{this_sub.file.content_type}}" width="100%" style="height:85vh"></iframe>
         {%endif%}
         {%endif%}
     </div>
