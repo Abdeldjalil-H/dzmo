@@ -134,8 +134,8 @@ class ExerciceSolution(models.Model):
     answer      = models.CharField(max_length = 30)
     num_of_tries= models.IntegerField(default = 0)
 
-    def get_answer(self):
-        return set(self.answer.replace(' ','').split(','))
+    # def get_answer(self):
+    #     return set(self.answer.replace(' ','').split(','))
     
     def add_try(self):
         self.num_of_tries += 1

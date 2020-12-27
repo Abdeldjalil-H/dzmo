@@ -107,7 +107,8 @@ def exerciceview(request, pk, chapter_slug,**kwargs):
         }
     if exercice in request.user.progress.solved_exercices.all():
         context['correct'] = True
-        context['answer'] = [int(x) for x in exercice.get_solution()]
+        if exercice.category != 'result':
+            context['answer'] = [int(x) for x in exercice.solution.split(',')]
         return render(request, template_name, context)
     if request.method == 'POST':
         if form.is_valid():
@@ -118,8 +119,16 @@ def exerciceview(request, pk, chapter_slug,**kwargs):
                                         exercice_id = pk)
             else:
                 obj = obj.first()
-            obj.answer = ','.join(form.cleaned_data['question'])
-            obj.correct = (obj.get_answer() == exercice.get_solution())
+            ans = ''
+            if exercice.category == 'multiple':
+                for char in form.cleaned_data['question']:
+                    ans += str(char) + ','
+                    ans = ans[:-1]
+            else:
+                ans = str(form.cleaned_data['question']).replace(' ','')
+                
+            obj.answer = ans
+            obj.correct = (obj.answer == exercice.solution)
             #if all the exercices are soloved, the open new chapter
             if obj.correct:
                 request.user.progress.solved_exercices.add(exercice)
