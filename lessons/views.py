@@ -123,7 +123,7 @@ def exerciceview(request, pk, chapter_slug,**kwargs):
             if exercice.category == 'multiple':
                 for char in form.cleaned_data['question']:
                     ans += str(char) + ','
-                    ans = ans[:-1]
+                ans = ans[:-1]
             else:
                 ans = str(form.cleaned_data['question']).replace(' ','')
                 
