@@ -109,7 +109,7 @@
     </div>
     <div class="card-body">
         <p class="card-text">
-        {{ this_sub.solution }}
+        {{ this_sub.solution|safe }}
         </p>
         {%if this_sub.file%}
         {%if '.pdf' in this_sub.file.name%}
@@ -133,7 +133,7 @@
     </div>
     <div class="card-body">
         <p class="card-text">
-        {{comment.content}}
+        {{comment.content|safe}}
         </p>
     </div>
 </div>

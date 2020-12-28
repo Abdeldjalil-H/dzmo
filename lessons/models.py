@@ -109,7 +109,7 @@ class Exercice(models.Model):
     solution    = models.CharField( max_length = 20,
                                 verbose_name = 'الإجابة')
     explanation = models.TextField(verbose_name = 'شرح الحل', blank = True)
-    image       = models.ImageField(blank = True)
+    image       = models.ImageField(blank = True, upload_to = 'exercices_images')
     points      = models.IntegerField(choices = EX_POINTS, default = 3)
     
     def get_choices(self):
