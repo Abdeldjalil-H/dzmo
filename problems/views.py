@@ -164,3 +164,10 @@ class LastCorrectedSubs(ListView):
     context_object_name = 'user_subs'
     def queryset(self, **kwargs):
         return self.request.user.progress.last_submissions.all() 
+
+
+def add_problems(statements_list, chapter, level):
+    for pr in statements_list:
+        if pr:
+            a = Problem(statement = pr, chapter = chapter, level= level)
+            a.save()
