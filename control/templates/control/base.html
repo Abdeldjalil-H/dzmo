@@ -91,9 +91,9 @@
     </head>
 
 <body>
-  {%block nav-bar%}
-  <nav class="navbar navbar-expand-lg navbar-dark bg-success sticky-top">
-    <div class="container">
+{%block nav-bar%}
+<nav class="navbar navbar-expand-lg navbar-dark bg-success sticky-top">
+  <div class="container">
     <!--
     <a class="navbar-brand" href="#">تحضير الفريق الجزائري لأولمبياد الرياضيات</a>
     -->
@@ -103,7 +103,7 @@
   
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav mr-auto list-unstyled">
-        {%with n=user.progress.last_submissions.count%}
+      {%with n=user.progress.last_submissions.count%}
         {%if n%}
         <li>
         <a href="{%url 'problems:last-corrected' %}" type="button" class="btn btn-info">
@@ -176,11 +176,10 @@
         </li>
         {%endif%}
       </ul>
-      
     </div>
   </div>
-  </nav>
-  {%endblock%}
+</nav>
+{%endblock%}
   {%if messages %}
   <div class="container">
     {%for msg in messages%}
