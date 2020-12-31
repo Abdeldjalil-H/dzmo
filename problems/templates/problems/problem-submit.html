@@ -27,6 +27,19 @@
     <div>
         <input class="my-3 btn btn-primary" type="button" value="معاينة" id="render" onclick="convert()"/>
     </div>
+    <div class="m-1">
+        <input type="checkbox" onclick="change_dir('MathInput')">
+        الكتابة من اليسار إلى اليمين.
+    </div>
+    <script>
+        function change_dir(id){
+            var elem = document.getElementById(id);
+            var inverse_dir = {"":"ltr", "rtl":"ltr", "ltr":"rtl"};
+            var inverse_align = {"":"left","left":"right", "right":"left"};
+            elem.style.textAlign = inverse_align[elem.style.textAlign];
+            elem.dir = inverse_dir[elem.dir]; 
+        }
+    </script>
 <div class="form-group">
 <form method='POST' enctype="multipart/form-data">
     {% csrf_token %}
