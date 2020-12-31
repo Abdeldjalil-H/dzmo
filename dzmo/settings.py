@@ -28,7 +28,7 @@ AWS_STORAGE_BUCKET_NAME='algeriamo'
 AWS_S3_REGION_NAME = "eu-west-3"
 AWS_S3_SIGNATURE_VERSION = "s3v4"
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False #(os.environ.get('DEBUG_VALUE') == "True")
+DEBUG = False #os.environ.get('DEBUG_VALUE')
 ALLOWED_HOSTS = ['dzmo.herokuapp.com']
 
 
@@ -71,7 +71,7 @@ ROOT_URLCONF = 'dzmo.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
