@@ -9,11 +9,14 @@ from .forms import UserAdminCreationForm, UserAdminChangeForm
 from .models import StudentProgress
 User = get_user_model()
 
+class ProgressInline(admin.StackedInline):
+    model = StudentProgress
+
 class UserAdmin(BaseUserAdmin):
     # The forms to add and change user instances
     form = UserAdminChangeForm
     add_form = UserAdminCreationForm
-
+    inlines = [ProgressInline]
     # The fields to be used in displaying the User model.
     # These override the definitions on the base UserAdmin
     # that reference specific fields on auth.User.
@@ -21,8 +24,8 @@ class UserAdmin(BaseUserAdmin):
     list_filter = ('is_admin','is_staff','is_active',)
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
-        ('Personal info', {'fields': ('first_name','last_name','date_of_birth')}),
-        ('Permissions', {'fields': ('is_admin','is_staff','is_active', 'is_corrector')}),
+        ('المعلومات الشخصية', {'fields': ('first_name','last_name','date_of_birth','wilaya','grade','sex',)}),
+        ('التخويلات', {'fields': ('is_admin','is_staff','is_active', 'is_corrector')}),
     )
     # add_fieldsets is not a standard ModelAdmin attribute. UserAdmin
     # overrides get_fieldsets to use this attribute when creating a user.
@@ -36,5 +39,4 @@ class UserAdmin(BaseUserAdmin):
     ordering = ('email',)
     filter_horizontal = ()
 
-admin.site.register(StudentProgress)
 admin.site.register(User, UserAdmin)

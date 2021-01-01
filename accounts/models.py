@@ -69,7 +69,7 @@ class User(AbstractBaseUser):
     is_active       = models.BooleanField(default = True) #acitve = can login
     is_staff        = models.BooleanField(default = False)
     is_admin        = models.BooleanField(default = False)
-    #is_corrector    = models.BooleanField(default = False)
+    is_corrector    = models.BooleanField(default = False)
 
     
     USERNAME_FIELD = 'email'
@@ -80,8 +80,8 @@ class User(AbstractBaseUser):
     def __str__(self):
         return self.email
     def get_full_name(self):
-        if first_name or last_name:
-            return first_name + ' ' + last_name
+        if self.first_name or self.last_name:
+            return self.first_name + ' ' + self.last_name
         return self.email
     def get_short_name(self):
         if self.username_abrv == 'f':
@@ -101,15 +101,29 @@ class User(AbstractBaseUser):
             return self.last_name + ' ' + self.first_name[0]
         return self.first_name + ' ' + self.last_name
 
+    class Meta:
+        verbose_name        = 'مستخدم'
+        verbose_name_plural = 'المستخدمون'
+
 class StudentProgress(models.Model):
     student             = models.OneToOneField(settings.AUTH_USER_MODEL,
                                                related_name = 'progress',
                                                on_delete = models.CASCADE
                                                ) #it may be changed
-    completed_chapters  = models.ManyToManyField(Chapter, blank = True)
-    solved_problems     = models.ManyToManyField(Problem,blank = True)
-    solved_exercices    = models.ManyToManyField(Exercice, blank = True)
-    last_submissions    = models.ManyToManyField(ProblemSubmission, blank = True)
+    completed_chapters  = models.ManyToManyField(Chapter, 
+                                            blank = True,
+                                            verbose_name='المحاور المتمة'
+                                            )
+    solved_problems     = models.ManyToManyField(Problem,
+                                                blank = True,
+                                                verbose_name= 'المسائل المحلولة',
+                                                )
+    solved_exercices    = models.ManyToManyField(Exercice,
+                                                blank = True,
+                                                verbose_name = 'التمارين المحلولة',
+                                                )
+    last_submissions    = models.ManyToManyField(ProblemSubmission, blank = True,
+                                                verbose_name = 'آخر المحاولات المقدمة',)
     points              = models.IntegerField(default = 0, editable = False)
     
     @property
@@ -129,3 +143,10 @@ class StudentProgress(models.Model):
             problems = Problem.objects.filter(chapter__in = self.completed_chapters.all())
         print(problems)
         return problems
+
+    def __str__(self):
+        return self.student.email
+
+    class Meta:
+        verbose_name        = 'تقدم التلميذ'
+        verbose_name_plural = 'تقدم التلاميذ'

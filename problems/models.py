@@ -70,6 +70,10 @@ class ProblemSubmission(models.Model):
             self.submited_on = timezone.now()
         super().save()
 
+    class Meta:
+        verbose_name        = 'إجابة مسألة'
+        verbose_name_plural = 'إجابات المسائل'
+
 class Comment(models.Model):
     content     = models.TextField('')
     user        = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete = models.SET_NULL, null = True)
@@ -77,3 +81,7 @@ class Comment(models.Model):
     submission  = models.ForeignKey(ProblemSubmission,
                                     related_name = 'comments',
                                     on_delete= models.CASCADE)
+
+    class Meta:
+        verbose_name        = 'تعليق'
+        verbose_name_plural = 'التعليقات'

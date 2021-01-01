@@ -71,14 +71,16 @@
         <a class="nav-link" href="{% url 'accounts:signup' %}">التسجيل</a>
       </li>
       {%endif%}
-      {%if user.is_staff%}
+      {%if user.is_corrector or user.is_staff%}
       <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           لوحة التحكم
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
           <a class="dropdown-item" href="{%url 'control:subs-list' %}">تصحيح المسائل</a>
-          <a class="dropdown-item" href=""></a>
+          {%if user.is_staff%}
+          <a class="dropdown-item" href="/admin/">إدارة الموقع</a>
+          {%endif%}
         </div>
       </li>
       {%endif%}

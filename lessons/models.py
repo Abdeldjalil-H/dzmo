@@ -140,3 +140,6 @@ class ExerciceSolution(models.Model):
     def add_try(self):
         self.num_of_tries += 1
         self.save()
+    class Meta:
+        verbose_name        = 'إجابة التمرين'
+        verbose_name_plural = 'إجابات التمارين'
