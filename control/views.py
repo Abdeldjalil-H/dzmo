@@ -14,7 +14,7 @@ from problems.models import(
 from .models import MainPagePost
 class StaffRequired(UserPassesTestMixin):
     def test_func(self):
-        return self.request.user.is_staff
+        return self.request.user.is_staff or self.request.user.is_corrector
 #class SubsList(UserPassesTestMixin, ListView):
 class SubsList(StaffRequired, ListView):
     template_name       = 'control/submissions-list.html'

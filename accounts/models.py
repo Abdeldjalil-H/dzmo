@@ -69,8 +69,7 @@ class User(AbstractBaseUser):
     is_active       = models.BooleanField(default = True) #acitve = can login
     is_staff        = models.BooleanField(default = False)
     is_admin        = models.BooleanField(default = False)
-    
-
+    is_corrector    = models.BooleanField(default = False)
 
     
     USERNAME_FIELD = 'email'
