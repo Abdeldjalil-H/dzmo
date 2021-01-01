@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings
 from lessons.models import Chapter
-
+from django.utils import timezone
 
 LEVELS = [(1,'1'),(2,'2'),(3,'3'),(4,'4'),(5,'5')]
 
@@ -53,7 +53,7 @@ class ProblemSubmission(models.Model):
                                    choices = STATUS)
     correct     = models.BooleanField(null = True)
     solution    = models.TextField()
-    submited_on = models.DateTimeField(auto_now = True)
+    submited_on = models.DateTimeField(blank = True, null = True)
     problem     = models.ForeignKey(Problem,
                                     on_delete = models.CASCADE)
     student     = models.ForeignKey(settings.AUTH_USER_MODEL,
@@ -64,6 +64,11 @@ class ProblemSubmission(models.Model):
                                     
     def __str__(self):
         return 'submission ' +str(self.id)
+
+    def save(self, *args, **kwargs):
+        if self.status == 'submit':
+            self.submited_on = timezone.now()
+        super().save()
 
 class Comment(models.Model):
     content     = models.TextField('')

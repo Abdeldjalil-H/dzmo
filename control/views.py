@@ -75,9 +75,12 @@ class ProblemCorrection(StaffRequired, CreateView):
         
 class MainPage(ListView):
     template_name       = 'control/base.html'
-    queryset            = MainPagePost.objects.filter(publish = True)
     context_object_name = 'posts'
-
+    def get_queryset(self):
+        posts = MainPagePost.objects.filter(publish = True)
+        if self.request.user.is_authenticated:
+            return posts
+        return posts.filter(public = True)
 def verify_mail(request):
     res = send_mail(
         subject = 'Subject here',

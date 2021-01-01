@@ -37,21 +37,21 @@
             var inverse_dir = {"":"ltr", "rtl":"ltr", "ltr":"rtl"};
             var inverse_align = {"":"left","left":"right", "right":"left"};
             elem.style.textAlign = inverse_align[elem.style.textAlign];
-            elem.dir = inverse_dir[elem.dir]; 
+            elem.dir = inverse_dir[elem.dir];
+            document.getElementById("MathOutput").style.textAlign = elem.style.textAlign;
         }
     </script>
-<div class="form-group">
-<form method='POST' enctype="multipart/form-data">
+	<div class="form-group">
+		<form method='POST' enctype="multipart/form-data">
     {% csrf_token %}
-    {{ form|crispy }}
-    
+    {{ form|crispy }}  
     <button type='submit' name ='sub' value ='submit' class="btn btn-outline-success"> تقديم الحل</button>
     <button type='submit' name ='sub' value ='draft' class="btn btn-outline-warning">حفظ كمسودة</button>
     {% if show_del %}
-    <a href="{%url 'problems:delete-sub' problem.chapter.topic problem.pk%}" class="btn btn-outline-danger">حذف المسودة </button>
+    <a href="{%url 'problems:delete-sub' problem.chapter.topic problem.pk%}" class="btn btn-outline-danger">حذف المسودة </a>
     {%endif%}
-</form>
-</div>
+		</form>
+	</div>
 </div>
 {% endif%}
 {% if user_subs %}
@@ -69,7 +69,6 @@
     </thead>
     <tbody>
 {% for sub in user_subs%}
-       
     <tr class="table-{% if sub.status == 'submit' %}warning{% elif sub.correct %}success{% else %}danger{%endif%}">
         <td>
             {% if sub.status == 'submit' %}
