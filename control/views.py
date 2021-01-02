@@ -76,6 +76,7 @@ class ProblemCorrection(StaffRequired, CreateView):
                 this_sub.student.progress.add_points(this_sub.problem.points)
             else:
                 this_sub.correct = False
+                this_sub.correction_in_progress = False
                 this_sub.save()
         else:
             this_sub.status = 'correct'
