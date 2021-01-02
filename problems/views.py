@@ -1,10 +1,10 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import HttpResponse
+from django.utils import timezone
 from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView, DeleteView
-                                
-                                
+                     
 from .models import Problem, ProblemSubmission, Comment
 from .forms import WriteSolution, WriteComment
 #List of problems by section
@@ -101,7 +101,8 @@ def problem_sub(request, **kwargs):
                                         student = request.user,
                                         problem = problem,
                                         status = request.POST.get('sub'),
-                                        file = request.FILES.get('file')
+                                        file = request.FILES.get('file'),
+                                        submited_on = timezone.now()
                                         )
                         submission.save()
                         if submission.status == 'draft':
@@ -117,6 +118,7 @@ def problem_sub(request, **kwargs):
                     form = WriteSolution(request.POST, request.FILES)
                     if form.is_valid():
                         old_draft.solution = form.cleaned_data['content']
+                        old_draft.submited_on = timezone.now()
                         old_draft.status = request.POST.get('sub')
                         if request.FILES.get('file'):
                             old_draft.file = request.FILES.get('file')

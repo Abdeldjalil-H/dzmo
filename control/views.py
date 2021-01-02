@@ -40,10 +40,20 @@ class ProblemCorrection(StaffRequired, CreateView):
         context = super().get_context_data(**kwargs)
         pk = self.kwargs.get('pk')
         this_sub = get_object_or_404(ProblemSubmission,id = pk)
-        context['this_sub'] = this_sub
-        context['judge']    = not this_sub.correct
         context['problem']  = this_sub.problem
         context['comments'] = this_sub.comments.all()
+        context['judge']    = not this_sub.correct
+        if self.request.method == 'GET':
+            decide = self.request.GET.get('decide')
+            if decide == 'to_correct':
+                this_sub.correction_in_progress = True
+                context['in_correction'] = True
+                this_sub.save()
+            elif decide == 'cancel_correction':
+                this_sub.correction_in_progress = False
+                this_sub.save()
+            
+        context['this_sub'] = this_sub
         context['correction_form'] = context['form']
         context['form'] = None
         return context
@@ -90,4 +100,3 @@ def verify_mail(request):
         fail_silently=False,
     )    
     return HttpResponse(f"Email sent to {res} members")
-

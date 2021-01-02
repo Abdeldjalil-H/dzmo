@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings
 from lessons.models import Chapter
-from django.utils import timezone
+
 
 LEVELS = [(1,'1'),(2,'2'),(3,'3'),(4,'4'),(5,'5')]
 
@@ -61,14 +61,9 @@ class ProblemSubmission(models.Model):
     file        = models.FileField(blank = True, null = True,
                                     upload_to = 'students_subs'
                                     )
-                                    
+    correction_in_progress = models.BooleanField(default = False, editable = False) 
     def __str__(self):
         return 'submission ' +str(self.id)
-
-    def save(self, *args, **kwargs):
-        if self.status == 'submit':
-            self.submited_on = timezone.now()
-        super().save()
 
     class Meta:
         verbose_name        = 'إجابة مسألة'

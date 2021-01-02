@@ -1,6 +1,15 @@
 {% load crispy_forms_tags %}
 {% include 'problems/problem-submit.html' %}
 <div class="container my-4">
+    {%if not this_sub.correction_in_progress and not in_correction%}
+    <form>
+        <button type="submit" name="decide" value="to_correct" class="btn btn-outline-primary">تصحيح الإجابة</button>
+    </form>
+    {%endif%}
+{%if in_correction%}
+<form>
+    <button type="submit" name="decide" value="cancel_correction" class="btn btn-outline-secondary my-4">تراجع</button>
+</form>
 <form method='POST'>
     {% csrf_token %}
     {{ correction_form|crispy }}
@@ -11,4 +20,5 @@
     <button type = 'submit' class="btn btn-outline-secondary">إرسال التعليق</button>
     {%endif%}
 </form>
+{%endif%}
 </div>
