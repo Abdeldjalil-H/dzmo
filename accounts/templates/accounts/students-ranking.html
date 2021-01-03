@@ -14,7 +14,11 @@
 			{%for student in students_list|dictsort:'progress.points' reversed%}
 			<tr id="student{{student.pk}}">
 				<th scope="row">{{student.progress.rank}}</th>
-				<td>{{student.username}}</td>
+				<td>
+					<a href="{%url 'accounts:profile' student.pk%}">
+					{{student.username}}
+					</a>
+				</td>
 				<td>{{student.progress.points}}</td>
 				<td>{{student.join_date}}</td>
 			</tr>
