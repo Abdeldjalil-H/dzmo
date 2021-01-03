@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import HttpResponse
 from django.utils import timezone
+from datetime import timedelta
 from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView, DeleteView
                      
@@ -166,6 +167,11 @@ class LastCorrectedSubs(ListView):
     context_object_name = 'user_subs'
     def queryset(self, **kwargs):
         return self.request.user.progress.last_submissions.all() 
+
+class LastSolvedProblems(ListView):
+    template_name       = 'problems/last-solved.html'
+    context_object_name = 'last_solved_problems'
+    queryset  = ProblemSubmission.objects.filter(correct = True).filter(submited_on__gte = timezone.now()-timedelta(days=7))
 
 
 def add_problems(statements_list, chapter, level):

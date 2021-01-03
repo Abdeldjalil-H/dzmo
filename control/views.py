@@ -1,6 +1,11 @@
-from django.shortcuts import render, get_object_or_404, HttpResponse
+from django.shortcuts import(
+    render, 
+    get_object_or_404, 
+    HttpResponse,
+    redirect,
+)
 from django.core.mail import send_mail
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy,reverse
 from django.views.generic import(
     ListView,
     CreateView,
@@ -36,24 +41,33 @@ class ProblemCorrection(StaffRequired, CreateView):
     fields              = ['content']
     success_url         = reverse_lazy('control:subs-list')
     
+    # def get(self, request, *args, **kwargs):
+    #     pk = self.kwargs.get('pk')
+    #     this_sub = get_object_or_404(ProblemSubmission,id = pk)
+    #     if this_sub.correction_in_progress:
+    #         return redirect(reverse_lazy('control:problem-correction',kwargs={'pk':this_sub.pk},current_app='control'))
+    #     return super().get(request, *args,**kwargs)
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         pk = self.kwargs.get('pk')
         this_sub = get_object_or_404(ProblemSubmission,id = pk)
         context['problem']  = this_sub.problem
         context['comments'] = this_sub.comments.all()
-        context['judge']    = not this_sub.correct
+        context['this_sub'] = this_sub
         if self.request.method == 'GET':
             decide = self.request.GET.get('decide')
             if decide == 'to_correct':
+                if this_sub.correction_in_progress:
+                    context['form'] = None
+                    return context
                 this_sub.correction_in_progress = True
                 context['in_correction'] = True
                 this_sub.save()
             elif decide == 'cancel_correction':
                 this_sub.correction_in_progress = False
                 this_sub.save()
-            
-        context['this_sub'] = this_sub
+
+        context['judge']    = not this_sub.correct
         context['correction_form'] = context['form']
         context['form'] = None
         return context

@@ -27,7 +27,7 @@ urlpatterns = [
                                     ), name = 'logout'),
     path('myaccount/', PersonalAccount.as_view(), name='account'),
     path('verification/', include('verify_email.urls')),
-    path('profile/changepw', PasswordChangeView.as_view(
+    path('myaccount/changepw', PasswordChangeView.as_view(
                             template_name='accounts/edit-profile.html',
                             extra_context ={'btn':'تغير كلمة المرور'},
                             success_url = reverse_lazy('accounts:account')

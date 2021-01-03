@@ -52,6 +52,15 @@
         </div>
       </li>
         {% if user.is_authenticated %}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="statistics" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            إحصائيات الموقع
+          </a>
+          <div class="dropdown-menu" aria-labelledby="statistics">
+            <a class="dropdown-item" href="{% url 'accounts:ranking'%}">ترتيب الطلاب</a>
+            <a class="dropdown-item" href="{%url 'problems:last-solved'%}">آخر المسائل المحلولة</a>
+          </div>
+        </li>
       <li class="nav-item">
         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           {{user.username}}

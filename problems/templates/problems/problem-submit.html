@@ -101,7 +101,7 @@
     <tbody>
     {% for sol in all_sols%}
         <tr>
-            <td><a href="">{{sol.student.username}}</a></td>
+            <td><a href="{%url 'accounts:profile' sol.student.pk%}">{{sol.student.username}}</a></td>
             <td>{{ sol.submited_on}}</td>
             <td><a href="{%url 'problems:submit' problem.chapter.topic problem.pk%}?sub={{sol.pk}}">عرض</a></td>
         </tr>
@@ -117,7 +117,7 @@
 <div class="card my-4">
     <div class="card-header" style="background-color: rgb(253, 255, 163) ;">
     {{this_sub.submited_on}}
-    <a class="card-link" href=""> {{this_sub.student.username}} </a>
+    <a class="card-link" href="{%url 'accounts:profile' this_sub.student.pk%}"> {{this_sub.student.username}} </a>
     </div>
     <div class="card-body">
         <p class="card-text">
@@ -141,7 +141,7 @@
 <div class="card my-4">
     <div class="card-header" style="background-color: rgb(253, 255, 163) ;">
         {{comment.date}}
-        <a href="">{{comment.user.username}}</a>
+        <a href="{%url 'accounts:profile' comment.user.pk%}">{{comment.user.username}}</a>
     </div>
     <div class="card-body">
         <p class="card-text">

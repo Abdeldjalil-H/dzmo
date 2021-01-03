@@ -11,7 +11,7 @@
     <button type="submit" name="decide" value="cancel_correction" class="btn btn-outline-secondary my-4">تراجع</button>
 </form>
 {%endif%}
-{%if in_correction or not judge%}
+{%if in_correction or not judge and form%}
 <form method='POST'>
     {% csrf_token %}
     {{ correction_form|crispy }}

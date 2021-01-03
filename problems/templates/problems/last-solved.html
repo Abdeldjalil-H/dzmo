@@ -1,0 +1,40 @@
+{%extends 'control/base.html'%}
+{%block content%}
+<div class="container">
+    <h2 class="my-4">المسائل التي تم حلها هذا الأسبوع</h2>
+	<table class="table">
+		<thead>
+			<tr>
+				<th scope="col">التلميذ</th>
+                <th scope="col">المسألة</th>
+                <th scope="col">المستوى</th>
+				<th scope="col">التاريخ</th>
+			</tr>
+		</thead>
+		<tbody>
+            {%for sub in last_solved_problems%}
+            <tr>
+                <td>
+                    <a href="{%url 'problems:last-solved'%}">
+                    {{sub.student.username}}
+                    </a>
+                </td>
+                <td>
+                    {%with topic=sub.problem.chapter.topic pk=sub.problem.pk%}
+                    {%if sub.problem in user.progress.solved_problems.all%}
+                    <a href="{%url 'problems:submit' topic pk%}">
+                    {{topic}} {{pk}}
+                    </a>
+                    {%else%}
+                    {{topic}} {{pk}}
+                    {%endif%}
+                    {%endwith%}
+                </td>
+                <td>{{sub.problem.level}}</td>
+                <td>{{sub.submited_on}}</td>
+            </tr>
+            {%endfor%}
+        </tbody>
+    </table>
+</div>
+{%endblock%}

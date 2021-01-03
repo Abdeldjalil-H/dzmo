@@ -11,7 +11,7 @@
 			</tr>
 		</thead>
 		<tbody>
-			{%for student in students_list%}
+			{%for student in students_list|dictsort:'progress.points' reversed%}
 			<tr id="student{{student.pk}}">
 				<th scope="row">{{student.progress.rank}}</th>
 				<td>{{student.username}}</td>
@@ -19,5 +19,7 @@
 				<td>{{student.join_date}}</td>
 			</tr>
 			{%endfor%}
+		</tbody>
+	</table>
 </div>
 {%endblock%}

@@ -1,5 +1,5 @@
 {% extends 'control/base.html'%}
-
+{% load mathfilters %}
 {% block content %}
 <div class="container">
   <div class="row m-0">
@@ -13,7 +13,17 @@
 					</tr>
 					<tr>
 						<td>
-							{{progress.wilaya}}
+							{%with grade=progress.student.grade%}
+							{%if grade < 2%}
+							السنة 
+							 {{grade|add:4}}
+							 متوسط
+							{%elif grade < 4%}
+							السنة 
+							 {{grade}}
+							 ثانوي
+							{%endif%}
+							{%endwith%}
 						</td>
 					</tr>			
 				</tbody></table>
@@ -30,17 +40,53 @@
 				</tr>
 			</tbody></table> 
     </div>
-    <div class="card m-3 col-lg-6 col-md-12 col-sm-12 col-xs-12">
-			<h3>المسائل التي قام بحلها</h3>
+    <div class="card m-3 col-lg-5 col-md-12 col-sm-12 col-xs-12">
+			<h3 class="card-title mt-3">المسائل التي قام بحلها</h3>
+			<div class="card-body overflow-auto" style="max-height:50vh;">
+			<table>
+				<tbody>
 			{% for problem in progress.solved_problems.all%}
-					{{problem}}
+				<tr>
+					<td>
+					{%if problem.chapter in user.progress.completed_chapters.all%}
+					<a href="{%url 'problems:submit' problem.chapter.topic problem.pk%}">مسألة {{problem.pk}}</a>
+					{%else%}
+					مسألة {{problem.pk}}
+					{%endif%}
+					</td>
+					<td>
+						+ {{problem.level|mul:15}}
+					</td>
+				</tr>
 			{%endfor%}
+			</tbody>
+			</table>
+		</div>
     </div>
-    <div class="card m-3 col-lg-6 col-md-12 col-sm-12 col-xs-12">
-			<h3>التمارين التي قام بحلها</h3>
+    <div class="card m-3 col-lg-5 col-md-12 col-sm-12 col-xs-12">
+			<h3 class="card-title mt-3">التمارين التي قام بحلها</h3>
+			<div class="card-body overflow-auto" style="max-height:50vh;">
+			<table>
+			<tbody>
 			{% for exercice in progress.solved_exercices.all%}
+				<tr>
+					<td>
+					{%if exercice in user.progress.solved_exercices.all%}
+					<a href="{%url 'lessons:exercice' exercice.chapter.topic exercice.chapter.slug exercice.pk%}">
 					{{exercice}}
+					</a>
+					{%else%}
+					{{exercice}}
+					{%endif%}
+					</td>
+					<td>
+						+ {{exercice.points}}
+					</td>
+				</tr>
 			{%endfor%}
+			</tbody>
+			</table>
+		</div>
     </div>
   </div>
 </div>

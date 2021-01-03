@@ -85,6 +85,7 @@ class ResetDone(PasswordResetDoneView):
 @method_decorator(login_required, name='dispatch')
 class StudentsRanking(ListView):
     template_name       = 'accounts/students-ranking.html'
-    queryset            = User.objects.exclude(is_staff = True)
+    #queryset            = User.objects.all()
+    model               = User
     context_object_name = 'students_list'
 

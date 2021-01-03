@@ -28,7 +28,7 @@ AWS_STORAGE_BUCKET_NAME='algeriamo'
 AWS_S3_REGION_NAME = "eu-west-3"
 AWS_S3_SIGNATURE_VERSION = "s3v4"
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False#(os.environ.get('DEBUG_VALUE') == 'True')
+DEBUG = True#False#(os.environ.get('DEBUG_VALUE') == 'True')
 ALLOWED_HOSTS = ['dzmo.herokuapp.com']
 
 
