@@ -33,7 +33,7 @@ class CorrectorsNotif(models.Model):
     def emails_list(self):
         pass
     def have_to_send_mail(self):
-        if self.total_subs > (self.num_old_subs-self.num_corrected_subs) and self.total_subs % self.notif_each ==0:
+        if self.total_subs >(self.num_old_subs-self.num_corrected_subs) and self.total_subs % self.notif_each ==0:
             #send_email
             res = send_mail(
                 subject = 'إجابات جديدة',
