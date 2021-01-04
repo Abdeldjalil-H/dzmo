@@ -12,7 +12,7 @@
 			</tr>
 		</thead>
 		<tbody>
-            {%for sub in last_solved_problems reversed%}
+            {%for sub in last_solved_problems%}
             <tr>
                 <td>
                     <a href="{%url 'accounts:profile' sub.student.pk%}">

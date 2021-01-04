@@ -6,7 +6,7 @@ def send_notif_to_correcters(sender, instance, created, **kwargs):
     if notif_settings:
         if instance.status in ['submit', 'comment']:
             notif_settings.have_to_send_mail()
-        elif instance.status in ['correct','wrong']:
+        elif instance.status in ['correct','wrong'] and not instance.student.is_staff:
             notif_settings.add_corrected_problem()
 
 
