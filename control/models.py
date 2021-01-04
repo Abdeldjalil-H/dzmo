@@ -25,8 +25,11 @@ class CorrectorsNotif(models.Model):
     
     @property
     def total_subs(self):
-        return ProblemSubmission.objects.filter(status__in = ['submit','comment']).count()
+        return ProblemSubmission.objects.filter(status__in = ['submit','comment']).exclude(student__is_staff = True).count()
 
+    def add_corrected_problem(self):
+        self.num_corrected_subs += 1
+        self.save()
     def emails_list(self):
         pass
     def have_to_send_mail(self):
