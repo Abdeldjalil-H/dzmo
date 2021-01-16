@@ -6,17 +6,22 @@ from django.shortcuts import(
 )
 from django.core.mail import send_mail
 from django.urls import reverse_lazy,reverse
+from django.conf import settings
 from django.views.generic import(
     ListView,
     CreateView,
+    FormView,
 )
 from django.contrib.auth.mixins import UserPassesTestMixin
 from problems.models import(
     ProblemSubmission,
     Comment,
+    Problem
     
 )
+from accounts.models import User
 from .models import MainPagePost
+from .forms import AddProblemsForm, SendMailForm
 class StaffRequired(UserPassesTestMixin):
     def test_func(self):
         return self.request.user.is_staff or self.request.user.is_corrector
@@ -99,14 +104,50 @@ class MainPage(ListView):
     def get_queryset(self):
         posts = MainPagePost.objects.filter(publish = True)
         if self.request.user.is_authenticated:
-            return posts
+            return posts.order_by('-publish_date')
         return posts.filter(public = True)
-def verify_mail(request):
+def mail(request, subject,msg, receivers):
     res = send_mail(
-        subject = 'Subject here',
-        message = 'Here is the message.',
-        from_email = 'algerianimoteam@gmail.com',
-        recipient_list = ['djaloulehez3@gmail.com'],
+        subject = subject,
+        message = msg,
+        from_email = settings.DEFAULT_FROM_EMAIL,
+        recipient_list = receivers,
         fail_silently=False,
-    )    
-    return HttpResponse(f"Email sent to {res} members")
+    ) 
+
+class SendMail(FormView):
+    template_name  = 'control/send-emails.html'
+    form_class     = SendMailForm
+    success_url    = reverse_lazy('control:send-mails')
+
+    def form_valid(self, form, **kwargs):
+        receivers = [usr.email for usr in form.cleaned_data['receivers']]
+        if form.cleaned_data['to_all_students']:
+            receivers += [stuent.email for student in User.objects.filter(grade__lt = 4)]
+        if form.cleaned_data['to_all_staff']:
+            receivers += [staff.email for staff in User.objects.filter(is_staff = True)]
+        send_mail(
+            subject = form.cleaned_data['subject'],
+            message = form.cleaned_data['msg'],
+            from_email = settings.DEFAULT_FROM_EMAIL,
+            recipient_list = receivers,
+            fail_silently=False,
+    ) 
+        return super().form_valid(form, **kwargs)
+class AddProblems(StaffRequired,FormView):
+    template_name   = 'control/add_problems.html'
+    form_class      = AddProblemsForm
+    success_url     = reverse_lazy('control:add-problems')
+
+    def form_valid(self, form,**kwargs):
+        add_problems(form.cleaned_data['statements'],
+                    form.cleaned_data['chapter'].pk,
+                    form.cleaned_data['level'],
+                    )
+        return super().form_valid(form, **kwargs)
+
+def add_problems(statements_str, chapter_id, level):
+    statements_list = statements_str.replace('\n',' ').split('\item')
+    for pr in statements_list:
+        if pr:
+            Problem.objects.create(statement = pr, chapter_id = chapter_id, level= level)

@@ -175,10 +175,3 @@ class LastSolvedProblems(ListView):
 							correct = True).filter(
 							submited_on__gte = timezone.now()-timedelta(days=7)).order_by(
 							'-submited_on')
-
-
-def add_problems(statements_list, chapter, level):
-	for pr in statements_list:
-		if pr:
-				a = Problem(statement = pr, chapter = chapter, level= level)
-				a.save()

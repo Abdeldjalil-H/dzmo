@@ -20,9 +20,6 @@ class UserAdminCreationForm(forms.ModelForm):
             raise forms.ValidationError('كلمتا السر غير متطابقتين')
         return password2
     
-    # def clean_wilaya(self):
-    #     if self.wilaya in range(0,49):
-    #         return self.wilaya
     
     def save(self, commit = True):
         user = super().save(commit = False)
