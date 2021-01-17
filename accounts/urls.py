@@ -35,6 +35,6 @@ urlpatterns = [
     path('<int:pk>/',Profile.as_view() , name = 'profile'),
     path('students-ranking/', StudentsRanking.as_view(), name='ranking'),
     path('reset/', ResetPW.as_view(), name='reset-pw'),
-    path('reset/done/', ResetDone.as_view(), name='password_reset_done'),
+    path('reset/done/', ResetDone.as_view(), name='pw_reset_done'),
     path('reset/<uidb64>/<token>/', ResetPWConfirm.as_view(), name='password_reset_confirm'),
 ]

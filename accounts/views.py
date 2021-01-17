@@ -68,7 +68,7 @@ class Profile(DetailView):
 class ResetPW(PasswordResetView):
     template_name = 'accounts/login.html'
     extra_context = {'title':'إعادة تعيين كلمة السر','btn':'إرسال'}
-    success_url = reverse_lazy('accounts:password_reset_done')
+    success_url = reverse_lazy('accounts:pw_reset_done')
 
 @method_decorator(cant_use_when_logged, name='dispatch')
 class ResetPWConfirm(PasswordResetConfirmView):
@@ -85,7 +85,6 @@ class ResetDone(PasswordResetDoneView):
 @method_decorator(login_required, name='dispatch')
 class StudentsRanking(ListView):
     template_name       = 'accounts/students-ranking.html'
-    #queryset            = User.objects.all()
     model               = User
     context_object_name = 'students_list'
 

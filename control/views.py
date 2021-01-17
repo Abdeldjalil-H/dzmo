@@ -106,7 +106,7 @@ class MainPage(ListView):
         if self.request.user.is_authenticated:
             return posts.order_by('-publish_date')
         return posts.filter(public = True)
-def mail(request, subject,msg, receivers):
+def mail(subject,msg, receivers):
     res = send_mail(
         subject = subject,
         message = msg,
@@ -115,7 +115,7 @@ def mail(request, subject,msg, receivers):
         fail_silently=False,
     ) 
 
-class SendMail(FormView):
+class SendMail(StaffRequired, FormView):
     template_name  = 'control/send-emails.html'
     form_class     = SendMailForm
     success_url    = reverse_lazy('control:send-mails')
@@ -123,7 +123,7 @@ class SendMail(FormView):
     def form_valid(self, form, **kwargs):
         receivers = [usr.email for usr in form.cleaned_data['receivers']]
         if form.cleaned_data['to_all_students']:
-            receivers += [stuent.email for student in User.objects.filter(grade__lt = 4)]
+            receivers += [student.email for student in User.objects.filter(grade__lt = 4)]
         if form.cleaned_data['to_all_staff']:
             receivers += [staff.email for staff in User.objects.filter(is_staff = True)]
         send_mail(
@@ -132,7 +132,7 @@ class SendMail(FormView):
             from_email = settings.DEFAULT_FROM_EMAIL,
             recipient_list = receivers,
             fail_silently=False,
-    ) 
+                ) 
         return super().form_valid(form, **kwargs)
 class AddProblems(StaffRequired,FormView):
     template_name   = 'control/add_problems.html'
