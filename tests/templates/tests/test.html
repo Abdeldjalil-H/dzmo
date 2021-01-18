@@ -1,0 +1,29 @@
+{%extends 'control/base.html'%}
+
+{%block content%}
+<div class="container">
+    <h2>إختبار</h2>
+    <p>المدة: {{test.duration}}</p>
+    <p>
+        يمكن تقديم إجراء الإختبار من {{test.starts_at}} 
+        إلى غاية {{test.ends_at}} (لا يمكن تسيليم الإجابات بعدها)
+    </p>
+    {%if not take_test and test.available%}
+    <form method="POST">
+        {%csrf_token%}
+        <button class="btn btn-outline-primary" name="take-test" value="yes" type="sumbit">
+            إجراء الإختبار
+        </button>
+    </form>
+    {%elif not test.available or take_test%}
+        {{test.problems|safe}}
+    {%endif%}
+    {%if take_test and can_answer%}
+    <form method="POST" enctype="multipart/form-data">
+        {%csrf_token%}
+        {{form}}
+        <button type="submit" class="btn btn-success">تقديم الإجابة</button>
+    </form>
+    {%endif%}
+</div>
+{%endblock%}

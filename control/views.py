@@ -1,5 +1,4 @@
-from django.shortcuts import(
-    render, 
+from django.shortcuts import( 
     get_object_or_404, 
     HttpResponse,
     redirect,
@@ -11,6 +10,7 @@ from django.views.generic import(
     ListView,
     CreateView,
     FormView,
+    UpdateView,
 )
 from django.contrib.auth.mixins import UserPassesTestMixin
 from problems.models import(
@@ -151,3 +151,9 @@ def add_problems(statements_str, chapter_id, level):
     for pr in statements_list:
         if pr:
             Problem.objects.create(statement = pr, chapter_id = chapter_id, level= level)
+
+'''class TestCorrection(UpdateView):
+    template_name =
+
+    def get_object(self, **kwargs):
+        return '''
