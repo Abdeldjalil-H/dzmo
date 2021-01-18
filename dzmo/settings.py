@@ -32,7 +32,7 @@ DEBUG = False#(os.environ.get('DEBUG_VALUE') == 'True')
 ALLOWED_HOSTS = ['dzmo.herokuapp.com']
 
 
-# Application definition
+#Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
