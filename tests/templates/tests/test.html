@@ -8,6 +8,10 @@
         يمكن تقديم إجراء الإختبار من {{test.starts_at}} 
         إلى غاية {{test.ends_at}} (لا يمكن تسيليم الإجابات بعدها)
     </p>
+    <p>سوف يظهر زر إجراء الإختبار عند وصول وقت بداية الإختبار. 
+        <br>
+        بعد الضغط عليه، سيبدأ عد الوقت لك.
+    </p>
     {%if not take_test and test.available%}
     <form method="POST">
         {%csrf_token%}
@@ -15,7 +19,7 @@
             إجراء الإختبار
         </button>
     </form>
-    {%elif not test.available or take_test%}
+    {%elif test.ends or take_test%}
         {{test.problems|safe}}
     {%endif%}
     {%if take_test and can_answer%}

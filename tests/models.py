@@ -49,8 +49,9 @@ class TestAnswer(models.Model):
         else:
             return 0
 
-    def can_answer(self,test):
-        return self.remaining_time(test) and not self.answer_submited
+    @property
+    def can_answer(self):
+        return self.remaining_time(self.test) and not self.answer_submited
     
     def add_ans_file(self, file):
         self.answer_file = file

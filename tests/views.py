@@ -35,11 +35,12 @@ class TestAnswerView(FormView):
                 )
         context['take_test']= test in self.request.user.test_set.all()
         if context['take_test']:
-            context['can_answer'] = self.get_user_ans(pk).can_answer(test)
+            context['can_answer'] = self.get_user_ans(pk).can_answer
         return context
 
     def form_valid(self, form, **kwargs):
         user_ans = self.get_user_ans(self.kwargs['pk'])
-        user_ans.add_ans_file(form.cleaned_data['file'])
+        if user_ans.can_answer:
+            user_ans.add_ans_file(form.cleaned_data['file'])
         user_ans.submited_now()
         return super().form_valid(form,**kwargs)
