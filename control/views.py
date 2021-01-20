@@ -20,6 +20,7 @@ from problems.models import(
     
 )
 from accounts.models import User
+from tests.models import Test, TestAnswer
 from .models import MainPagePost
 from .forms import AddProblemsForm, SendMailForm
 class StaffRequired(UserPassesTestMixin):
@@ -152,8 +153,22 @@ def add_problems(statements_str, chapter_id, level):
         if pr:
             Problem.objects.create(statement = pr, chapter_id = chapter_id, level= level)
 
-'''class TestCorrection(UpdateView):
-    template_name =
+class TestAnswersList(StaffRequired, ListView):
+    template_name = 'control/test-answers.html'
+    queryset = TestAnswer.objects.filter(corrected = False)
+    context_object_name = 'answers_list'
 
+class TestCorrection(StaffRequired, UpdateView):
+    template_name = 'control/test-correction.html'
+    fields = ['mark','comment']
+    success_url = reverse_lazy('control:test-ans-list')
+    
     def get_object(self, **kwargs):
-        return '''
+        return get_object_or_404(TestAnswer, pk = self.kwargs['pk'])
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['ans'] = get_object_or_404(TestAnswer, pk = self.kwargs['pk'])
+        return context
+    def form_valid(self, form, **kwargs):
+        form.instance.corrected = True
+        return super().form_valid(form, **kwargs)

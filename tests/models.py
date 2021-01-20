@@ -22,9 +22,12 @@ class Test(models.Model):
     @property
     def available(self):
         return self.started and not self.ends
+
+    def __str__(self):
+        return f'الاختبار {self.pk}'
     class Meta:
-        verbose_name        = 'إختبار'
-        verbose_name_plural = 'إختبارات'
+        verbose_name        = 'اختبار'
+        verbose_name_plural = 'اختبارات'
 
 class TestAnswer(models.Model):
     test        = models.ForeignKey(Test, on_delete = models.SET_NULL, null=True)
@@ -33,9 +36,10 @@ class TestAnswer(models.Model):
     start_time  = models.DateTimeField(auto_now_add = True)
     submited_on = models.DateTimeField(blank = True, null = True)
     #corrector part
-    mark        = models.IntegerField(null = True)
+    mark        = models.IntegerField(default = 0)
     comment     = models.TextField(blank = True, null = True)
-
+    corrected   = models.BooleanField(default = False)
+    
     @property
     def answer_submited(self):
         if self.answer_file:
@@ -60,6 +64,21 @@ class TestAnswer(models.Model):
     def submited_now(self):
         self.submited_on = timezone.now()
         self.save()
+
+    def set_mark(self, mark, comment=''):
+        self.mark = mark
+        self.comment = comment
+        self.save()
+    def save(self, *args, **kwargs):
+        if self.pk:
+            old_mark = TestAnswer.objects.get(pk = self.pk).mark
+        if self.mark - old_mark:
+            self.student.progress.add_points(
+                self.mark - old_mark
+                )
+        super().save(*args, **kwargs)
+    def __str__(self):
+        return f'إجابة الاختبار {self.test}: {self.student.username}'
     class Meta:
         verbose_name        = 'إجابة اختبار'
-        verbose_name_plural = 'إجابات الإختبارات'
+        verbose_name_plural = 'إجابات الاختبارات'

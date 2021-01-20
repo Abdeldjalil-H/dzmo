@@ -84,6 +84,7 @@
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
           <a class="dropdown-item" href="{%url 'control:subs-list' %}">تصحيح المسائل</a>
+          <a class="dropdown-item" href="{%url 'control:test-ans-list' %}">تصحيح الاختبارات</a>
           {%if user.is_staff%}
           <a class="dropdown-item" href="/admin/">إدارة الموقع</a>
           <a class="dropdown-item" href="{%url 'control:add-problems'%}">إضافة مسائل</a>

@@ -7,8 +7,8 @@ from django.urls import reverse_lazy
 from .models import Test, TestAnswer
 from .forms import UploadFileForm
 class TestsList(ListView):
-    template_name = 'tests-list.html'
-    model = Test
+    template_name = 'tests/tests-list.html'
+    queryset = Test.objects.all()
     context_object_name = 'tests_list'
 class TestAnswerView(FormView):
     template_name   = 'tests/test.html'
@@ -44,3 +44,13 @@ class TestAnswerView(FormView):
             user_ans.add_ans_file(form.cleaned_data['file'])
         user_ans.submited_now()
         return super().form_valid(form,**kwargs)
+
+class TestResult(ListView):
+    template_name = 'tests/test-results.html'
+    
+    context_object_name = 'answers_list'
+    def get_queryset(self, **kwargs):
+        pk = self.kwargs['pk']
+        return TestAnswer.objects.filter(
+                    test_id = pk, 
+                    corrected = True).order_by('-mark') 

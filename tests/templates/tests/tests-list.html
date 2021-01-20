@@ -1,0 +1,35 @@
+{%extends 'control/base.html'%}
+
+{%block content%}
+<div class="container">
+  <h2>الاختبارات</h2>
+    <table class="table">
+        <tbody>
+        {%for tst in tests_list%}
+          <tr>
+            <td scope="col">
+              <a href="{%url 'tests:test' tst.pk%}">
+              {{tst}}
+              </a>
+            </td>
+            <td scope="col">
+                {%if tst.ends%}
+                <a href="#">
+                التصحيح
+                </a>
+                {%endif%}
+            </td>
+            <td scope="col">
+                {%if tst.ends%}
+                <a href="{%url 'tests:test-results' tst.pk %}">
+                النتائج
+                </a>
+                {%endif%}
+
+            </td>
+          </tr>
+          {%endfor%}
+        </tbody>
+        </table>
+</div>
+{%endblock%}
