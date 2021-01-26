@@ -32,7 +32,8 @@ class Test(models.Model):
 class TestAnswer(models.Model):
     test        = models.ForeignKey(Test, on_delete = models.SET_NULL, null=True)
     student     = models.ForeignKey(User, on_delete = models.CASCADE)
-    answer_file = models.FileField(upload_to = 'tests',)
+    answer_file = models.FileField()
+    char_file   = models.CharField(max_length = 200, null = True, blank = True) 
     start_time  = models.DateTimeField(auto_now_add = True)
     submited_on = models.DateTimeField(blank = True, null = True)
     #corrector part
@@ -58,7 +59,7 @@ class TestAnswer(models.Model):
         return self.remaining_time(self.test) and not self.answer_submited
     
     def add_ans_file(self, file):
-        self.answer_file = file
+        self.answer_file.url = 'https://drive.google.com/uc?export=view&id=' + file
         self.save()
 
     def submited_now(self):
@@ -72,10 +73,10 @@ class TestAnswer(models.Model):
     def save(self, *args, **kwargs):
         if self.pk:
             old_mark = TestAnswer.objects.get(pk = self.pk).mark
-        if self.mark - old_mark:
-            self.student.progress.add_points(
-                self.mark - old_mark
-                )
+            if self.mark - old_mark:
+                self.student.progress.add_points(
+                    self.mark - old_mark
+                    )
         super().save(*args, **kwargs)
     def __str__(self):
         return f'إجابة الاختبار {self.test}: {self.student.username}'

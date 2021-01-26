@@ -2,10 +2,10 @@
 
 {%block content%}
 <div class="container">
-    <h2>إختبار</h2>
+    <h2>اختبار</h2>
     <p>المدة: {{test.duration}}</p>
     <p>
-        يمكن تقديم إجراء الإختبار من {{test.starts_at}} 
+        يمكن تقديم إجراء الاختبار من {{test.starts_at}} 
         إلى غاية {{test.ends_at}} (لا يمكن تسيليم الإجابات بعدها)
     </p>
     <p>سوف يظهر زر إجراء الإختبار عند وصول وقت بداية الإختبار. 
@@ -20,10 +20,14 @@
         </button>
     </form>
     {%elif test.ends or take_test%}
+    <div>
         {{test.problems|safe}}
+    </div>
     {%endif%}
     {%if take_test and can_answer%}
-    <form method="POST" enctype="multipart/form-data">
+    <iframe class="py-5" src="https://script.google.com/macros/s/AKfycbxBH4V8AyMkdbzK48UjpFSOZ3xHg0h39fYTR_A2xlcU7iqqydVjtT7a/exec" width="100%" frameborder="0" class="d-flex justify-content-right">
+    </iframe>
+    <form method="POST" enctype="multipart/form-data" class="py-4">
         {%csrf_token%}
         {{form}}
         <button type="submit" class="btn btn-success">تقديم الإجابة</button>
