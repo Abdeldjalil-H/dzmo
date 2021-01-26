@@ -32,8 +32,7 @@ class Test(models.Model):
 class TestAnswer(models.Model):
     test        = models.ForeignKey(Test, on_delete = models.SET_NULL, null=True)
     student     = models.ForeignKey(User, on_delete = models.CASCADE)
-    answer_file = models.FileField()
-    char_file   = models.URLField(max_length=500, null = True, blank = True) 
+    answer_file   = models.URLField(max_length=500, null = True, blank = True) 
     start_time  = models.DateTimeField(auto_now_add = True)
     submited_on = models.DateTimeField(blank = True, null = True)
     #corrector part
