@@ -58,7 +58,7 @@ class TestAnswer(models.Model):
         return self.remaining_time(self.test) and not self.answer_submited
     
     def add_ans_file(self, file):
-        self.answer_file.url = 'https://drive.google.com/uc?export=view&id=' + file
+        self.answer_file = 'https://drive.google.com/uc?export=view&id=' + file
         self.save()
 
     def submited_now(self):

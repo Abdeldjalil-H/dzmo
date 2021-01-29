@@ -37,10 +37,15 @@ class CorrectorsNotif(models.Model):
             #send_email
             res = send_mail(
                 subject = 'إجابات جديدة',
-                message = f'هناك {self.total_subs} إجابة لم يتم تصحيحها.',
+                message = f'''هناك 
+                {self.total_subs} 
+                إجابة لم يتم تصحيحها.
+                
+                https://algerianmo.com/control/correction
+                ''',
                 from_email = settings.DEFAULT_FROM_EMAIL,
                 recipient_list = ['djaloulehez3@gmail.com','chen.anas@gmail.com'],
-                fail_silently=False,
+                fail_silently=True,
                 )
             if res:
                 self.num_old_subs       = self.total_subs
