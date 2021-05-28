@@ -20,10 +20,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY='c3431ee882033413b0d40835acb1bf5d6664cdddd0430dfead8738602c56'
-AWS_ACCESS_KEY_ID='AKIAYGTGE2PPY2YR364N'
-AWS_SECRET_ACCESS_KEY='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'
-AWS_STORAGE_BUCKET_NAME='algeriamo'
+SECRET_KEY=os.getenv('SECRET_KEY')
+AWS_ACCESS_KEY_ID=os.getenv('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY=os.getenv('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME=os.getenv('AWS_STORAGE_BUCKET_NAME')
 
 AWS_S3_REGION_NAME = "eu-west-3"
 AWS_S3_SIGNATURE_VERSION = "s3v4"
@@ -143,11 +143,11 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'algerianimoteam@gmail.com'
-EMAIL_HOST_PASSWORD = 'oldoulhemzkvrsof'#'inzpnuffmoefetwc'
+EMAIL_HOST_USER = os.getenv('DEFAULT_EMAIL')
+EMAIL_HOST_PASSWORD = os.getenv('GMAIL_KEY')#'oldoulhemzkvrsof'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
-DEFAULT_FROM_EMAIL = 'algerianimoteam@gmail.com'
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_EMAIL')
 
 VERIFICATION_SUCCESS_TEMPLATE = None
 
