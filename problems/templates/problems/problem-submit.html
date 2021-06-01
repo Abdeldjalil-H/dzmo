@@ -38,18 +38,22 @@
             var inverse_align = {"":"left","left":"right", "right":"left"};
             elem.style.textAlign = inverse_align[elem.style.textAlign];
             elem.dir = inverse_dir[elem.dir];
-            document.getElementById("MathOutput").style.textAlign = elem.style.textAlign;
+            var output = document.getElementById("MathOutput");
+            output.style.textAlign = elem.style.textAlign;
+            output.dir = elem.dir;
+            document.getElementById("writing_dir") = elem.style.textAlign;
         }
     </script>
 	<div class="form-group">
 		<form method='POST' enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form|crispy }}  
-    <button type='submit' name ='sub' value ='submit' class="btn btn-outline-success"> تقديم الحل</button>
-    <button type='submit' name ='sub' value ='draft' class="btn btn-outline-warning">حفظ كمسودة</button>
-    {% if show_del %}
-    <a href="{%url 'problems:delete-sub' problem.chapter.topic problem.pk%}" class="btn btn-outline-danger">حذف المسودة </a>
-    {%endif%}
+            <input hidden name="dir" id="writing_dir">
+            {% csrf_token %}
+            {{ form|crispy }}  
+            <button type='submit' name ='sub' value ='submit' class="btn btn-outline-success"> تقديم الحل</button>
+            <button type='submit' name ='sub' value ='draft' class="btn btn-outline-warning">حفظ كمسودة</button>
+            {% if show_del %}
+            <a href="{%url 'problems:delete-sub' problem.chapter.topic problem.pk%}" class="btn btn-outline-danger">حذف المسودة </a>
+            {%endif%}
 		</form>
 	</div>
 </div>
@@ -120,7 +124,7 @@
     <a class="card-link" href="{%url 'accounts:profile' this_sub.student.pk%}"> {{this_sub.student.username}} </a>
     </div>
     <div class="card-body">
-        <p class="card-text">
+        <p class="card-text" {%if this_sub.ltr_dir%} dir="ltr" style="text-align:left" {%else%} dir="rtl" style="text-align:right">
         {{ this_sub.solution|safe }}
         </p>
         {%if this_sub.file%}
