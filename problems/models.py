@@ -62,7 +62,7 @@ class ProblemSubmission(models.Model):
                                     upload_to = 'students_subs'
                                     )
     correction_in_progress = models.BooleanField(default = False, editable = False) 
-    ltr_dir = models.BooleanField(default = False)
+    ltr_dir     = models.BooleanField(default = False)
 
     def __str__(self):
         return 'submission ' +str(self.id)
