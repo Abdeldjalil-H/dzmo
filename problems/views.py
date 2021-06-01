@@ -120,7 +120,7 @@ def problem_sub(request, **kwargs):
 									form = WriteSolution(request.POST, request.FILES)
 									if form.is_valid():
 											old_draft.solution = form.cleaned_data['content']
-											old_draft.ltr_dir = (form.cleaned_data['dir'] == 'left')
+											old_draft.ltr_dir = (request.POST.get('dir') == 'left')
 											old_draft.submited_on = timezone.now()
 											old_draft.status = request.POST.get('sub')
 											if request.FILES.get('file'):
