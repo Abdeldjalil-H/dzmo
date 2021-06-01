@@ -124,7 +124,7 @@
     <a class="card-link" href="{%url 'accounts:profile' this_sub.student.pk%}"> {{this_sub.student.username}} </a>
     </div>
     <div class="card-body">
-        <p class="card-text" {%if this_sub.ltr_dir%} dir="ltr" style="text-align:left" {%else%} dir="rtl" style="text-align:right">
+        <p class="card-text" {%if this_sub.ltr_dir%} dir="ltr" style="text-align:left" {%else%} dir="rtl" style="text-align:right" {%endif%}>
         {{ this_sub.solution|safe }}
         </p>
         {%if this_sub.file%}
