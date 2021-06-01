@@ -23,12 +23,14 @@
 </div>
 {% if not show_btn and form%}
 <div class="container">
-    <div id="MathOutput"></div>
+    <div id="MathOutput" {%if ltr_dir%} dir="ltr" style="text-align:left" {%else%} dir="rtl" style="text-align:right" {%endif%}>
+
+    </div>
     <div>
         <input class="my-3 btn btn-primary" type="button" value="معاينة" id="render" onclick="convert()"/>
     </div>
     <div class="m-1">
-        <input type="checkbox" onclick="change_dir('MathInput')">
+        <input type="checkbox" onclick="change_dir('MathInput')" {%if ltr_dir%} checked {%endif%}>
         الكتابة من اليسار إلى اليمين.
     </div>
     <script>

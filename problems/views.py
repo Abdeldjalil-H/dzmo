@@ -131,6 +131,7 @@ def problem_sub(request, **kwargs):
 											return redirect(problem_url+ f'?sub={old_draft.id}')
 							form = WriteSolution(initial={'content':old_draft.solution})
 							context['form'] = form
+							context['ltr_dir'] = old_draft.ltr_dir
 							context['show_del'] = True
 							
 		else:
