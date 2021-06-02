@@ -1,3 +1,4 @@
+from problems.forms import WriteComment
 from django.shortcuts import( 
     get_object_or_404, 
     HttpResponse,
@@ -44,7 +45,8 @@ class SubsList(StaffRequired, ListView):
 class ProblemCorrection(StaffRequired, CreateView):
     template_name       = 'control/problem-correction.html'
     model               = Comment
-    fields              = ['content']
+    #form_class          = WriteComment
+    fields              = ['ltr_dir','content']
     success_url         = reverse_lazy('control:subs-list')
     
     def get_context_data(self, **kwargs):
@@ -70,6 +72,7 @@ class ProblemCorrection(StaffRequired, CreateView):
 
         context['judge']    = not this_sub.correct
         context['correction_form'] = context['form']
+        context['correction_form'].fields['ltr_dir'].widget.attrs = {'style':'position:relative;margin-left:5px;'}
         context['form'] = None
         return context
 
@@ -77,6 +80,7 @@ class ProblemCorrection(StaffRequired, CreateView):
         pk = self.kwargs.get('pk')
         form.instance.user          = self.request.user
         form.instance.submission_id = pk
+           
         this_sub = get_object_or_404(ProblemSubmission,id = pk)
         status = self.request.POST['status']
         #the other case is when we send only a comment

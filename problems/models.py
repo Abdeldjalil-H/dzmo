@@ -98,6 +98,14 @@ class Comment(models.Model):
     submission  = models.ForeignKey(ProblemSubmission,
                                     related_name = 'comments',
                                     on_delete= models.CASCADE)
+    ltr_dir     = models.BooleanField(default=False, 
+    verbose_name='الكتابة من اليسار')
+    @property
+    def get_dir_style(self):
+        if self.ltr_dir:
+            return 'dir=ltr style=text-align:left;'
+        else:
+            return 'dir=rtl style=text-align:right;'
 
     class Meta:
         verbose_name        = 'تعليق'

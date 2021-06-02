@@ -1,6 +1,15 @@
 from django import forms
 
 class WriteSolution(forms.Form):
+    ltr_dir = forms.BooleanField( 
+                                widget=forms.CheckboxInput(
+                                    attrs = {'style':'position:inherit;margin-left:4px;',
+                                    'onclick':"change_dir('MathInput')"
+                                    }
+                                ),
+                                label='الكتابة من اليسار',
+                                required = False,
+                                )
     content = forms.CharField(widget=forms.Textarea(
                             attrs={'id':'MathInput',
 
@@ -16,7 +25,14 @@ class WriteSolution(forms.Form):
 
 
 class WriteComment(forms.Form):
-	content = forms.CharField(widget=forms.Textarea(
-						attrs={'id':'MathInput',}),
-						label='',
-						)
+    ltr_dir = forms.BooleanField( 
+                                widget=forms.CheckboxInput(
+                                    attrs = {'style':'position:inherit;margin-left:4px;'}
+                                ),
+                                label='الكتابة من اليسار',
+                                required = False,
+                                )
+    content = forms.CharField(widget=forms.Textarea(
+                        attrs={'id':'MathInput',}),
+                        label='',
+    )

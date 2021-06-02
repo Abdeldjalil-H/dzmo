@@ -29,10 +29,7 @@
     <div>
         <input class="my-3 btn btn-primary" type="button" value="معاينة" id="render" onclick="convert()"/>
     </div>
-    <div class="m-1">
-        <input type="checkbox" onclick="change_dir('MathInput')" {%if ltr_dir%} checked {%endif%}>
-        الكتابة من اليسار إلى اليمين.
-    </div>
+
     <script>
         function change_dir(id){
             var elem = document.getElementById(id);
@@ -156,7 +153,7 @@
         <a href="{%url 'accounts:profile' comment.user.pk%}">{{comment.user.username}}</a>
     </div>
     <div class="card-body">
-        <p class="card-text">
+        <p class="card-text" {{comment.get_dir_style}}>
         {{comment.content|safe}}
         </p>
     </div>

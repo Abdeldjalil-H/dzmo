@@ -33,7 +33,8 @@ def comment(request, sub):
 	if form.is_valid():
 			cmnt = Comment(user = request.user,
 											content = form.cleaned_data['content'],
-											submission_id = sub
+											submission_id = sub,
+											ltr_dir = form.cleaned_data['ltr_dir']
 											)
 			cmnt.save()
 
@@ -99,12 +100,13 @@ def problem_sub(request, **kwargs):
 									if form.is_valid():
 											submission = ProblemSubmission(
 																			solution = form.cleaned_data['content'],
+																			ltr_dir = form.cleaned_data['ltr_dir'],
+																
 																			student = request.user,
 																			problem = problem,
 																			status = request.POST.get('sub'),
 																			file = request.FILES.get('file'),
 																			submited_on = timezone.now(),								)
-											submission.set_dir(request.POST.get('dir'))
 											submission.save()
 											if submission.status == 'draft':
 													return redirect(problem_url)
@@ -119,7 +121,7 @@ def problem_sub(request, **kwargs):
 									form = WriteSolution(request.POST, request.FILES)
 									if form.is_valid():
 											old_draft.solution = form.cleaned_data['content']
-											old_draft.set_dir(request.POST.get('dir'))
+											old_draft.ltr_dir = form.cleaned_data['ltr_dir']
 											old_draft.submited_on = timezone.now()
 											old_draft.status = request.POST.get('sub')
 											if request.FILES.get('file'):
@@ -128,7 +130,8 @@ def problem_sub(request, **kwargs):
 											if old_draft.status == 'draft':
 													return redirect(problem_url)
 											return redirect(problem_url+ f'?sub={old_draft.id}')
-							form = WriteSolution(initial={'content':old_draft.solution},
+							form = WriteSolution(initial={'content':old_draft.solution, 
+							'ltr_dir':old_draft.ltr_dir},
 							dir_attrs = old_draft.get_dir_attrs()
 							)
 							context['form'] = form
