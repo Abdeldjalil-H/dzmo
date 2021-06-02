@@ -103,9 +103,8 @@ def problem_sub(request, **kwargs):
 																			problem = problem,
 																			status = request.POST.get('sub'),
 																			file = request.FILES.get('file'),
-																			submited_on = timezone.now(),
-																			ltr_dir = (request.POST.get('dir') == 'left')
-																			)
+																			submited_on = timezone.now(),								)
+											submission.set_dir(request.POST.get('dir'))
 											submission.save()
 											if submission.status == 'draft':
 													return redirect(problem_url)
@@ -120,7 +119,7 @@ def problem_sub(request, **kwargs):
 									form = WriteSolution(request.POST, request.FILES)
 									if form.is_valid():
 											old_draft.solution = form.cleaned_data['content']
-											old_draft.ltr_dir = (request.POST.get('dir') == 'left')
+											old_draft.set_dir(request.POST.get('dir'))
 											old_draft.submited_on = timezone.now()
 											old_draft.status = request.POST.get('sub')
 											if request.FILES.get('file'):
@@ -129,9 +128,11 @@ def problem_sub(request, **kwargs):
 											if old_draft.status == 'draft':
 													return redirect(problem_url)
 											return redirect(problem_url+ f'?sub={old_draft.id}')
-							form = WriteSolution(initial={'content':old_draft.solution})
+							form = WriteSolution(initial={'content':old_draft.solution},
+							dir_attrs = old_draft.get_dir_attrs()
+							)
 							context['form'] = form
-							context['ltr_dir'] = old_draft.ltr_dir
+							context['preview_dir'] = old_draft.get_dir_style
 							context['show_del'] = True
 							
 		else:

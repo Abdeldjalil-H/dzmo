@@ -23,7 +23,7 @@
 </div>
 {% if not show_btn and form%}
 <div class="container">
-    <div id="MathOutput" {%if ltr_dir%} dir="ltr" style="text-align:left" {%else%} dir="rtl" style="text-align:right" {%endif%}>
+    <div id="MathOutput" {{preview_dir}}>
 
     </div>
     <div>
@@ -36,10 +36,16 @@
     <script>
         function change_dir(id){
             var elem = document.getElementById(id);
-            var inverse_dir = {"":"ltr", "rtl":"ltr", "ltr":"rtl"};
-            var inverse_align = {"":"left","left":"right", "right":"left"};
-            elem.style.textAlign = inverse_align[elem.style.textAlign];
-            elem.dir = inverse_dir[elem.dir];
+            if(elem.style.textAlign == "left") {
+                elem.style.textAlign = "right";
+            } else {
+                elem.style.textAlign = "left";
+            }
+            if(elem.dir == "ltr") {
+                elem.dir = "rtl";
+            } else {
+                elem.dir = "ltr";
+            }
             var output = document.getElementById("MathOutput");
             output.style.textAlign = elem.style.textAlign;
             output.dir = elem.dir;
@@ -126,7 +132,7 @@
     <a class="card-link" href="{%url 'accounts:profile' this_sub.student.pk%}"> {{this_sub.student.username}} </a>
     </div>
     <div class="card-body">
-        <p class="card-text" {%if this_sub.ltr_dir%} dir="ltr" style="text-align:left" {%else%} dir="rtl" style="text-align:right" {%endif%}>
+        <p class="card-text" {{ this_sub.get_dir_style }}>
         {{ this_sub.solution|safe }}
         </p>
         {%if this_sub.file%}

@@ -67,6 +67,26 @@ class ProblemSubmission(models.Model):
     def __str__(self):
         return 'submission ' +str(self.id)
 
+    def set_dir(self, dir):
+        if dir:
+            if dir == 'left':
+                self.ltr_dir = True
+            else:
+                self.ltr_dir = False
+
+    @property
+    def get_dir_style(self):
+        if self.ltr_dir:
+            return 'dir=ltr style=text-align:left;'
+        else:
+            return 'dir=rtl style=text-align:right;'
+
+    def get_dir_attrs(self):
+        if self.ltr_dir:
+            return {'dir':'ltr', 'style':'text-align:left;'}
+        else:
+            return {'dir':'rtl', 'style':'text-align:right;'}
+
     class Meta:
         verbose_name        = 'إجابة مسألة'
         verbose_name_plural = 'إجابات المسائل'
