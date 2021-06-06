@@ -27,7 +27,9 @@ class WriteSolution(forms.Form):
 class WriteComment(forms.Form):
     ltr_dir = forms.BooleanField( 
                                 widget=forms.CheckboxInput(
-                                    attrs = {'style':'position:inherit;margin-left:4px;'}
+                                    attrs = {'style':'position:inherit;margin-left:4px;',
+                                    'onclick':"change_dir()",
+                                    }
                                 ),
                                 label='الكتابة من اليسار',
                                 required = False,

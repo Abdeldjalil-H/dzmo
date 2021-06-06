@@ -72,7 +72,9 @@ class ProblemCorrection(StaffRequired, CreateView):
 
         context['judge']    = not this_sub.correct
         context['correction_form'] = context['form']
-        context['correction_form'].fields['ltr_dir'].widget.attrs = {'style':'position:relative;margin-left:5px;'}
+        context['correction_form'].fields['ltr_dir'].widget.attrs = {'style':'position:relative;margin-left:5px;', 
+        'onclick':"change_dir('id_content')",
+        }
         context['form'] = None
         return context
 

@@ -1,6 +1,8 @@
 {% extends 'control/base.html' %}
 {% load crispy_forms_tags%}
+
 {% block content %}
+
 <div class="container my-4">
     <h2>
         مسألة 
@@ -22,6 +24,24 @@
 {% endif%}
 </div>
 {% if not show_btn and form%}
+<script>
+    function change_dir(id){
+        var elem = document.getElementById(id);
+        if(elem.style.textAlign == "left") {
+            elem.style.textAlign = "right";
+        } else {
+            elem.style.textAlign = "left";
+        }
+        if(elem.dir == "ltr") {
+            elem.dir = "rtl";
+        } else {
+            elem.dir = "ltr";
+        }
+        var output = document.getElementById("MathOutput");
+        output.style.textAlign = elem.style.textAlign;
+        output.dir = elem.dir;
+    }
+</script>
 <div class="container">
     <div id="MathOutput" {{preview_dir}}>
 
@@ -30,28 +50,8 @@
         <input class="my-3 btn btn-primary" type="button" value="معاينة" id="render" onclick="convert()"/>
     </div>
 
-    <script>
-        function change_dir(id){
-            var elem = document.getElementById(id);
-            if(elem.style.textAlign == "left") {
-                elem.style.textAlign = "right";
-            } else {
-                elem.style.textAlign = "left";
-            }
-            if(elem.dir == "ltr") {
-                elem.dir = "rtl";
-            } else {
-                elem.dir = "ltr";
-            }
-            var output = document.getElementById("MathOutput");
-            output.style.textAlign = elem.style.textAlign;
-            output.dir = elem.dir;
-            document.getElementById("writing_dir").value = elem.style.textAlign;
-        }
-    </script>
 	<div class="form-group">
 		<form method='POST' enctype="multipart/form-data">
-            <input hidden name="dir" id="writing_dir">
             {% csrf_token %}
             {{ form|crispy }}  
             <button type='submit' name ='sub' value ='submit' class="btn btn-outline-success"> تقديم الحل</button>
@@ -162,6 +162,21 @@
 </div>
 {% endif %}
 {%if cmnt%}
+<script>
+    function change_dir(){
+        var elem = document.getElementById("MathInput");
+        if(elem.style.textAlign == "left") {
+            elem.style.textAlign = "right";
+        } else {
+            elem.style.textAlign = "left";
+        }
+        if(elem.dir == "ltr") {
+            elem.dir = "rtl";
+        } else {
+            elem.dir = "ltr";
+        }
+    }
+</script>
 <div class="container">      
 <div class="form-group">
 <form method='POST'>

@@ -1,5 +1,20 @@
 {% load crispy_forms_tags %}
 {% include 'problems/problem-submit.html' %}
+<script>
+    function change_dir(id){
+        var elem = document.getElementById(id);
+        if(elem.style.textAlign == "left") {
+            elem.style.textAlign = "right";
+        } else {
+            elem.style.textAlign = "left";
+        }
+        if(elem.dir == "ltr") {
+            elem.dir = "rtl";
+        } else {
+            elem.dir = "ltr";
+        }
+    }
+</script>
 <div class="container my-4">
     {%if not this_sub.correction_in_progress and not in_correction%}
     <form>
@@ -7,6 +22,7 @@
     </form>
     {%endif%}
 {%if in_correction%}
+
 <form>
     <button type="submit" name="decide" value="cancel_correction" class="btn btn-outline-secondary my-4">تراجع</button>
 </form>
