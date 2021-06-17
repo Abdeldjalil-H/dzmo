@@ -30,7 +30,9 @@ class Problem(models.Model):
         return 15*self.level
     
     def __str__(self):
-        return f'مسألة {self.id}. {self.chapter.name}'
+        if self.chapter:
+            return f'مسألة {self.id}. {self.chapter.name}'
+        return f'مسألة {self.id} (محور محذوف)'
     class Meta:
         verbose_name        = 'مسألة'
         verbose_name_plural = 'مسائل'
@@ -65,7 +67,7 @@ class ProblemSubmission(models.Model):
     ltr_dir     = models.BooleanField(default = False)
 
     def __str__(self):
-        return 'submission ' +str(self.id)
+        return 'submission ' + str(self.id)
 
     def set_dir(self, dir):
         if dir:

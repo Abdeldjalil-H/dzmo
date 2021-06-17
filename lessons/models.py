@@ -121,8 +121,9 @@ class Exercice(models.Model):
         return set(self.solution.replace(' ','').split(','))
 
     def __str__(self):
-        return f'تمرين {self.id}: {self.chapter.name}'
-
+        if self.chapter:
+            return f'تمرين {self.id}: {self.chapter.name}'
+        return f'تمرين {self.id} (محور محذوف)'
     class Meta:
         verbose_name        = 'تمرين'
         verbose_name_plural = 'تمارين'
