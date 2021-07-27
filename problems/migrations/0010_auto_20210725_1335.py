@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='problem',
             name='statement',
-            field=models.TextField(default='this is a pb', verbose_name='المسألة'),
+            field=models.TextField(verbose_name='المسألة'),
             preserve_default=False,
         ),
     ]
