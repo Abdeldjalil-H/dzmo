@@ -15,7 +15,7 @@ class AbstractProblem(models.Model):
 
     class Meta:
         abstract = True                              
-class Problem(AbstractProblem):
+class Problem(models.Model, AbstractProblem):
     chapter     = models.ForeignKey(Chapter, related_name = 'problems',
                                     on_delete = models.SET_NULL,
                                     null = True,
