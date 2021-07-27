@@ -25,7 +25,7 @@ class Problem(AbstractProblem):
                                         verbose_name = 'عدد الحلول')
     added_on    = models.DateTimeField(auto_now_add = True)
     #we use False for tests
-    #publish     = models.BooleanField(default = True)
+    publish     = models.BooleanField(default = True)
 
     def has_access(self, request):
         return self.chapter in request.user.progress.completed_chapters.all()
