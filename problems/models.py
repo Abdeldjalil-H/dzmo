@@ -1,26 +1,31 @@
 from django.db import models
 from django.conf import settings
+from django.db.models.base import Model
 from lessons.models import Chapter
 
 
 LEVELS = [(1,'1'),(2,'2'),(3,'3'),(4,'4'),(5,'5')]
 
-class Problem(models.Model):
+class AbstractProblem(models.Model):
     statement   = models.TextField(verbose_name ='المسألة')
     level       = models.IntegerField(choices = LEVELS,
                                       verbose_name = 'المستوى')
+    source      = models.CharField(max_length = 200, blank = True,
+                                    verbose_name = 'المصدر')
+
+    class Meta:
+        abstract = True                              
+class Problem(AbstractProblem):
     chapter     = models.ForeignKey(Chapter, related_name = 'problems',
                                     on_delete = models.SET_NULL,
                                     null = True,
                                     verbose_name = 'المحور'
                                     )
-    source      = models.CharField(max_length = 200, blank = True,
-                                    verbose_name = 'المصدر')
     solved_by   = models.IntegerField(  default = 0, editable = False,
                                         verbose_name = 'عدد الحلول')
     added_on    = models.DateTimeField(auto_now_add = True)
     #we use False for tests
-    publish     = models.BooleanField(default = True)
+    #publish     = models.BooleanField(default = True)
 
     def has_access(self, request):
         return self.chapter in request.user.progress.completed_chapters.all()
@@ -28,7 +33,12 @@ class Problem(models.Model):
     @property
     def points(self):
         return 15*self.level
+
+    def get_topic(self):
+        return self.chapter.get_topic()
     
+    def get_name(self):
+        return f'مسألة {self.get_topic()} مستوى {self.level}'
     def __str__(self):
         if self.chapter:
             return f'مسألة {self.id}. {self.chapter.name}'
@@ -89,6 +99,12 @@ class ProblemSubmission(models.Model):
         else:
             return {'dir':'rtl', 'style':'text-align:right;'}
 
+    def set_status(self, status):
+        self.status = status
+
+    def delete(self):
+        self.file.delete(save=False)
+        super().delete()
     class Meta:
         verbose_name        = 'إجابة مسألة'
         verbose_name_plural = 'إجابات المسائل'
