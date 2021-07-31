@@ -7,7 +7,7 @@
 				<th scope="col">الرتبة</th>
 				<th scope="col">التلميذ</th>
 				<th scope="col">النقاط</th>
-				<th scope="col">تاريخ الإنضمام</th>
+				<th scope="col">النقاط هذا الأسبوع</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -20,7 +20,7 @@
 					</a>
 				</td>
 				<td>{{student.progress.points}}</td>
-				<td>{{student.join_date}}</td>
+				<td>{{student.count_last_points}}</td>
 			</tr>
 			{%endfor%}
 		</tbody>

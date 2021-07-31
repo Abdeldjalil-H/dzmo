@@ -2,9 +2,10 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 from django.conf import settings
-
+from datetime import timedelta
+from django.utils import timezone
 from lessons.models import Chapter, Exercice
-from problems.models import Problem, ProblemSubmission
+from problems.models import Problem, ProblemSubmission, STATUS
 
 
 class UserManager(BaseUserManager):
@@ -101,6 +102,50 @@ class User(AbstractBaseUser):
             return self.last_name + ' ' + self.first_name[0]
         return self.first_name + ' ' + self.last_name
 
+    def get_solved_problems_by_topic(self, topic):
+        return self.progress.solved_problems.filter(chapter__topic=topic)
+
+    def get_opened_problems_by_topic(self, topic):
+        return self.progress.opened_problems(topic = topic)
+    
+    def get_all_subs_by_problem(self, problem):
+        return self.problemsubmission_set.filter(problem=problem)
+    
+    def has_solved(self, problem):
+        solved = False
+        for sub in self.get_all_subs_by_problem():
+            solved |= sub.correct
+        return solved
+    def has_submit(self, problem):
+        return self.problemsubmission_set.filter(problem=problem).exists()
+    def add_solved_problem(self, problem):
+        self.progress.solved_problems.add(problem)
+        for sub in self.get_all_subs_by_problem(problem):
+            sub.set_status('correct')
+            sub.save()
+
+    def add_points(self, points):
+        self.progress.add_points(points)
+    
+    @property
+    def count_last_points(self, period=7):
+        start_day = timezone.now() - timedelta(days=period)
+        
+        return 15 * sum(self.problemsubmission_set.filter(submited_on__gte=start_day, correct=True).values_list('problem__level', flat=True))
+        
+    def get_solved_wrong_pending_indicies(self, topic):
+        solved = set(self.progress.solved_problems.filter(chapter__topic=topic).values_list('pk', flat=True))
+        wrong = set(
+            self.problemsubmission_set.filter(problem__chapter__topic=topic).filter(correct = False).values_list('problem__pk', flat=True)
+        )
+        wrong = wrong.difference(solved)
+        pending = set(
+            self.problemsubmission_set.filter(problem__chapter__topic=topic).filter(status='submit').values_list('problem__pk', flat=True)
+        )
+        pending = pending.difference(wrong)
+
+        return list(solved), list(wrong), list(pending)
+
     class Meta:
         verbose_name        = 'مستخدم'
         verbose_name_plural = 'المستخدمون'
@@ -134,14 +179,13 @@ class StudentProgress(models.Model):
         self.points += points
         self.save()
     #solved problems: either I make a M2M or a method (exercices also)
-    
+
     def opened_problems(self,topic = None):
         if topic:
             chapters = self.completed_chapters.filter(topic = topic)
             problems= Problem.objects.filter(chapter__in = chapters)
         else:
             problems = Problem.objects.filter(chapter__in = self.completed_chapters.all())
-        print(problems)
         return problems
 
     def __str__(self):
@@ -150,3 +194,6 @@ class StudentProgress(models.Model):
     class Meta:
         verbose_name        = 'تقدم التلميذ'
         verbose_name_plural = 'تقدم التلاميذ'
+
+#class UserGroup(models.Group):
+#    pass
