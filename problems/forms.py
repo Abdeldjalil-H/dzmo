@@ -11,10 +11,7 @@ class WriteSolution(forms.Form):
                                 required = False,
                                 )
     content = forms.CharField(widget=forms.Textarea(
-                            attrs={'id':'MathInput',
-
-                                  }
-                                                    ),
+                            attrs={'id':'MathInput'}),
                             label='',
                             )
     file    = forms.FileField(label='', required = False)

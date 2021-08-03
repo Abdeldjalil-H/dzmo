@@ -45,64 +45,79 @@ class SubsList(StaffRequired, ListView):
 class ProblemCorrection(StaffRequired, CreateView):
     template_name       = 'control/problem-correction.html'
     model               = Comment
-    #form_class          = WriteComment
+    need_form           = False
     fields              = ['ltr_dir','content']
     success_url         = reverse_lazy('control:subs-list')
+    submission_model = ProblemSubmission
+
+    def setup(self, request, *args, **kwargs):
+        self.submission = get_object_or_404(self.submission_model, pk=kwargs[self.pk_url_kwarg])
+        self.decide = request.GET.get('decide')
+        return super().setup(request, *args, **kwargs)
     
+    def get(self, request, *args, **kwargs):
+        if self.decide != 'to_correct' and self.decide:
+            self.submission.set_correcting(False)
+            self.submission.save()
+            self.extra_context = {'can_correct':True}
+        elif not self.decide:
+            self.extra_context = {'can_correct':self.submission.can_be_corrected()}
+        elif self.submission.can_be_corrected():
+            self.need_form = True
+            self.extra_context = {'can_correct':True}
+            self.submission.set_correcting(True)
+            self.submission.save()
+        return super().get(request, *args, **kwargs)
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class=form_class)
+        form.fields['ltr_dir'].widget.attrs = {'style':'position:relative;margin-left:5px;', 
+        'onclick':"change_dir('id_content')",
+        }
+        return form
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         pk = self.kwargs.get('pk')
-        this_sub = get_object_or_404(ProblemSubmission,id = pk)
-        context['problem']  = this_sub.problem
-        context['comments'] = this_sub.comments.all()
-        context['this_sub'] = this_sub
-
-        if self.request.method == 'GET':
-            decide = self.request.GET.get('decide')
-            if decide == 'to_correct':
-                if this_sub.correction_in_progress:
-                    context['form'] = None
-                    return context
-                this_sub.correction_in_progress = True
-                context['in_correction'] = True
-                this_sub.save()
-            elif decide == 'cancel_correction':
-                this_sub.correction_in_progress = False
-                this_sub.save()
-
-        context['judge']    = not this_sub.correct
-        context['correction_form'] = context['form']
-        context['correction_form'].fields['ltr_dir'].widget.attrs = {'style':'position:relative;margin-left:5px;', 
-        'onclick':"change_dir('id_content')",
-        }
-        context['form'] = None
+        context['problem']  = self.submission.problem
+        context['comments'] = self.submission.get_comments()
+        context['this_sub'] = self.submission
+        if not self.need_form:
+            context['form'] = None      
         return context
 
+    def handle_correct_sub(self):
+        self.submission.correct = True
+        self.submission.save()
+        self.submission.student.add_solved_problem(self.submission.problem)
+        self.submission.student.add_points(self.submission.problem.points)
+
+    def handle_wrong_sub(self):
+        self.submission.correct = False
+        self.submission.set_correcting(False)
+        self.submission.save()
+
+    def handle_comment_correct_sub(self):
+        self.submission.set_status('correct')
+        self.submission.save()
+
+    def notify_student(self):
+        self.submission.student.progress.last_submissions.add(self.submission)
+
     def form_valid(self, form, **kwargs):
-        pk = self.kwargs.get('pk')
+        pk = self.submission.pk
         form.instance.user          = self.request.user
         form.instance.submission_id = pk
-           
-        this_sub = get_object_or_404(ProblemSubmission,id = pk)
-        status = self.request.POST['status']
+        status = self.request.POST.get('status')
         #the other case is when we send only a comment
         if status:
-            this_sub.status = status
-            this_sub.save()
-            #the 2nd condition: to run this only the first time
-            if this_sub.status == 'correct' and not this_sub.correct:
-                this_sub.correct = True
-                this_sub.student.progress.solved_problems.add(this_sub.problem)
-                this_sub.save()
-                this_sub.student.progress.add_points(this_sub.problem.points)
+            self.submission.set_status(status)
+            if status == 'correct':
+                self.handle_correct_sub()
             else:
-                this_sub.correct = False
-                this_sub.correction_in_progress = False
-                this_sub.save()
+                self.handle_wrong_sub()
         else:
-            this_sub.status = 'correct'
-            this_sub.save()
-        this_sub.student.progress.last_submissions.add(this_sub)
+            self.handle_comment_correct_sub()
+        self.notify_student()
         return super().form_valid(form, **kwargs)
         
 class MainPage(ListView):
@@ -146,15 +161,22 @@ class AddProblems(StaffRequired,FormView):
     form_class      = AddProblemsForm
     success_url     = reverse_lazy('control:add-problems')
 
+    def add_problems(self, form):
+        return add_problems(**form.cleaned_data)
     def form_valid(self, form,**kwargs):
+        self.add_problems(form)
+        '''
         add_problems(form.cleaned_data['statements'],
                     form.cleaned_data['chapter'].pk,
                     form.cleaned_data['level'],
                     )
+        '''
         return super().form_valid(form, **kwargs)
 
-def add_problems(statements_str, chapter_id, level):
-    statements_list = statements_str.replace('\n',' ').split('\item')
+def add_problems(**kwargs):
+    chapter_id = kwargs['chapter'].pk
+    statements_list = kwargs['statements'].replace('\n',' ').split('\item')
+    level = kwargs['level']
     for pr in statements_list:
         if pr:
             Problem.objects.create(statement = pr, chapter_id = chapter_id, level= level)

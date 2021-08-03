@@ -1,0 +1,13 @@
+<div class="container my-4">
+    <h2 {%if ltr%}style="text-align:left;" {%endif%}>
+        {{problem.get_name}}
+    </h2>
+<p {%if ltr%} dir="ltr" style="text-align:left;" {%endif%} class="my-4">
+    {{problem.statement|safe}}
+</p>
+{%if show_btn %}
+<form >
+    <button type = 'submit' name = 'sub' value="0" class="btn btn-outline-secondary" >{{btn}}</button>
+</form>
+{% endif%}
+</div>

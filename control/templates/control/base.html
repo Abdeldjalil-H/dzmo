@@ -80,6 +80,9 @@
             mjx-container {
               overflow-x: auto;
             }
+            dl, ol, ul {
+              list-style-type: none;
+            }
         .dropdown-menu {
 			text-align: right !important;
 			}
@@ -91,15 +94,13 @@
 {%block nav-bar%}
 {%include "control/nav-bar.html"%}
 {%endblock%}
-  {%if messages %}
-  <div class="container">
-    {%for msg in messages%}
-    <div class="alert" role="alert">
-      {{msg}}
-    </div>
-    {%endfor%}
-  </div>
-  {%endif%}
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li{% if message.tags %} class="m-4 alert alert-{{ message.tags }}"{% endif %}>{{ message|safe }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
 
 
 {% block content %}

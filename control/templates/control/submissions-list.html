@@ -17,8 +17,9 @@
         {% for sub in level %}
             <tr>
                 <th scope="row">{{ forloop.counter }}</th>
-                <td class=" "><a href="{% url 'problems:submit' sub.problem.chapter.topic sub.problem.pk %}">
-                    {{sub.problem.chapter.topic}} {{sub.problem.pk}}
+                {% url 'problems:submit' sub.problem.chapter.topic sub.problem.pk as the_url%}
+                <td class=""><a href="{{the_url}}">
+                    {{ sub.problem.get_code }}
                 </a></td>
                 <td class=""><a href="">
                     {{ sub.student.username }}

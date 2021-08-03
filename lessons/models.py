@@ -34,6 +34,17 @@ class Chapter(models.Model):
     def prereq_chapters(self):
         return Chapter.objects.filter(id__in = [ch.pk for ch in self.prereq.all()])
     
+    def get_topic(self):
+        if self.topic == 'a':
+            return 'جبر'
+        elif self.topic == 'c':
+            return 'توفيقات'
+        elif self.topic == 'g':
+            return 'هندسة'
+        elif self.topic == 'nt':
+            return 'نظرية أعداد'
+        else:
+            return 'أساسيات'
     def has_access(self, request):
         for ch in self.prereq.all(): 
             if Chapter.objects.get(id =ch.id) not in request.user.progress.completed_chapters.all():

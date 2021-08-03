@@ -16,15 +16,18 @@ class ProblemsList(ListView):
 	def get_context_data(self, **kwargs):
 			context = super().get_context_data(**kwargs)
 			topic = self.kwargs.get('slug')
-			problems = self.request.user.progress.opened_problems(topic = topic).filter(publish = True)
+			context['topic'] = topic
+			problems = self.request.user.get_opened_problems_by_topic(topic)
 			problems_by_levels = []
 			for k in range(1,6):
 					problems_by_levels.append(problems.filter(level = k))
 			context['problems_list'] = problems_by_levels
-			context['solved_problems'] = self.request.user.progress.solved_problems.filter(chapter__topic=topic)
-			context['wrong_problems'] = [
-					sub.problem for sub in self.request.user.problemsubmission_set.filter(correct = False)
-					]
+			
+			
+			solved, wrong, pending = self.request.user.get_solved_wrong_pending_indicies(topic)
+			context['solved_problems'] = solved
+			context['wrong_problems'] = wrong
+			context['pending_problems'] = pending
 			return context
 
 
@@ -41,8 +44,7 @@ def comment(request, sub):
 def problem_sub(request, **kwargs):
 	template   = 'problems/problem-submit.html'
 	qs  = Problem.objects.filter(
-			chapter__in = request.user.progress.completed_chapters.filter(topic = kwargs['slug']),
-			publish = True           )
+			chapter__in = request.user.progress.completed_chapters.filter(topic = kwargs['slug']))
 	problem = get_object_or_404(qs, id = kwargs['pk'])
 	problem_url = reverse('problems:submit', kwargs = {'pk': kwargs['pk'], 'slug':kwargs['slug']})
 	context = {
@@ -57,7 +59,7 @@ def problem_sub(request, **kwargs):
 	if problem in request.user.progress.solved_problems.all():
 			#the student can see the solutions
 			if not sub:
-					sub = request.user.problemsubmission_set.filter(problem = problem).filter(correct = True).first().pk
+					sub = request.user.submissions.filter(problem = problem).filter(correct = True).first().pk
 					return redirect(problem_url + f'?sub={sub}')
 			subs     = ProblemSubmission.objects.filter(problem = problem)
 			all_sols = subs.filter(correct = True)
@@ -85,7 +87,7 @@ def problem_sub(request, **kwargs):
 			
 		if sub == None:
 					#not good
-					context['user_subs'] = request.user.problemsubmission_set.filter(problem = problem).exclude(status = 'draft')
+					context['user_subs'] = request.user.submissions.filter(problem = problem).exclude(status = 'draft')
 					context['show_btn'] = True
 					if not old_draft:
 							context['btn']     = 'إجابة جديدة'
@@ -159,15 +161,11 @@ class DeleteDraft(DeleteView):
 	
 	def get_object(self, **kwargs):
 		problem = Problem.objects.get(pk = self.kwargs['pk'])
-		return get_object_or_404(self.request.user.problemsubmission_set.filter(status = 'draft'), problem = problem)
+		return get_object_or_404(self.request.user.submissions.filter(status = 'draft'), problem = problem)
 
 	def get_success_url(self, **kwargs):
 		problem = Problem.objects.get(pk = self.kwargs['pk'])
-		return reverse_lazy('problems:submit', kwargs={
-																		'slug': problem.chapter.topic,
-																		'pk': problem.pk,
-																									}
-													)
+		return reverse_lazy('problems:submit', kwargs={'slug':problem.chapter.topic,'pk':problem.pk,})
 
 class LastCorrectedSubs(ListView):
 	template_name       = 'problems/last-subs.html'

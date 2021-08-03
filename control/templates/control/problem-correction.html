@@ -1,5 +1,5 @@
 {% load crispy_forms_tags %}
-{% include 'problems/problem-submit.html' %}
+{% include 'problems/show-pb-subs.html' %}
 <script>
     function change_dir(id){
         var elem = document.getElementById(id);
@@ -15,28 +15,31 @@
         }
     }
 </script>
+
+{% if can_correct %}
 <div class="container my-4">
-    {%if not this_sub.correction_in_progress and not in_correction%}
+    {%if not form%}
     <form>
         <button type="submit" name="decide" value="to_correct" class="btn btn-outline-primary">تصحيح الإجابة</button>
     </form>
+    {%else%}
+    <form>
+        <button type="submit" name="decide" value="cancel_correction" class="btn btn-outline-secondary my-4">تراجع</button>
+    </form>
     {%endif%}
-{%if in_correction%}
 
-<form>
-    <button type="submit" name="decide" value="cancel_correction" class="btn btn-outline-secondary my-4">تراجع</button>
-</form>
-{%endif%}
-{%if in_correction or not judge and form%}
-<form method='POST'>
-    {% csrf_token %}
-    {{ correction_form|crispy }}
-    {% if judge %}
-    <button type = 'submit' name ='status' value = 'correct' class="btn btn-success">إجابة صحيحة</button>
-    <button type = 'submit' name ='status' value = 'wrong' class="btn btn-danger">إجابة خاطئة</button>
-    {% else %}
-    <button type = 'submit' class="btn btn-outline-secondary">إرسال التعليق</button>
+    {%if form%}
+    <form method='POST'>
+        {% csrf_token %}
+        {{ form|crispy }}
+        {% if not this_sub.correct %}
+        <button type='submit' name='status' value='correct' class="btn btn-success">إجابة صحيحة</button>
+        <button type='submit' name='status' value='wrong' class="btn btn-danger">إجابة خاطئة</button>
+        {% else %}
+        <button type='submit' class="btn btn-outline-secondary">إرسال التعليق</button>
+        {%endif%}
+    </form>
     {%endif%}
-</form>
+
+    </div>
 {%endif%}
-</div>

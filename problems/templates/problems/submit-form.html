@@ -1,0 +1,38 @@
+{% load crispy_forms_tags%}
+<script>
+    function change_dir(id){
+        var elem = document.getElementById(id);
+        if(elem.style.textAlign == "left") {
+            elem.style.textAlign = "right";
+        } else {
+            elem.style.textAlign = "left";
+        }
+        if(elem.dir == "ltr") {
+            elem.dir = "rtl";
+        } else {
+            elem.dir = "ltr";
+        }
+        var output = document.getElementById("MathOutput");
+        output.style.textAlign = elem.style.textAlign;
+        output.dir = elem.dir;
+    }
+</script>
+<div class="container">
+    <div id="MathOutput" {{preview_dir}}>
+    </div>
+    <div>
+        <input class="my-3 btn btn-primary" type="button" value="معاينة" id="render" onclick="convert()"/>
+    </div>
+
+	<div class="form-group">
+		<form method='POST' enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form|crispy }}  
+            <button type='submit' name ='sub' value ='submit' class="btn btn-outline-success"> تقديم الحل</button>
+            <button type='submit' name ='sub' value ='draft' class="btn btn-outline-warning">حفظ كمسودة</button>
+            {% if show_del %}
+            <a href="{{request.path}}delete/" class="btn btn-outline-danger">حذف المسودة </a>
+            {%endif%}
+		</form>
+	</div>
+</div>

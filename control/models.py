@@ -41,7 +41,7 @@ class CorrectorsNotif(models.Model):
                 {self.total_subs} 
                 إجابة لم يتم تصحيحها.
                 
-                https://algerianmo.com/control/correction
+                http://algerianmo.com/control/correction
                 ''',
                 from_email = settings.DEFAULT_FROM_EMAIL,
                 recipient_list = ['djaloulehez3@gmail.com','chen.anas@gmail.com'],

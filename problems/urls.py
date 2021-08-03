@@ -16,7 +16,6 @@ urlpatterns = [
     path('last-solved/',LastSolvedProblems.as_view(), name='last-solved'),
     path('<slug:slug>/', login_required(ProblemsList.as_view()), name = 'list'),
     path('<slug:slug>/<int:pk>/',login_required(problem_sub), name = 'submit'),
-    path('<slug:slug>/<int:pk>/delete', DeleteDraft.as_view(), name='delete-sub'),
+    path('<slug:slug>/<int:pk>/delete/', DeleteDraft.as_view(), name='delete-sub'),
 
 ]
-#chose the problem with chapter and pk otherwise you will see geo in a/5 (example)

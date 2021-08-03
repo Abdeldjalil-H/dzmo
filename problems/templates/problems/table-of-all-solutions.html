@@ -1,0 +1,23 @@
+<div class="container">
+    <h3>
+        إجابات التلاميذ الآخرين
+        </h3>
+    <table class="table col-lg-9 my-4">
+        <thead>
+          <tr>
+            <th scope="col">التلميذ</th>
+            <th scope="col">تاريخ الإرسال</th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for sol in all_solutions%}
+            <tr>
+                <td><a href="{%url 'accounts:profile' sol.student.pk%}">{{sol.student.username}}</a></td>
+                <td>{{ sol.submited_on}}</td>
+                <td><a href="{{request.path}}?sub={{sol.pk}}">عرض</a></td>
+            </tr>
+        {%endfor%}
+        </tbody>
+    </table>
+</div>
