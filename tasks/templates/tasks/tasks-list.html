@@ -1,0 +1,10 @@
+{% extends 'control/base.html' %}
+{%block content%}
+<ul>
+    {%for task in tasks_list%}
+        <a href="{%url 'tasks:problems-list' task.pk%}">
+            {{task}}
+        </a>
+    {%endfor%}
+</ul>
+{%endblock%}
