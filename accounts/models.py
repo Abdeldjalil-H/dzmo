@@ -7,6 +7,17 @@ from django.utils import timezone
 from lessons.models import Chapter, Exercice
 from problems.models import Problem, ProblemSubmission, STATUS
 
+TEAMS_COLORS = [('white','white'),
+('green', 'green'), ('red','red'), ('black','black')
+]
+class Team(models.Model):
+    color = models.CharField(max_length=100, choices=TEAMS_COLORS, unique=True)
+
+    def __str__(self):
+        return f'{self.color} team'
+
+    def get_tasks(self):
+        return self.tasks.all()
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password = None, is_active = True, is_staff = False, is_admin = False):
@@ -42,7 +53,7 @@ class UserManager(BaseUserManager):
         )
         return user
 
-WILAYAS = [(a,a) for a in range(1,49)]
+WILAYAS = [(a,a) for a in range(1,59)]
 GRADES  = [ (-3, 'السنة 1 متوسط'), 
             (-2, 'السنة 2 متوسط'), 
             (-1, 'السنة 3 متوسط'), 
@@ -72,8 +83,8 @@ class User(AbstractBaseUser):
     is_admin        = models.BooleanField(default = False)
     is_corrector    = models.BooleanField(default = False)
 
-    
-    USERNAME_FIELD = 'email'
+    team            = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True)
+    USERNAME_FIELD  = 'email'
     #USERNAME and password are required by default
     REQUIRED_FIELDS = []         #['first_name', 'last_name']
 
@@ -109,15 +120,15 @@ class User(AbstractBaseUser):
         return self.progress.opened_problems(topic = topic)
     
     def get_all_subs_by_problem(self, problem):
-        return self.problemsubmission_set.filter(problem=problem)
+        return self.submissions.filter(problem=problem)
     
     def has_solved(self, problem):
         solved = False
-        for sub in self.get_all_subs_by_problem():
+        for sub in self.get_all_subs_by_problem(problem):
             solved |= sub.correct
         return solved
     def has_submit(self, problem):
-        return self.problemsubmission_set.filter(problem=problem).exists()
+        return self.submissions.filter(problem=problem).exists()
     def add_solved_problem(self, problem):
         self.progress.solved_problems.add(problem)
         for sub in self.get_all_subs_by_problem(problem):
@@ -131,18 +142,18 @@ class User(AbstractBaseUser):
     def count_last_points(self, period=7):
         start_day = timezone.now() - timedelta(days=period)
         
-        return 15 * sum(self.problemsubmission_set.filter(submited_on__gte=start_day, correct=True).values_list('problem__level', flat=True))
+        return 15 * sum(self.submissions.filter(submited_on__gte=start_day, correct=True).values_list('problem__level', flat=True))
         
     def get_solved_wrong_pending_indicies(self, topic):
         solved = set(self.progress.solved_problems.filter(chapter__topic=topic).values_list('pk', flat=True))
         wrong = set(
-            self.problemsubmission_set.filter(problem__chapter__topic=topic).filter(correct = False).values_list('problem__pk', flat=True)
+            self.submissions.filter(problem__chapter__topic=topic).filter(correct = False).values_list('problem__pk', flat=True)
         )
-        wrong = wrong.difference(solved)
+        #wrong = wrong.difference(solved)
         pending = set(
-            self.problemsubmission_set.filter(problem__chapter__topic=topic).filter(status='submit').values_list('problem__pk', flat=True)
+            self.submissions.filter(problem__chapter__topic=topic).filter(status='submit').values_list('problem__pk', flat=True)
         )
-        pending = pending.difference(wrong)
+        #pending = pending.difference(wrong)
 
         return list(solved), list(wrong), list(pending)
 
@@ -194,6 +205,3 @@ class StudentProgress(models.Model):
     class Meta:
         verbose_name        = 'تقدم التلميذ'
         verbose_name_plural = 'تقدم التلاميذ'
-
-#class UserGroup(models.Group):
-#    pass

@@ -6,7 +6,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .forms import UserAdminCreationForm, UserAdminChangeForm
 # Register your models here.
 
-from .models import StudentProgress
+from .models import StudentProgress, Team
 User = get_user_model()
 
 class ProgressInline(admin.StackedInline):
@@ -21,11 +21,12 @@ class UserAdmin(BaseUserAdmin):
     # These override the definitions on the base UserAdmin
     # that reference specific fields on auth.User.
     list_display = ('first_name','last_name','email',)
-    list_filter = ('is_admin','is_staff','is_active','grade')
+    list_filter = ('is_admin','is_staff','is_active','grade','team')
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
         ('المعلومات الشخصية', {'fields': ('first_name','last_name','date_of_birth','wilaya','grade','sex',)}),
         ('التخويلات', {'fields': ('is_admin','is_staff','is_active', 'is_corrector')}),
+        ('الفريق', {'fields': ('team',)})
     )
     # add_fieldsets is not a standard ModelAdmin attribute. UserAdmin
     # overrides get_fieldsets to use this attribute when creating a user.
@@ -40,3 +41,4 @@ class UserAdmin(BaseUserAdmin):
     filter_horizontal = ()
 
 admin.site.register(User, UserAdmin)
+admin.site.register(Team)
