@@ -32,9 +32,9 @@ class TaskProblem(AbstractProblem):
         return self.submissions.filter(student=user).first()
         return self.submissions.filter(student=user, status='draft').first()
     def can_submit(self, user):
-        #if draft or now sub
-        return not self.get_user_subs(user).exists()
-        return not self.has_solved(user)
+        #if draft or no sub
+        sub = self.get_user_subs(user).first()
+        return not sub or sub.status == 'draft'
 
     def get_code(self):
         return f'{self.pk}'

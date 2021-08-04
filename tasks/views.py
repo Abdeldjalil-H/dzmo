@@ -58,8 +58,8 @@ class TaskPbSubmit(CreateView):
             } 
         return super().get_initial()
     
-    def get_success_url(self, **kwargs):
-        return reverse_lazy('tasks:pb-view', kwargs={'task_pk':self.kwargs['task_pk'], 'pb_pk':self.problem.pk})
+    def get_success_url(self, sub_pk):
+        return reverse_lazy('tasks:pb-view', kwargs={'task_pk':self.kwargs['task_pk'], 'pb_pk':self.problem.pk}) + f'?sub={sub_pk}'
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -77,7 +77,7 @@ class TaskPbSubmit(CreateView):
             obj.set_status(self.request.POST['sub'])
             obj.set_submited_now()
             obj.save()
-        return HttpResponseRedirect(self.get_success_url())
+        return HttpResponseRedirect(self.get_success_url(obj.pk))
 
 class TaskPbView(DetailView):
     template_name = 'tasks/task-problem.html'
@@ -167,7 +167,7 @@ class TaskPbsCorrection(ProblemCorrection):
     submission_model    = TaskProblemSubmission
     model               = TaskComment
     pk_url_kwarg = 'sub_pk'
-
+    template_name = 'tasks/subs-list.html'
     def get_success_url(self):
         return reverse_lazy(('tasks:task-subs-list'), kwargs={'task_pk':self.kwargs['task_pk']})
     def handle_correct_sub(self):
