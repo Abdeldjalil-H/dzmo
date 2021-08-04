@@ -1,4 +1,5 @@
 import os
+from django.utils import timezone
 from accounts.models import Team
 from django.conf import settings
 from django.db import models
@@ -48,17 +49,20 @@ class TaskProblemSubmission(AbstractPbSubmission):
     problem     = models.ForeignKey(TaskProblem, on_delete = models.CASCADE, related_name='submissions')
     file        = models.FileField(blank = True, null = True, upload_to = file_path_name)
 
+    def set_submited_now(self):
+        self.submited_on = timezone.now()
     def update(self, solution, dir, status):
         self.solution=solution
         self.ltr_dir=dir
         self.status=status
+        self.submited_on = timezone.now()
         self.save()
     def set_dir(self, dir):
         self.ltr_dir = dir
 class Task(models.Model):
     name        = models.CharField(max_length=100, null=True)
     team        = models.ManyToManyField(Team, related_name='tasks')
-    problems    = models.ManyToManyField(TaskProblem)
+    problems    = models.ManyToManyField(TaskProblem, null=True)
     started_on  = models.DateField()
     ended_on    = models.DateField()
 

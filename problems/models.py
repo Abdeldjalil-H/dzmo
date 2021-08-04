@@ -107,6 +107,9 @@ class AbstractPbSubmission(models.Model):
         return user == self.student and not self.correct and self.status == 'wrong'
     def can_comment(self, user):
         return user == self.student and self.status == 'wrong'
+
+    def __str__(self):
+        return f'إجابة {self.pk}: مسألة {self.problem.pk} {self.student.get_full_name()}'
     class Meta:
         abstract = True
 

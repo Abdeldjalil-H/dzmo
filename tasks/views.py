@@ -75,6 +75,7 @@ class TaskPbSubmit(CreateView):
             obj.set_student(self.request.user)
             obj.problem_id = self.kwargs['pb_pk']
             obj.set_status(self.request.POST['sub'])
+            obj.set_submited_now()
             obj.save()
         return HttpResponseRedirect(self.get_success_url())
 
@@ -172,13 +173,14 @@ class TaskPbsCorrection(ProblemCorrection):
     def handle_correct_sub(self):
         self.submission.correct = True
         self.submission.save()
+        self.submission.student.add_points(self.submission.problem.points)
 
     def notify_student(self):
         pass
 
 class AddProblems(AddProblems):
     form_class = AddProblemsForm
-
+    success_url = reverse_lazy(('tasks:add-pbs'))
     def add_problems(self, form):
         return add_problems(**form.cleaned_data)
 
