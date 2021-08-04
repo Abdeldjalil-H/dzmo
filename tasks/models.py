@@ -39,6 +39,11 @@ class TaskProblem(AbstractProblem):
     def get_code(self):
         return f'{self.pk}'
 
+    class Meta:
+        verbose_name = 'مسألة واجبات'
+        verbose_name_plural = 'مسائل الواجبات'
+        ordering = ['pk']
+
 def file_path_name(instance, filename):
     ext = filename.split('.')[-1]
     name = f'{instance.problem.pk}_u{instance.student.pk}.{ext}'
@@ -59,6 +64,9 @@ class TaskProblemSubmission(AbstractPbSubmission):
         self.save()
     def set_dir(self, dir):
         self.ltr_dir = dir
+    class Meta:
+        verbose_name = 'إجابة مسألة واجب'
+        verbose_name_plural = 'إجابات مسائل الواجبات'
 class Task(models.Model):
     name        = models.CharField(max_length=100, null=True)
     team        = models.ManyToManyField(Team, related_name='tasks')
@@ -85,3 +93,5 @@ class TaskComment(AbstractComment):
 
         class Meta:
             ordering = ['date']
+            verbose_name = 'تعليق واجب'
+            verbose_name_plural = 'تعليقات الواجبات'
