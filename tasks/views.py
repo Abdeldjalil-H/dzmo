@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.views.generic.detail import DetailView
 from django.views.generic import ListView
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import (
     get_object_or_404,
     redirect,
@@ -21,22 +22,31 @@ from control.views import (
     AddProblems,
 )
 from .forms import SubmitForm, CommentForm, AddProblemsForm
+
+class CheckTeam(UserPassesTestMixin):
+    def test_func(self):
+        if not self.request.user.is_authenticated:
+            return False
+        task = Task.objects.get(pk=self.kwargs['task_pk'])
+        return task.has_access(self.request.user)
 class TasksList(ListView):
     template_name       = 'tasks/tasks-list.html'
     context_object_name = 'tasks_list'
 
     def get_queryset(self):
-        return self.request.user.team.get_tasks()
+        user = self.request.user
+        if user.is_team_member():
+            return {'team': user.team.get_name(), 'tasks': user.team.get_tasks()}
     
-class TaskProblemsList(ListView):
+class TaskProblemsList(CheckTeam, ListView):
     template_name       = 'tasks/problems-list.html'
     context_object_name = 'problems_list'
     
     def get_queryset(self, **kwargs):
-        task = get_object_or_404(Task, pk=self.kwargs['pk'])
+        task = get_object_or_404(Task, pk=self.kwargs['task_pk'])
         return task.get_problems_by_level()
         
-class TaskPbSubmit(CreateView):
+class TaskPbSubmit(CheckTeam, CreateView):
     model = TaskProblemSubmission
     form_class = SubmitForm
     template_name = 'tasks/task-problem.html'
@@ -79,7 +89,7 @@ class TaskPbSubmit(CreateView):
             obj.save()
         return HttpResponseRedirect(self.get_success_url(obj.pk))
 
-class TaskPbView(DetailView):
+class TaskPbView(CheckTeam, DetailView):
     template_name = 'tasks/task-problem.html'
     context_object_name = 'this_sub'
     form_class = CommentForm
@@ -167,7 +177,7 @@ class TaskPbsCorrection(ProblemCorrection):
     submission_model    = TaskProblemSubmission
     model               = TaskComment
     pk_url_kwarg = 'sub_pk'
-    template_name = 'tasks/subs-list.html'
+    template_name = 'tasks/correction-subs-list.html'
     def get_success_url(self):
         return reverse_lazy(('tasks:task-subs-list'), kwargs={'task_pk':self.kwargs['task_pk']})
     def handle_correct_sub(self):

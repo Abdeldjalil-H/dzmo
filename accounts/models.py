@@ -18,7 +18,9 @@ class Team(models.Model):
 
     def get_tasks(self):
         return self.tasks.all()
-
+    
+    def get_name(self):
+        return self.__str__()
 class UserManager(BaseUserManager):
     def create_user(self, email, password = None, is_active = True, is_staff = False, is_admin = False):
         if not email:
@@ -83,7 +85,7 @@ class User(AbstractBaseUser):
     is_admin        = models.BooleanField(default = False)
     is_corrector    = models.BooleanField(default = False)
 
-    team            = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True)
+    team            = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, blank=True)
     USERNAME_FIELD  = 'email'
     #USERNAME and password are required by default
     REQUIRED_FIELDS = []         #['first_name', 'last_name']
@@ -137,7 +139,9 @@ class User(AbstractBaseUser):
 
     def add_points(self, points):
         self.progress.add_points(points)
-    
+    def is_team_member(self):
+        return self.team is not None
+
     @property
     def count_last_points(self, period=7):
         start_day = timezone.now() - timedelta(days=period)

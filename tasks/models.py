@@ -70,7 +70,7 @@ class TaskProblemSubmission(AbstractPbSubmission):
 class Task(models.Model):
     name        = models.CharField(max_length=100, null=True)
     team        = models.ManyToManyField(Team, related_name='tasks')
-    problems    = models.ManyToManyField(TaskProblem, null=True)
+    problems    = models.ManyToManyField(TaskProblem, blank=True)
     started_on  = models.DateField()
     ended_on    = models.DateField()
 
@@ -87,7 +87,12 @@ class Task(models.Model):
     def get_subs_by_level(self):
         all_subs = TaskProblemSubmission.objects.filter(problem__in = self.problems.all(), student__team__in = self.team.all(), status__in = ['submit','comment'])
         return [all_subs.filter(problem__level = k) for k in range(1,6)]
-    
+    def has_access(self, user):
+        if user.is_staff:
+            return True
+        if not user.is_team_member():
+            return False
+        return user.team in self.team.all()
 class TaskComment(AbstractComment):
         submission  = models.ForeignKey(TaskProblemSubmission,related_name = 'comments',on_delete= models.CASCADE)
 

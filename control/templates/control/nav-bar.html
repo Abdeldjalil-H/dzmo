@@ -20,7 +20,7 @@
         <a class="nav-link" href="/">الرئيسية <span class="sr-only">(current)</span></a>
       </li>
       <li class="nav-item">
-        <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">المنتدى</a>
+        <a class="nav-link" {%if user.is_team_member%}href="{%url 'tasks:tasks-list'%}" {%else%}aria-disabled="true" href="#" {%endif%}>الواجبات</a>
       </li>
       <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -86,9 +86,11 @@
           <a class="dropdown-item" href="{%url 'control:subs-list' %}">تصحيح المسائل</a>
           <a class="dropdown-item" href="{%url 'control:test-ans-list' %}">تصحيح الاختبارات</a>
           {%if user.is_staff%}
+          
           <a class="dropdown-item" href="/admin/">إدارة الموقع</a>
           <a class="dropdown-item" href="{%url 'control:add-problems'%}">إضافة مسائل</a>
           <a class="dropdown-item" href="{%url 'control:send-mails'%}">إرسال بريد</a>
+          <a class="dropdown-item" href="{%url 'tasks:add-pbs'%}">إضافة مسائل الواجبات</a>
           {%endif%}
         </div>
       </li>
