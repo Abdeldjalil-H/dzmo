@@ -5,9 +5,9 @@ from django import forms
 from .models import TaskComment, TaskProblemSubmission, Task
 from control.forms import AddProblemsForm
 class SubmitForm(ModelForm):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, dir_attrs={}, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['solution'].required = False
+        self.fields['solution'].widget.attrs |= dir_attrs
     class Meta:
         model = TaskProblemSubmission
         fields = ['ltr_dir','solution','file']
@@ -20,6 +20,8 @@ class SubmitForm(ModelForm):
             'solution':'',
             'file':'إرفاق ملف'
         }
+
+            
     ''' 
     def clean_solution(self):
         data = self.cleaned_data['solution']
@@ -39,7 +41,7 @@ class CommentForm(ModelForm):
         widgets = {
             'content': forms.Textarea(
                         attrs={'id':'MathInput',}),
-            'ltr_dir': forms.CheckboxInput( attrs = {'style':'position:inherit;margin-left:4px;','onclick':"change_dir()",})       
+            'ltr_dir': forms.CheckboxInput(attrs = {'style':'position:inherit;margin-left:4px;','onclick':"change_dir()",})       
         }
         labels = {
             'content':''

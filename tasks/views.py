@@ -65,16 +65,23 @@ class TaskPbSubmit(CheckTeam, CreateView):
         if self.draft_sub:
             self.initial = {'solution':self.draft_sub.solution,
                             'ltr_dir':self.draft_sub.ltr_dir,
-            } 
+            }
         return super().get_initial()
-    
+    def get_form(self):
+        dir_attrs = self.draft_sub.get_dir_attrs() if self.draft_sub else {}
+        return self.form_class(dir_attrs=dir_attrs, **self.get_form_kwargs())
     def get_success_url(self, sub_pk):
-        return reverse_lazy('tasks:pb-view', kwargs={'task_pk':self.kwargs['task_pk'], 'pb_pk':self.problem.pk}) + f'?sub={sub_pk}'
+        url = reverse_lazy('tasks:pb-view', kwargs={'task_pk':self.kwargs['task_pk'], 'pb_pk':self.problem.pk})
+        if sub_pk:
+            return url + f'?sub={sub_pk}'
+        return url
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['problem'] = self.problem
-        context['show_del'] = True if self.draft_sub else False
+        if self.draft_sub:
+            context['preview_dir'] = self.draft_sub.get_dir_style
+            context['show_del'] = True
         return context
 
     def form_valid(self, form):
