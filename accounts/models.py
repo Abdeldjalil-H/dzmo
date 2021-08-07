@@ -6,7 +6,7 @@ from datetime import timedelta
 from django.utils import timezone
 from lessons.models import Chapter, Exercice
 from problems.models import Problem, ProblemSubmission, STATUS
-
+from tasks.models import TaskProblemSubmission
 TEAMS_COLORS = [('white','white'),
 ('green', 'green'), ('red','red'), ('black','black')
 ]
@@ -123,7 +123,8 @@ class User(AbstractBaseUser):
     
     def get_all_subs_by_problem(self, problem):
         return self.submissions.filter(problem=problem)
-    
+    def is_tasks_corrector(self):
+        return self.is_staff
     def has_solved(self, problem):
         solved = False
         for sub in self.get_all_subs_by_problem(problem):
@@ -160,7 +161,13 @@ class User(AbstractBaseUser):
         #pending = pending.difference(wrong)
 
         return list(solved), list(wrong), list(pending)
-
+    
+    def add_task_correction_notif(self, sub):
+        self.progress.last_tasks_subs.add(sub)
+    def tasks_subs_notif(self):
+        return self.progress.last_tasks_subs.count()
+    def get_last_tasks_subs(self):
+        return self.progress.last_tasks_subs.all()
     class Meta:
         verbose_name        = 'مستخدم'
         verbose_name_plural = 'المستخدمون'
@@ -184,6 +191,7 @@ class StudentProgress(models.Model):
                                                 )
     last_submissions    = models.ManyToManyField(ProblemSubmission, blank = True,
                                                 verbose_name = 'آخر المحاولات المقدمة',)
+    last_tasks_subs     = models.ManyToManyField(TaskProblemSubmission, blank=True)                                            
     points              = models.IntegerField(default = 0, editable = False)
     
     @property

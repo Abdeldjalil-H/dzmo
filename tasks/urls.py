@@ -7,7 +7,8 @@ from .views import (
     TaskSubsList,
     TaskPbsCorrection,
     DeleteDraft,
-    AddProblems
+    AddProblems,
+    LastCorrectedSubs,
 )
 app_name = 'tasks'
 
@@ -20,5 +21,6 @@ urlpatterns = [
     #path('correction/list/',name='correction-tasks-list'),
     path('correction/task<int:task_pk>/', TaskSubsList.as_view(), name='task-subs-list'),
     path('correction/task<int:task_pk>/<int:sub_pk>/',TaskPbsCorrection.as_view()),
+    path('last-corrected/', LastCorrectedSubs.as_view(), name='last-corrected'),
     path('add-pbs/', AddProblems.as_view(), name='add-pbs'),
 ]

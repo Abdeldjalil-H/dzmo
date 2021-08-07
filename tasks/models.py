@@ -1,13 +1,11 @@
 import os
 from django.utils import timezone
-from accounts.models import Team
 from django.conf import settings
 from django.db import models
 from django.shortcuts import get_object_or_404
 from problems.models import ( 
     AbstractComment,
     AbstractPbSubmission, 
-    Comment,
     AbstractProblem
 )
 
@@ -18,8 +16,8 @@ class TaskProblem(AbstractProblem):
         return self.submissions.filter(student=user, status='draft').exists()
     def get_user_subs(self, user):
         return self.submissions.filter(student=user, status__isnull=False)
-    def get_all_subs(self):
-        return self.submissions.all()
+    def get_correct_subs(self):
+        return self.submissions.filter(correct=True)
     def get_sub(self, **kwargs):
         return get_object_or_404(self.submissions, **kwargs)
     
@@ -64,13 +62,19 @@ class TaskProblemSubmission(AbstractPbSubmission):
         self.save()
     def set_dir(self, dir):
         self.ltr_dir = dir
+    
+    def mark_as_seen(self, user):
+        user.progress.last_tasks_subs.remove(self)
+
+    def get_task(self):
+        return self.problem.task.get(team=self.student.team)
     class Meta:
         verbose_name = 'إجابة مسألة واجب'
         verbose_name_plural = 'إجابات مسائل الواجبات'
 class Task(models.Model):
     name        = models.CharField(max_length=100, null=True)
-    team        = models.ManyToManyField(Team, related_name='tasks')
-    problems    = models.ManyToManyField(TaskProblem, blank=True)
+    team        = models.ManyToManyField('accounts.Team', related_name='tasks')
+    problems    = models.ManyToManyField(TaskProblem, related_name='task', blank=True)
     started_on  = models.DateField()
     ended_on    = models.DateField()
 
@@ -93,6 +97,7 @@ class Task(models.Model):
         if not user.is_team_member():
             return False
         return user.team in self.team.all()
+
 class TaskComment(AbstractComment):
         submission  = models.ForeignKey(TaskProblemSubmission,related_name = 'comments',on_delete= models.CASCADE)
 

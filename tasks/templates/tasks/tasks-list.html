@@ -1,11 +1,32 @@
-{% extends 'control/base.html' %}
+{%extends 'control/base.html'%}
+
 {%block content%}
-<ul>
-    {%for task in tasks_list.tasks%}
-        <li><a href="{%url 'tasks:problems-list' task.pk%}">
-            {{task}}
-        </a>
-        </li>
-    {%endfor%}
-</ul>
+<div class="container">
+  <h2>الواجبات</h2>
+    <table class="table">
+        <tbody>
+        {%for task in tasks_list.tasks%}
+          <tr>
+            <td scope="col">
+              <a href="{%url 'tasks:problems-list' task.pk%}">
+              {{task}}
+              </a>
+            </td>
+            <td scope="col">                
+                <a href="">
+                آخر الإجابات
+                </a>
+            </td>
+            {%if user.is_tasks_corrector%}
+            <td scope="col">                
+                <a href="{%url 'tasks:task-subs-list' task.pk%}">
+                تصحيح الإجابات
+                </a>
+            </td>
+            {%endif%}
+          </tr>
+          {%endfor%}
+        </tbody>
+        </table>
+</div>
 {%endblock%}
