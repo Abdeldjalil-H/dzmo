@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     'accounts.apps.AccountsConfig',
     'control.apps.ControlConfig',
     'tests.apps.TestsConfig',
-    'tasks.apps.TasksConfig',
+    #'tasks.apps.TasksConfig',
 
     'crispy_forms',
     'mathfilters',

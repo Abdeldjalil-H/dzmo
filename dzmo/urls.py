@@ -25,14 +25,14 @@ from problems import urls as problems_urls
 from control import urls as control_urls
 from control.views import MainPage
 from tests import urls as tests_urls
-from tasks import urls as tasks_urls
+#from tasks import urls as tasks_urls
 urlpatterns = [
     path('', MainPage.as_view(), name ='main'),
     path('problems/', include(problems_urls)),
     path('lessons/', include(lessons_urls)),
     path('accounts/', include(accounts_urls)),
     path('control/', include(control_urls)),
-    path('tasks/', include(tasks_urls)),
+    #path('tasks/', include(tasks_urls)),
     path('tests/', include(tests_urls)),
     path('admin/', admin.site.urls),
     #path('', include('django.contrib.auth.urls'))
