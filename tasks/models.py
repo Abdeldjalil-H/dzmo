@@ -71,6 +71,7 @@ class TaskProblemSubmission(AbstractPbSubmission):
     class Meta:
         verbose_name = 'إجابة مسألة واجب'
         verbose_name_plural = 'إجابات مسائل الواجبات'
+
 class Task(models.Model):
     name        = models.CharField(max_length=100, null=True)
     team        = models.ManyToManyField('accounts.Team', related_name='tasks')

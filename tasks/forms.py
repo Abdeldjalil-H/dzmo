@@ -51,5 +51,5 @@ LEVELS = [(1,'1'),(2,'2'),(3,'3'),(4,'4'),(5,'5')]
 class AddProblemsForm(forms.Form):
   
     statements  = forms.CharField(widget=forms.Textarea(),label ='المسائل')
-    task = forms.ModelChoiceField(queryset=Task.objects.all(), label='الواجب')  
+    #task = forms.ModelChoiceField(queryset=Task.objects.all(), label='الواجب')  
     level       = forms.ChoiceField(choices = LEVELS, label = 'المستوى')
