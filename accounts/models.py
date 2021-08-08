@@ -191,7 +191,7 @@ class StudentProgress(models.Model):
                                                 )
     last_submissions    = models.ManyToManyField(ProblemSubmission, blank = True,
                                                 verbose_name = 'آخر المحاولات المقدمة',)
-    last_tasks_subs     = models.ManyToManyField('tasks.TaskProblemSubmission', blank=True)                                            
+    #last_tasks_subs     = models.ManyToManyField('tasks.TaskProblemSubmission', blank=True)                                            
     points              = models.IntegerField(default = 0, editable = False)
     
     @property
