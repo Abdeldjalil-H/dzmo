@@ -6,7 +6,7 @@ from datetime import timedelta
 from django.utils import timezone
 from lessons.models import Chapter, Exercice
 from problems.models import Problem, ProblemSubmission, STATUS
-from tasks.models import TaskProblemSubmission
+#from tasks.models import TaskProblemSubmission
 TEAMS_COLORS = [('white','white'),
 ('green', 'green'), ('red','red'), ('black','black')
 ]
@@ -191,7 +191,7 @@ class StudentProgress(models.Model):
                                                 )
     last_submissions    = models.ManyToManyField(ProblemSubmission, blank = True,
                                                 verbose_name = 'آخر المحاولات المقدمة',)
-    last_tasks_subs     = models.ManyToManyField(TaskProblemSubmission, blank=True)                                            
+    last_tasks_subs     = models.ManyToManyField('tasks.TaskProblemSubmission', blank=True)                                            
     points              = models.IntegerField(default = 0, editable = False)
     
     @property

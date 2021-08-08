@@ -8,7 +8,7 @@ from problems.models import (
     AbstractPbSubmission, 
     AbstractProblem
 )
-
+from accounts.models import Team
 class TaskProblem(AbstractProblem):
     def get_name(self):
         return f'Problem'
@@ -74,7 +74,7 @@ class TaskProblemSubmission(AbstractPbSubmission):
 
 class Task(models.Model):
     name        = models.CharField(max_length=100, null=True)
-    team        = models.ManyToManyField('accounts.Team', related_name='tasks')
+    team        = models.ManyToManyField(Team, related_name='tasks')
     problems    = models.ManyToManyField(TaskProblem, related_name='task', blank=True)
     started_on  = models.DateField()
     ended_on    = models.DateField()
