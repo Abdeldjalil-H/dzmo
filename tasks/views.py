@@ -65,9 +65,11 @@ class TaskPbSubmit(CheckTeam, CreateView):
         if self.draft_sub:
             self.initial = {'solution':self.draft_sub.solution,
                             'ltr_dir':self.draft_sub.ltr_dir,
-            } 
+            }
         return super().get_initial()
-    
+    def get_form(self):
+        dir_attrs = self.draft_sub.get_dir_attrs() if self.draft_sub else {}
+        return self.form_class(dir_attrs=dir_attrs, **self.get_form_kwargs())
     def get_success_url(self, sub_pk):
         url = reverse_lazy('tasks:pb-view', kwargs={'task_pk':self.kwargs['task_pk'], 'pb_pk':self.problem.pk})
         if sub_pk:
@@ -77,7 +79,9 @@ class TaskPbSubmit(CheckTeam, CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['problem'] = self.problem
-        context['show_del'] = True if self.draft_sub else False
+        if self.draft_sub:
+            context['preview_dir'] = self.draft_sub.get_dir_style
+            context['show_del'] = True
         return context
 
     def form_valid(self, form):
@@ -96,6 +100,7 @@ class TaskPbView(CheckTeam, DetailView):
     template_name = 'tasks/task-problem.html'
     context_object_name = 'this_sub'
     form_class = CommentForm
+
     def get_success_url(self, sub_pk):
         return reverse_lazy(('tasks:pb-view'), kwargs={'task_pk':self.kwargs['task_pk'], 'pb_pk':self.problem.pk}) + f'?sub={sub_pk}'
     def setup(self, request, *args, **kwargs):
@@ -133,7 +138,7 @@ class TaskPbView(CheckTeam, DetailView):
         if not self.sub:
             return None
         if self.problem.has_solved(self.request.user):
-            return self.problem.get_sub(pk=self.sub)
+            return self.problem.get_sub(pk=self.sub, correct=True)
 
         obj = get_object_or_404(self.problem.get_user_subs(self.user), pk=self.sub)
         self.handle_non_correct_sub(obj)
@@ -148,9 +153,10 @@ class TaskPbView(CheckTeam, DetailView):
         #btn text and submit value
         context['user_subs'] = self.problem.get_user_subs(self.user)
         if self.object:
+            self.object.mark_as_seen(self.user)
             context['comments'] = self.object.get_comments()
         if self.problem.has_solved(self.user):
-            context['all_sols'] = self.problem.get_all_subs()
+            context['all_sols'] = self.problem.get_correct_subs()
             context['show_btn'] = False
         elif self.problem.has_draft_sub(self.user):
             context['btn'] = 'إكمال المحاولة السابقة'
@@ -189,8 +195,12 @@ class TaskPbsCorrection(ProblemCorrection):
         self.submission.student.add_points(self.submission.problem.points)
 
     def notify_student(self):
-        pass
-
+        self.request.user.add_task_correction_notif(self.submission)
+class LastCorrectedSubs(ListView):
+    template_name = 'tasks/last-corrected-subs.html'
+    context_object_name = 'user_subs'
+    def get_queryset(self):
+        return self.request.user.get_last_tasks_subs()
 class AddProblems(AddProblems):
     form_class = AddProblemsForm
     success_url = reverse_lazy(('tasks:add-pbs'))

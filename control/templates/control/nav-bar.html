@@ -10,11 +10,20 @@
       {%with n=user.progress.last_submissions.count%}
       {%if n%}
       <li>
-      <a href="{%url 'problems:last-corrected' %}" type="button" class="btn btn-info">
+      <a href="{%url 'problems:last-corrected'%}" type="button" class="btn btn-info">
         {{n}}
       </a>
       </li>
       {%endif%}
+    {%endwith%}
+    {%with n=user.tasks_subs_notif%}
+    {%if n%} 
+    <li>
+      <a href="{%url 'tasks:last-corrected'%}" type="button" class="btn btn-warning">
+        {{n}}
+      </a>
+    </li>
+    {%endif%} 
     {%endwith%}
       <li class="nav-item">
         <a class="nav-link" href="/">الرئيسية <span class="sr-only">(current)</span></a>
