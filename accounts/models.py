@@ -147,8 +147,8 @@ class User(AbstractBaseUser):
     def count_last_points(self, period=7):
         start_day = timezone.now() - timedelta(days=period)
         
-        return 15 * sum(self.submissions.filter(submited_on__gte=start_day, correct=True).values_list('problem__level', flat=True) +
-        sum(self.tasks_submissions.filter(submited_on__gte=start_day, correct=True).values_list('problem__level', flat=True))
+        return 15 * (sum(self.submissions.filter(submited_on__gte=start_day, correct=True).values_list('problem__level', flat=True)) +
+        (sum(self.tasks_submissions.filter(submited_on__gte=start_day, correct=True).values_list('problem__level', flat=True)))
         )
         
         
