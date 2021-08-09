@@ -195,7 +195,7 @@ class TaskPbsCorrection(ProblemCorrection):
         self.submission.student.add_points(self.submission.problem.points)
 
     def notify_student(self):
-        self.request.user.add_task_correction_notif(self.submission)
+        self.submission.student.add_task_correction_notif(self.submission)
 class LastCorrectedSubs(ListView):
     template_name = 'tasks/last-corrected-subs.html'
     context_object_name = 'user_subs'

@@ -49,9 +49,8 @@ STATUS = [
 class AbstractPbSubmission(models.Model):
     status      = models.CharField(max_length = 10, choices = STATUS, null=True)
     correct     = models.BooleanField(null = True)
-    solution    = models.TextField()
+    solution    = models.TextField(blank=True, null=True)
     submited_on = models.DateTimeField(blank = True, null = True)
-
     correction_in_progress = models.BooleanField(default = False, editable = False) 
     ltr_dir     = models.BooleanField(default = False)
 
