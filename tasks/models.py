@@ -99,6 +99,9 @@ class Task(models.Model):
             return False
         return user.team in self.team.all()
 
+    class Meta:
+        verbose_name = 'واجب'
+        verbose_name_plural = 'واجبات'
 class TaskComment(AbstractComment):
         submission  = models.ForeignKey(TaskProblemSubmission,related_name = 'comments',on_delete= models.CASCADE)
 

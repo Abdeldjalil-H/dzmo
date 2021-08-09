@@ -6,6 +6,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import (
+    get_list_or_404,
     get_object_or_404,
     redirect,
 )
@@ -201,6 +202,13 @@ class LastCorrectedSubs(ListView):
     context_object_name = 'user_subs'
     def get_queryset(self):
         return self.request.user.get_last_tasks_subs()
+
+class CorrectSolsByTask(CheckTeam, ListView):
+    template_name = 'tasks/correct-sols-by-task.html'
+    context_object_name = 'sols'
+    def get_queryset(self):
+        get_list_or_404(TaskProblemSubmission, task__pk=self.kwargs['task_pk'], correct=True)
+        
 class AddProblems(AddProblems):
     form_class = AddProblemsForm
     success_url = reverse_lazy(('tasks:add-pbs'))
