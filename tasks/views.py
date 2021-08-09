@@ -69,7 +69,10 @@ class TaskPbSubmit(CheckTeam, CreateView):
         return super().get_initial()
     
     def get_success_url(self, sub_pk):
-        return reverse_lazy('tasks:pb-view', kwargs={'task_pk':self.kwargs['task_pk'], 'pb_pk':self.problem.pk}) + f'?sub={sub_pk}'
+        url = reverse_lazy('tasks:pb-view', kwargs={'task_pk':self.kwargs['task_pk'], 'pb_pk':self.problem.pk})
+        if sub_pk:
+            return url + f'?sub={sub_pk}'
+        return url
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
