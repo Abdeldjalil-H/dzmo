@@ -54,10 +54,11 @@ class TaskProblemSubmission(AbstractPbSubmission):
 
     def set_submited_now(self):
         self.submited_on = timezone.now()
-    def update(self, solution, dir, status):
+    def update(self, solution, dir, status, file):
         self.solution=solution
         self.ltr_dir=dir
         self.status=status
+        self.file=file
         self.submited_on = timezone.now()
         self.save()
     def set_dir(self, dir):
