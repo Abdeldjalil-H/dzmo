@@ -112,7 +112,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-*.cfg
+pyvenv.cfg
 # Spyder project settings
 .spyderproject
 .spyproject
