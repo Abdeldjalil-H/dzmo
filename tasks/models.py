@@ -15,7 +15,7 @@ class TaskProblem(AbstractProblem):
     def has_draft_sub(self, user):
         return self.submissions.filter(student=user, status='draft').exists()
     def get_user_subs(self, user):
-        return self.submissions.filter(student=user, status__isnull=False)
+        return self.submissions.filter(student=user, status__isnull=False).exclude(status='draft')
     def get_correct_subs(self):
         return self.submissions.filter(correct=True)
     def get_sub(self, **kwargs):

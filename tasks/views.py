@@ -88,7 +88,7 @@ class TaskPbSubmit(CheckTeam, CreateView):
     def form_valid(self, form):
         obj = form.save(commit=False)
         if self.draft_sub:
-            self.draft_sub.update(obj.solution, obj.ltr_dir, self.request.POST['sub'], self.request.FILES['file'])
+            self.draft_sub.update(obj.solution, obj.ltr_dir, self.request.POST['sub'], self.request.FILES.get('file'))
         else:                 
             obj.set_student(self.request.user)
             obj.problem_id = self.kwargs['pb_pk']
@@ -207,7 +207,7 @@ class CorrectSolsByTask(CheckTeam, ListView):
     template_name = 'tasks/correct-sols-by-task.html'
     context_object_name = 'sols'
     def get_queryset(self):
-        get_list_or_404(TaskProblemSubmission, problem__task__pk=self.kwargs['task_pk'], correct=True)
+        return get_list_or_404(TaskProblemSubmission, problem__task__pk=self.kwargs['task_pk'], correct=True)
         
 class AddProblems(AddProblems):
     form_class = AddProblemsForm
