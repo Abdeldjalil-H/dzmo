@@ -93,6 +93,12 @@ class Task(models.Model):
     def get_subs_by_level(self):
         all_subs = TaskProblemSubmission.objects.filter(problem__in = self.problems.all(), student__team__in = self.team.all(), status__in = ['submit','comment'])
         return [all_subs.filter(problem__level = k) for k in range(1,6)]
+    def get_correct_pks(self, user):
+        return list(TaskProblemSubmission.objects.filter(problem__in = self.problems.all(), student=user, correct=True).values_list('problem__pk', flat=True))
+    def get_wrong_pks(self, user):
+        return list(TaskProblemSubmission.objects.filter(problem__in = self.problems.all(), student=user, correct=False).values_list('problem__pk', flat=True))
+    def get_pending_pks(self, user):
+        return list(TaskProblemSubmission.objects.filter(problem__in = self.problems.all(), student=user, status='submit').values_list('problem__pk', flat=True))
     def has_access(self, user):
         if user.is_staff:
             return True

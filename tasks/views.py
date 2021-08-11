@@ -44,9 +44,17 @@ class TaskProblemsList(CheckTeam, ListView):
     context_object_name = 'problems_list'
     
     def get_queryset(self, **kwargs):
-        task = get_object_or_404(Task, pk=self.kwargs['task_pk'])
-        return task.get_problems_by_level()
-        
+        self.task = get_object_or_404(Task, pk=self.kwargs['task_pk'])
+        return self.task.get_problems_by_level()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        context['solved_problems'] = self.task.get_correct_pks(user)
+        context['wrong_problems'] = self.task.get_wrong_pks(user)
+        context['pending_problems'] = self.task.get_pending_pks(user)
+        print(context['solved_problems'])
+        return context    
 class TaskPbSubmit(CheckTeam, CreateView):
     model = TaskProblemSubmission
     form_class = SubmitForm
