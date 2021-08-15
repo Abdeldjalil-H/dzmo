@@ -1,12 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-
 from django.conf import settings
 from datetime import timedelta
 from django.utils import timezone
 from lessons.models import Chapter, Exercice
 from problems.models import Problem, ProblemSubmission, STATUS
-#from tasks.models import TaskProblemSubmission
+from control.models import Submissions
 TEAMS_COLORS = [('white','white'),
 ('green', 'green'), ('red','red'), ('black','black')
 ]
@@ -125,11 +124,7 @@ class User(AbstractBaseUser):
         return self.submissions.filter(problem=problem)
     def is_tasks_corrector(self):
         return self.is_staff
-    def has_solved(self, problem):
-        solved = False
-        for sub in self.get_all_subs_by_problem(problem):
-            solved |= sub.correct
-        return solved
+
     def has_submit(self, problem):
         return self.submissions.filter(problem=problem).exists()
     def add_solved_problem(self, problem):
@@ -147,7 +142,7 @@ class User(AbstractBaseUser):
     def count_last_points(self, period=7):
         start_day = timezone.now() - timedelta(days=period)
         
-        return 15 * (sum(self.submissions.filter(submited_on__gte=start_day, correct=True).values_list('problem__level', flat=True)) +
+        return 15 * (sum(Submissions.get_last_correct(student=self).values_list('problem__level', flat=True)) +
         (sum(self.tasks_submissions.filter(submited_on__gte=start_day, correct=True).values_list('problem__level', flat=True)))
         )
         
@@ -188,12 +183,8 @@ class StudentProgress(models.Model):
                                                 blank = True,
                                                 verbose_name= 'المسائل المحلولة',
                                                 )
-    solved_exercices    = models.ManyToManyField(Exercice,
-                                                blank = True,
-                                                verbose_name = 'التمارين المحلولة',
-                                                )
-    last_submissions    = models.ManyToManyField(ProblemSubmission, blank = True,
-                                                verbose_name = 'آخر المحاولات المقدمة',)
+    solved_exercices    = models.ManyToManyField(Exercice, blank = True, verbose_name = 'التمارين المحلولة')
+    last_submissions    = models.ManyToManyField(ProblemSubmission, blank = True, verbose_name = 'آخر المحاولات المقدمة',)
     last_tasks_subs     = models.ManyToManyField('tasks.TaskProblemSubmission', blank=True)                                            
     points              = models.IntegerField(default = 0, editable = False)
     
