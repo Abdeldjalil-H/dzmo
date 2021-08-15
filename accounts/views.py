@@ -1,10 +1,9 @@
+from control.models import Submissions
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import login, authenticate
 from django.contrib.auth.views import(
-    PasswordChangeView,
     PasswordResetView,
     PasswordResetConfirmView,
     PasswordResetDoneView
@@ -64,6 +63,10 @@ class Profile(DetailView):
     model               = StudentProgress
     context_object_name = 'progress'
 
+    def get_object(self):
+        user = get_object_or_404(User, pk = self.kwargs['pk'])
+        return user.progress
+
 @method_decorator(cant_use_when_logged, name='dispatch')
 class ResetPW(PasswordResetView):
     template_name = 'accounts/login.html'
@@ -87,4 +90,8 @@ class StudentsRanking(ListView):
     template_name       = 'accounts/students-ranking.html'
     model               = User
     context_object_name = 'students_list'
+
+    def get(self, request, *args, **kwargs):
+        Submissions.update_last_correct()
+        return super().get(request, *args, **kwargs)
 
