@@ -1,7 +1,11 @@
+from problems.models import ProblemSubmission
 from django.db import models
 from django.core.mail import send_mail
-from problems.models import ProblemSubmission
 from django.conf import settings
+from requests import post
+from django.utils import timezone
+from datetime import timedelta
+from json import dumps
 # Create your models here.
 
 class MainPagePost(models.Model):
@@ -19,35 +23,75 @@ class MainPagePost(models.Model):
         verbose_name_plural = 'منشورات الصفحة الرئيسية'
 
 class CorrectorsNotif(models.Model):
-    num_old_subs        = models.IntegerField(default = 0)
-    num_corrected_subs  = models.IntegerField(default=0)
-    notif_each          = models.IntegerField(default = 3)
+    new_subs    = models.SmallIntegerField(default=0)
+    notif_each  = models.SmallIntegerField(default=5)
+    url         = models.URLField(blank=True, null=True)
     
-    @property
-    def total_subs(self):
-        return ProblemSubmission.objects.filter(status__in = ['submit','comment']).exclude(student__is_staff = True).count()
+    def notify(self):
+        msg = f'''هناك {Submissions.count_subs()} إجابة جديدة.
+        '''
+        data = dumps({
+            'username': 'Grader Notif',
+            'content': msg,
+        })
 
-    def add_corrected_problem(self):
-        self.num_corrected_subs += 1
+        post(self.url, data=data, headers = {'Content-Type': 'application/json'}) 
+        
+    def update(self, status):
+        if status in ['submit','comment']:
+            if self.new_subs == self.notif_each - 1:
+                self.new_subs = 0
+                self.notify()
+            else:
+                self.new_subs += 1
+        elif status != 'draft' and self.new_subs > 0:
+            self.new_subs -= 1
         self.save()
-    def emails_list(self):
-        pass
-    def have_to_send_mail(self):
-        if self.total_subs >(self.num_old_subs-self.num_corrected_subs) and (self.total_subs % self.notif_each ==0):
-            #send_email
-            res = send_mail(
-                subject = 'إجابات جديدة',
-                message = f'''هناك 
-                {self.total_subs} 
-                إجابة لم يتم تصحيحها.
-                
-                http://algerianmo.com/control/correction
-                ''',
-                from_email = settings.DEFAULT_FROM_EMAIL,
-                recipient_list = ['djaloulehez3@gmail.com','chen.anas@gmail.com'],
-                fail_silently=True,
-                )
-            if res:
-                self.num_old_subs       = self.total_subs
-                self.num_corrected_subs = 0
-                self.save()
+
+class Submissions(models.Model):
+    problems_subs = models.ManyToManyField(ProblemSubmission, blank=True, related_name='+')
+    last_correct_subs = models.ManyToManyField(ProblemSubmission, blank=True, related_name='+')
+    tasks_subs      = models.ManyToManyField('tasks.TaskProblemSubmission', blank=True, related_name='+')
+
+    @classmethod
+    def add_sub(cls, sub):
+        return cls.objects.first().problems_subs.add(sub)
+    
+    @classmethod
+    def remove_sub(cls, sub):
+        cls.objects.first().problems_subs.remove(sub)
+    @classmethod
+    def add_correct_sub(cls, sub):
+        return cls.objects.first().last_correct_subs.add(sub)
+    
+    @classmethod
+    def count_subs(cls):
+        return cls.objects.first().problems_subs.count()
+    
+    @classmethod
+    def count_correct_subs(cls):
+        return cls.objects.first().last_correct_subs.count()
+    
+    @classmethod
+    def get_problems_subs(cls, **kwargs):
+        return cls.objects.first().problems_subs.filter(**kwargs)
+    @classmethod
+    def get_problems_subs_by_level(cls, **kwargs):
+        subs = cls.objects.first().problems_subs.all()
+        return [subs.filter(problem__level = k) for k in range(1,6)]
+    
+    @classmethod
+    def remove_correct_subs(cls, *args):
+        cls.objects.first().last_correct_subs.remove(*args)
+    
+    @classmethod
+    def update_last_correct(cls):
+        cls.remove_correct_subs(*cls.objects.first().last_correct_subs.filter(submited_on__lt = timezone.now()-timedelta(days=7)))
+    @classmethod
+    def get_last_correct(cls, **kwargs):
+        return cls.objects.first().last_correct_subs.filter(**kwargs)
+
+def init_submissions():
+    instance = Submissions.objects.first()
+    instance.problems_subs.add(*ProblemSubmission.objects.filter(status__in = ['submit', 'comment']))
+    instance.last_correct_subs.add(*ProblemSubmission.objects.filter(submited_on__gte = timezone.now()-timedelta(days=7)))

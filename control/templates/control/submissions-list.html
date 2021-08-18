@@ -1,6 +1,6 @@
 {%extends 'control/base.html'%}
 {% block content %}
-<div>
+<div class="">
     {% for level in subs_list %}
     <div class="container">
         <h3>المستوى {{ forloop.counter }}</h3>
@@ -8,8 +8,12 @@
             <thead>
               <tr>
                 <th scope="col">#</th>
-                <th scope="col">المسألة</th>
-                <th scope="col">التلميذ</th>
+                <th scope="col"><a href="{{link}}&order=problem">
+                    المسألة
+                </a></th>
+                <th scope="col">
+                    التلميذ
+                </th>
                 <th scope="col">الحالة</th>
               </tr>
             </thead>

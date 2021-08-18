@@ -1,12 +1,8 @@
-from problems.forms import WriteComment
-from django.shortcuts import( 
-    get_object_or_404, 
-    HttpResponse,
-    redirect,
-)
+from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
-from django.urls import reverse_lazy,reverse
+from django.urls import reverse_lazy
 from django.conf import settings
+from datetime import timedelta
 from django.views.generic import(
     ListView,
     CreateView,
@@ -22,7 +18,7 @@ from problems.models import(
 )
 from accounts.models import User
 from tests.models import Test, TestAnswer
-from .models import MainPagePost
+from .models import MainPagePost, Submissions
 from .forms import AddProblemsForm, SendMailForm
 class StaffRequired(UserPassesTestMixin):
     def test_func(self):
@@ -31,16 +27,18 @@ class StaffRequired(UserPassesTestMixin):
 class SubsList(StaffRequired, ListView):
     template_name       = 'control/submissions-list.html'
     context_object_name = 'subs_list'
-    queryset            = ProblemSubmission.objects.filter(status__in = ['submit', 'comment'])
     
+    def get_queryset(self):
+        return Submissions.get_problems_subs_by_level()
+    '''
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        qs = self.queryset
-        subs_by_level =[]
-        for k in range(1,6):
-            subs_by_level.append(qs.filter(problem__level = k))
-        context['subs_list'] = subs_by_level
+        order = self.request.GET.getlist('order') if self.request.GET.get('order') else ['submited_on']
+        old_link = '?order=' + '&order='.join(order)
+        context['link'] = old_link
+        {'pb':'order=problem', 'student':'order=student', 'status':'order=status'}
         return context
+        '''
 
 class ProblemCorrection(StaffRequired, CreateView):
     template_name       = 'control/problem-correction.html'
@@ -48,7 +46,7 @@ class ProblemCorrection(StaffRequired, CreateView):
     need_form           = False
     fields              = ['ltr_dir','content']
     success_url         = reverse_lazy('control:subs-list')
-    submission_model = ProblemSubmission
+    submission_model    = ProblemSubmission
 
     def setup(self, request, *args, **kwargs):
         self.submission = get_object_or_404(self.submission_model, pk=kwargs[self.pk_url_kwarg])
@@ -68,6 +66,7 @@ class ProblemCorrection(StaffRequired, CreateView):
             self.submission.set_correcting(True)
             self.submission.save()
         return super().get(request, *args, **kwargs)
+    
     def get_form(self, form_class=None):
         form = super().get_form(form_class=form_class)
         form.fields['ltr_dir'].widget.attrs = {'style':'position:relative;margin-left:5px;', 
@@ -90,6 +89,8 @@ class ProblemCorrection(StaffRequired, CreateView):
         self.submission.save()
         self.submission.student.add_solved_problem(self.submission.problem)
         self.submission.student.add_points(self.submission.problem.points)
+        if self.submission.get_time_since_submit() < timedelta(days=7):
+            Submissions.add_correct_sub(self.submission)
 
     def handle_wrong_sub(self):
         self.submission.correct = False
@@ -105,7 +106,7 @@ class ProblemCorrection(StaffRequired, CreateView):
 
     def form_valid(self, form, **kwargs):
         pk = self.submission.pk
-        form.instance.user          = self.request.user
+        form.instance.user = self.request.user
         form.instance.submission_id = pk
         status = self.request.POST.get('status')
         #the other case is when we send only a comment
@@ -117,6 +118,8 @@ class ProblemCorrection(StaffRequired, CreateView):
                 self.handle_wrong_sub()
         else:
             self.handle_comment_correct_sub()
+        
+        Submissions.remove_sub(self.submission)
         self.notify_student()
         return super().form_valid(form, **kwargs)
         
@@ -128,6 +131,7 @@ class MainPage(ListView):
         if self.request.user.is_authenticated:
             return posts.order_by('-publish_date')
         return posts.filter(public = True)
+
 def mail(subject,msg, receivers):
     res = send_mail(
         subject = subject,
@@ -156,6 +160,7 @@ class SendMail(StaffRequired, FormView):
             fail_silently=False,
                 ) 
         return super().form_valid(form, **kwargs)
+
 class AddProblems(StaffRequired,FormView):
     template_name   = 'control/add_problems.html'
     form_class      = AddProblemsForm
