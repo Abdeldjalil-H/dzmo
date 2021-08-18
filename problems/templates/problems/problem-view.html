@@ -17,11 +17,30 @@
 {% endif %}
 
 {%if comments%}
-{%include 'problems/comments.html' with comments=comments %}
+<div class="container" id="comment-container">
+    <h2>التعليقات</h2>
+    {%include 'problems/comments.html' with comments=comments %}
+</div>
 {% endif %}
 
 {% if cmnt %}
 <script>
+    $(document).ready(function(){
+        var $form = $("#comment-form")
+        $form.submit(function(event){
+            event.preventDefault()
+            var $formData = $(this).serialize()
+            var $endpoint = $form.attr("data-url") || window.location.href
+            $.ajax({
+                method: "POST",
+                url: $endpoint,
+                data: $formData,
+                success: function(data){
+                    $form.parent().html(data)
+                }
+            })  
+        })
+    })
     function change_dir(){
         var elem = document.getElementById("MathInput");
         if(elem.style.textAlign == "left") {
@@ -38,7 +57,7 @@
 </script>
 <div class="container">      
     <div class="form-group">
-        <form method='POST'>
+        <form method='POST' id="comment-form">
         {% csrf_token %}
         {{cmnt|crispy}}
         <button type ='submit' class="btn btn-outline-secondary">تعليق</button>
@@ -47,41 +66,3 @@
 </div>
 {%endif%}
 {% endblock %}
-
-
-{%block javascript%}
-<script>
-    $(document).ready(function(){
-        var $form = $(".comment-form")
-        $form.submit(function(event){
-            event.preventDefault()
-            var $formData = $(this).serialize()
-            var $endpoint = $form.attr("data-url") || window.location.href
-            console.log($formData)
-            $.ajax({
-                method: "POST",
-                url: $endpoint,
-                data: $formData,
-                success: handleFormSuccess,
-                error: handleFormError
-            })
-
-            
-        })
-
-        function handleFormSuccess(data, textStatus, jqXHR){
-            console.log(data)
-            console.log(textStatus)
-            console.log(jqXHR)
-            document.getElementsByClassName('comment')[0].getElementsByTagName('a')[0].text = 'hooll';
-            $form[0].reset();
-        }
-
-        function handleFormError(jqXHR, textStatus, errorThrown){
-            console.log(jqXHR)
-            console.log(textStatus)
-            console.log(errorThrown)
-        }
-    })
-</script>
-{%endblock%}

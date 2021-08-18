@@ -1,16 +1,13 @@
-<div class="container">
-    <h2>التعليقات</h2>
-    {% for comment in comments%}
-    <div class="card my-4 comment">
-        <div class="card-header" style="background-color: rgb(253, 255, 163) ;">
-            {{comment.date}}
-            <a href="{%url 'accounts:profile' comment.user.pk%}">{{comment.user.username}}</a>
-        </div>
-        <div class="card-body">
-            <p class="card-text" {{comment.get_dir_style}}>
-            {{comment.content|safe}}
-            </p>
-        </div>
+{% for comment in comments%}
+<div class="card my-4 comment">
+    <div class="card-header" style="background-color: rgb(253, 255, 163) ;">
+        {{comment.date}}
+        <a href="{%url 'accounts:profile' comment.user.pk%}">{{comment.user.username}}</a>
     </div>
-    {%endfor%}
+    <div class="card-body">
+        <p class="card-text" {{comment.get_dir_style}}>
+        {{comment.content|safe}}
+        </p>
+    </div>
 </div>
+{%endfor%}

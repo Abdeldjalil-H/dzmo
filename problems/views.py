@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404, redirect
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, HttpResponse
+from django.template.loader import render_to_string
 from django.contrib import messages
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DeleteView, CreateView
@@ -92,6 +93,8 @@ class _ProblemView(DetailView):
 		sub.set_status('comment')
 		sub.save()
 		Submissions.add_sub(sub)
+		if self.request.is_ajax():
+			return HttpResponse(render_to_string('problems/comments.html', {'comments': [form.instance]}))
 		return HttpResponseRedirect(self.get_success_url(sub.pk))
 
 	def handle_non_correct_sub(self, sub):
