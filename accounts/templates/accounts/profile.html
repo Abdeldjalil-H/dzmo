@@ -13,17 +13,7 @@
 					</tr>
 					<tr>
 						<td>
-							{%with grade=progress.student.grade%}
-							{%if grade < 2%}
-							السنة 
-							 {{grade|add:4}}
-							 متوسط
-							{%elif grade < 4%}
-							السنة 
-							 {{grade}}
-							 ثانوي
-							{%endif%}
-							{%endwith%}
+							{{progress.student.get_school_grade}}
 						</td>
 					</tr>			
 				</tbody></table>

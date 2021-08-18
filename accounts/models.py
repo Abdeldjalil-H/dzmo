@@ -138,6 +138,8 @@ class User(AbstractBaseUser):
     def is_team_member(self):
         return self.team is not None
 
+    def get_school_grade(self):
+        return dict(GRADES)[self.grade] if self.grade < 4 else ''
     @property
     def count_last_points(self, period=7):
         start_day = timezone.now() - timedelta(days=period)
@@ -146,20 +148,15 @@ class User(AbstractBaseUser):
         (sum(self.tasks_submissions.filter(submited_on__gte=start_day, correct=True).values_list('problem__level', flat=True)))
         )
         
-        
-    def get_solved_wrong_pending_indicies(self, topic):
-        solved = set(self.progress.solved_problems.filter(chapter__topic=topic).values_list('pk', flat=True))
-        wrong = set(
-            self.submissions.filter(problem__chapter__topic=topic).filter(correct = False).values_list('problem__pk', flat=True)
-        )
-        #wrong = wrong.difference(solved)
-        pending = set(
-            self.submissions.filter(problem__chapter__topic=topic).filter(status='submit').values_list('problem__pk', flat=True)
-        )
-        #pending = pending.difference(wrong)
+    def get_correct_pks(self, topic):
+        return list(self.progress.solved_problems.filter(chapter__topic=topic).values_list('pk', flat=True))
 
-        return list(solved), list(wrong), list(pending)
+    def get_pending_pks(self, topic):
+        return list(Submissions.get_problems_subs(student=self, problem__chapter__topic=topic).values_list('problem__pk', flat=True))
     
+    def get_wrong_pks(self, topic):
+        return list(self.submissions.filter(correct=False, problem__chapter__topic=topic).values_list('problem__pk', flat=True))
+   
     def add_task_correction_notif(self, sub):
         self.progress.last_tasks_subs.add(sub)
     def tasks_subs_notif(self):
@@ -171,18 +168,9 @@ class User(AbstractBaseUser):
         verbose_name_plural = 'المستخدمون'
 
 class StudentProgress(models.Model):
-    student             = models.OneToOneField(settings.AUTH_USER_MODEL,
-                                               related_name = 'progress',
-                                               on_delete = models.CASCADE
-                                               ) #it may be changed
-    completed_chapters  = models.ManyToManyField(Chapter, 
-                                            blank = True,
-                                            verbose_name='المحاور المتمة'
-                                            )
-    solved_problems     = models.ManyToManyField(Problem,
-                                                blank = True,
-                                                verbose_name= 'المسائل المحلولة',
-                                                )
+    student             = models.OneToOneField(settings.AUTH_USER_MODEL, related_name = 'progress', on_delete = models.CASCADE)
+    completed_chapters  = models.ManyToManyField(Chapter, blank = True, verbose_name='المحاور المتمة')
+    solved_problems     = models.ManyToManyField(Problem, blank = True,verbose_name= 'المسائل المحلولة')
     solved_exercices    = models.ManyToManyField(Exercice, blank = True, verbose_name = 'التمارين المحلولة')
     last_submissions    = models.ManyToManyField(ProblemSubmission, blank = True, verbose_name = 'آخر المحاولات المقدمة',)
     last_tasks_subs     = models.ManyToManyField('tasks.TaskProblemSubmission', blank=True)                                            

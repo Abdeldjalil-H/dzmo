@@ -9,9 +9,9 @@ from django.contrib.auth.views import(
     PasswordResetDoneView
 )
 
-from .models import User, StudentProgress
+from .models import User
 from .decorators import cant_use_when_logged
-from django.urls import reverse
+
 from django.views.generic import(
     DetailView,
     UpdateView,
@@ -60,7 +60,6 @@ class PersonalAccount(UpdateView):
 @method_decorator(login_required, name='dispatch')
 class Profile(DetailView):
     template_name       = 'accounts/profile.html'
-    model               = StudentProgress
     context_object_name = 'progress'
 
     def get_object(self):
