@@ -98,4 +98,4 @@ def init_submissions():
         instance = Submissions()
         instance.save()
     instance.problems_subs.add(*ProblemSubmission.objects.filter(status__in = ['submit', 'comment']))
-    instance.last_correct_subs.add(*ProblemSubmission.objects.filter(submited_on__gte = timezone.now()-timedelta(days=7)))
+    instance.last_correct_subs.add(*ProblemSubmission.objects.filter(correct=True, submited_on__gte = timezone.now()-timedelta(days=7)))
