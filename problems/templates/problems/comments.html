@@ -1,7 +1,7 @@
 <div class="container">
     <h2>التعليقات</h2>
     {% for comment in comments%}
-    <div class="card my-4">
+    <div class="card my-4 comment">
         <div class="card-header" style="background-color: rgb(253, 255, 163) ;">
             {{comment.date}}
             <a href="{%url 'accounts:profile' comment.user.pk%}">{{comment.user.username}}</a>

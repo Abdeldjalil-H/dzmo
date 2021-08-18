@@ -1,171 +1,187 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from django.core.files.uploadedfile import SimpleUploadedFile
-from django.http import HttpResponse
-from django.utils import timezone
-from datetime import timedelta
-from django.urls import reverse, reverse_lazy
-from django.views.generic import ListView, DeleteView
-										
-from .models import Problem, ProblemSubmission, Comment
-from .forms import WriteSolution, WriteComment
+from django.shortcuts import get_object_or_404, redirect
+from django.http import HttpResponseRedirect, JsonResponse
+from django.contrib import messages
+from django.urls import reverse_lazy
+from django.views.generic import ListView, DeleteView, CreateView
+from django.views.generic.detail import DetailView
+from django.contrib.auth.mixins import UserPassesTestMixin
+from control.models import Submissions		
+from .models import Problem, ProblemSubmission
+from .forms import CommentForm, SubmitForm
 #List of problems by section
 class ProblemsList(ListView):
 	template_name = 'problems/problems-list.html'
 	context_object_name = 'problems_list'
-	model = Problem
+
+	def get_queryset(self):
+		problems = self.request.user.get_opened_problems_by_topic(self.kwargs.get('topic'))
+		return [problems.filter(level = k) for k in range(1,6)]
+	
 	def get_context_data(self, **kwargs):
-			context = super().get_context_data(**kwargs)
-			topic = self.kwargs.get('slug')
-			context['topic'] = topic
-			problems = self.request.user.get_opened_problems_by_topic(topic)
-			problems_by_levels = []
-			for k in range(1,6):
-					problems_by_levels.append(problems.filter(level = k))
-			context['problems_list'] = problems_by_levels
+		context = super().get_context_data(**kwargs)
+		topic = self.kwargs.get('topic')
+		context['topic'] = topic
 			
-			
-			solved, wrong, pending = self.request.user.get_solved_wrong_pending_indicies(topic)
-			context['solved_problems'] = solved
-			context['wrong_problems'] = wrong
-			context['pending_problems'] = pending
-			return context
+		user = self.request.user
+		context['solved_problems'] = user.get_correct_pks(topic)
+		context['wrong_problems'] = user.get_wrong_pks(topic)
+		context['pending_problems'] =user.get_pending_pks(topic) 
+		return context
 
+class HaveAccessToProblem(UserPassesTestMixin):
+	def test_func(self):
+		if not self.request.user.is_authenticated:
+			return False
+		problem = get_object_or_404(Problem, chapter__topic = self.kwargs['topic'], pk = self.kwargs['pb_pk'])
+		return problem.has_access(self.request.user)
 
-def comment(request, sub):
-	form = WriteComment(request.POST)
-	if form.is_valid():
-			cmnt = Comment(user = request.user,
-											content = form.cleaned_data['content'],
-											submission_id = sub,
-											ltr_dir = form.cleaned_data['ltr_dir']
-											)
-			cmnt.save()
+class _ProblemView(DetailView):
+	context_object_name = 'this_sub'
 
-def problem_sub(request, **kwargs):
-	template   = 'problems/problem-submit.html'
-	qs  = Problem.objects.filter(
-			chapter__in = request.user.progress.completed_chapters.filter(topic = kwargs['slug']))
-	problem = get_object_or_404(qs, id = kwargs['pk'])
-	problem_url = reverse('problems:submit', kwargs = {'pk': kwargs['pk'], 'slug':kwargs['slug']})
-	context = {
-			'problem': problem
-	}
-	sub = request.GET.get('sub')
-
-	if request.user.progress.last_submissions.filter(problem = problem):
-		for x in request.user.progress.last_submissions.filter(problem=problem):
-				request.user.progress.last_submissions.remove(x)
-
-	if problem in request.user.progress.solved_problems.all():
-			#the student can see the solutions
-			if not sub:
-					sub = request.user.submissions.filter(problem = problem).filter(correct = True).first().pk
-					return redirect(problem_url + f'?sub={sub}')
-			subs     = ProblemSubmission.objects.filter(problem = problem)
-			all_sols = subs.filter(correct = True)
-			# submissions of this user
-			this_user_subs = subs.filter(student = request.user)
-			#or from this_user_subs
-			this_sub = this_user_subs.filter(id = int(sub)).first()
-			if not this_sub:
-					this_sub = get_object_or_404(all_sols, id  = int(sub))
-			comments = Comment.objects.filter(submission_id = int(sub))
-			context['all_sols'] = all_sols
-			context['user_subs'] = this_user_subs
-			context['this_sub'] = this_sub
-			context['comments'] = comments
-			if this_sub.student == request.user:
-					context['cmnt'] = WriteComment()
-			if request.method == 'POST':
-					comment(request, sub)
-					return redirect(problem_url + f'?sub={sub}')
-
-	else:
-		old_subs  = ProblemSubmission.objects.filter(student = request.user).filter(problem_id = kwargs['pk'])
-		old_draft = old_subs.filter(status = 'draft')
-		#?sub = 0 draft , ?sub != comment to the wrong or see a submission not corrected yet
-			
-		if sub == None:
-					#not good
-					context['user_subs'] = request.user.submissions.filter(problem = problem).exclude(status = 'draft')
-					context['show_btn'] = True
-					if not old_draft:
-							context['btn']     = 'إجابة جديدة'
-					else:
-							context['btn']     = 'إكمال المحاولة السابقة'
-		elif sub == '0':
-					context['show_btn'] = False
-					if not old_draft:
-							#create new sub
-							if request.method == 'POST':
-									form = WriteSolution(request.POST, request.FILES)
-									if form.is_valid():
-											submission = ProblemSubmission(
-																			solution = form.cleaned_data['content'],
-																			ltr_dir = form.cleaned_data['ltr_dir'],
-																
-																			student = request.user,
-																			problem = problem,
-																			status = request.POST.get('sub'),
-																			file = request.FILES.get('file'),
-																			submited_on = timezone.now(),								)
-											submission.save()
-											if submission.status == 'draft':
-													return redirect(problem_url)
-											return redirect(problem_url + f'?sub={submission.id}')
-							form = WriteSolution()
-							context['form'] = form
-							
-					else:
-							#there is a draft
-							old_draft = old_draft[0]
-							if request.method == 'POST':                   
-									form = WriteSolution(request.POST, request.FILES)
-									if form.is_valid():
-											old_draft.solution = form.cleaned_data['content']
-											old_draft.ltr_dir = form.cleaned_data['ltr_dir']
-											old_draft.submited_on = timezone.now()
-											old_draft.status = request.POST.get('sub')
-											if request.FILES.get('file'):
-													old_draft.file = request.FILES.get('file')
-											old_draft.save()
-											if old_draft.status == 'draft':
-													return redirect(problem_url)
-											return redirect(problem_url+ f'?sub={old_draft.id}')
-							form = WriteSolution(initial={'content':old_draft.solution, 
-							'ltr_dir':old_draft.ltr_dir},
-							dir_attrs = old_draft.get_dir_attrs()
-							)
-							context['form'] = form
-							context['preview_dir'] = old_draft.get_dir_style
-							context['show_del'] = True
-							
+	def setup(self, request, *args, **kwargs):
+		self.problem = get_object_or_404(self.problem_model, pk=kwargs['pb_pk'])
+		self.sub = int(request.GET.get('sub')) if request.GET.get('sub') else None
+		self.user = request.user
+		return super().setup(request, *args, **kwargs)
+ 
+	def get(self, request, *args, **kwargs):
+		if request.GET.get('sub') == '0':
+			return redirect('sub=0/')
+		return super().get(request, *args, **kwargs)
+	
+	def post(self, request, *args, **kwargs):
+		form = self.form_class(request.POST)
+		if form.is_valid():
+			return self.form_valid(form)   
 		else:
-					#show a submission of his 
-					old_subs = old_subs.filter(status__in = ['submit','wrong','comment'])
-					this_sub = get_object_or_404(old_subs, pk = int(sub))
-					context['all_subs'] = old_subs
-					context['this_sub'] = this_sub
-					if this_sub.status in ['wrong', 'comment']:
-							context['comments'] = Comment.objects.filter(submission_id = sub)
-							context['cmnt'] = WriteComment()
-					if request.method == 'POST':
-							comment(request, sub)
-							this_sub.status = 'comment'
-							this_sub.save()
-							return redirect(problem_url + f'?sub={sub}')
-	return render(request, template, context)
-
-class DeleteDraft(DeleteView):
-	template_name       = 'problems/delete-draft.html'
+			pass
 	
 	def get_object(self, **kwargs):
-		problem = Problem.objects.get(pk = self.kwargs['pk'])
-		return get_object_or_404(self.request.user.submissions.filter(status = 'draft'), problem = problem)
+		if not self.sub:
+			return None
+		if self.problem.has_solved(self.request.user):
+			return self.problem.get_sub(pk=self.sub, correct=True)
+
+		obj = get_object_or_404(self.problem.get_user_subs(self.user), pk=self.sub)
+		self.handle_non_correct_sub(obj)
+		return obj
+
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context['problem'] = self.problem
+		context['show_btn'] = self.problem.can_submit(self.user)
+
+		context['user_subs'] = self.problem.get_user_subs(self.user)
+		if self.object:
+			self.object.mark_as_seen(self.user)
+			context['comments'] = self.object.get_comments()
+		if self.problem.has_solved(self.user):
+			context['all_sols'] = self.problem.get_correct_subs()
+			context['show_btn'] = False
+		elif self.problem.has_draft_sub(self.user):
+			context['btn'] = 'إكمال المحاولة السابقة'
+		else:
+			context['btn'] = 'إجابة جديدة'
+		return context
+	
+	def form_valid(self, form):
+		sub = self.problem.get_unique_sub(self.user)
+		form.instance.set_sub(sub)
+		form.instance.set_user(self.user)
+		form.save()
+		sub.set_status('comment')
+		sub.save()
+		Submissions.add_sub(sub)
+		return HttpResponseRedirect(self.get_success_url(sub.pk))
+
+	def handle_non_correct_sub(self, sub):
+		if sub.can_be_deleted(self.user):
+			msg = '''هذه الإجابة غير صحيحة. يمكنك الرد في التعليقات، أو  <a href="delete/" class="alert-link">حذف </a> الإجابة السابقة، وتقديم إجابة جديدة.'''
+			messages.info(self.request, msg)
+		if sub.can_comment(self.user):
+			self.extra_context = {'cmnt':self.form_class()}
+
+class ProblemView(HaveAccessToProblem, _ProblemView):
+	template_name = 'problems/problem-view.html'
+	form_class = CommentForm
+	problem_model = Problem
+	def get_success_url(self, sub_pk):
+		return reverse_lazy(('problems:pb-view'), kwargs={'topic':self.kwargs['topic'], 'pb_pk':self.kwargs['pb_pk']}) + f'?sub={sub_pk}'
+
+class _ProblemSubmit(CreateView):
+
+	def setup(self, request, *args, **kwargs):
+		self.problem = get_object_or_404(self.problem_model, pk=kwargs['pb_pk'])
+		self.draft_sub = self.problem_model.objects.get(pk = kwargs['pb_pk']).get_unique_sub(request.user)
+		return super().setup(request, *args, **kwargs)
+    
+	def get(self, request, *args, **kwargs):
+		if not self.problem.can_submit(self.request.user):
+			return HttpResponseRedirect(self.get_success_url(None))
+		return super().get(request, *args, **kwargs)
+    
+	def get_initial(self):
+		if self.draft_sub:
+			self.initial = {'solution':self.draft_sub.solution,
+							'ltr_dir':self.draft_sub.ltr_dir,
+			}
+		return super().get_initial()
+
+	def get_form(self):
+		dir_attrs = self.draft_sub.get_dir_attrs() if self.draft_sub else {}
+		return self.form_class(dir_attrs=dir_attrs, **self.get_form_kwargs())
+
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context['problem'] = self.problem
+		if self.draft_sub:
+			context['preview_dir'] = self.draft_sub.get_dir_style
+			context['show_del'] = True
+		return context
+
+	def form_valid(self, form):
+		obj = form.save(commit=False)
+		if self.draft_sub:
+			self.draft_sub.update(obj.solution, obj.ltr_dir, self.request.POST['sub'], self.request.FILES.get('file'))
+			obj = self.draft_sub
+		else:                 
+			obj.set_student(self.request.user)
+			obj.problem_id = self.kwargs['pb_pk']
+			obj.set_status(self.request.POST['sub'])
+			obj.set_submited_now()
+			obj.save()
+		if obj.status == 'submit':
+			Submissions.add_sub(obj)
+			pk = obj.pk
+		else:
+			pk = None
+		return HttpResponseRedirect(self.get_success_url(pk))
+
+class ProblemSubmit(HaveAccessToProblem, _ProblemSubmit):
+	model = ProblemSubmission
+	form_class = SubmitForm
+	template_name = 'problems/problem-submit.html'
+	problem_model = Problem
+
+	def get_success_url(self, sub_pk):
+		url = reverse_lazy('problems:pb-view', kwargs={'topic':self.kwargs['topic'], 'pb_pk':self.problem.pk})
+		if sub_pk:
+			return url + f'?sub={sub_pk}'
+		return url
+
+class DeleteSubmission(DeleteView):
+	template_name = 'problems/delete-draft.html'
+	problem_model = Problem
+	def delete(self, request, *args, **kwargs):
+		obj = self.get_object()
+		obj.soft_delete()
+		return HttpResponseRedirect(self.get_success_url())
+	
+	def get_object(self):
+		return self.problem_model.objects.get(pk=self.kwargs['pb_pk']).get_unique_sub(self.request.user)
 
 	def get_success_url(self, **kwargs):
-		problem = Problem.objects.get(pk = self.kwargs['pk'])
-		return reverse_lazy('problems:submit', kwargs={'slug':problem.chapter.topic,'pk':problem.pk,})
+		return reverse_lazy('problems:pb-view', kwargs={'topic':self.kwargs['topic'],'pb_pk':self.kwargs['pb_pk']})
 
 class LastCorrectedSubs(ListView):
 	template_name       = 'problems/last-subs.html'
@@ -176,7 +192,6 @@ class LastCorrectedSubs(ListView):
 class LastSolvedProblems(ListView):
 	template_name       = 'problems/last-solved.html'
 	context_object_name = 'last_solved_problems'
-	queryset = ProblemSubmission.objects.filter(
-							correct = True).filter(
-							submited_on__gte = timezone.now()-timedelta(days=7)).order_by(
-							'-submited_on')
+	def get_queryset(self):
+		Submissions.update_last_correct()
+		return Submissions.get_last_correct().order_by('-submited_on')

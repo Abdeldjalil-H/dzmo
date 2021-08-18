@@ -4,52 +4,10 @@
 {% block content %}
 
 {%include 'problems/problem-statement.html' with show_btn=show_btn btn=btn ltr=ltr%}
-<!--include write solution form-->
+
+
 {% if not show_btn and form%}
 {%include 'problems/submit-form.html' with form=form show_del=show_del%}
 {% endif%}
-{% if user_subs %}
-{% include 'problems/student-subs-list.html' with sub=sub %}
-{%endif%}
-
-{% if all_sols%}
-{%include 'problems/table-of-all-solutions.html' with all_solutions=all_sols %}
-{%endif%}
-
-{% if this_sub%}
-{% include 'problems/solution-box.html' with sub=this_sub %}
-{% endif %}
-{%if comments%}
-{%include 'problems/comments.html' with comments=comments %}
-{% endif %}
-
-{% if cmnt %}
-
-<script>
-    function change_dir(){
-        var elem = document.getElementById("MathInput");
-        if(elem.style.textAlign == "left") {
-            elem.style.textAlign = "right";
-        } else {
-            elem.style.textAlign = "left";
-        }
-        if(elem.dir == "ltr") {
-            elem.dir = "rtl";
-        } else {
-            elem.dir = "ltr";
-        }
-    }
-</script>
-<div class="container">      
-    <div class="form-group">
-        <form method='POST'>
-        {% csrf_token %}
-        {{cmnt|crispy}}
-        <button type ='submit' class="btn btn-outline-secondary">تعليق</button>
-        </form>
-    </div>
-</div>
-
-{%endif%}
 
 {% endblock %}

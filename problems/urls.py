@@ -1,21 +1,21 @@
 from django.urls import path
 from django.contrib.auth.decorators import login_required
 from .views import (
+    DeleteSubmission,
+    ProblemSubmit,
     ProblemsList,
-    problem_sub,
-    DeleteDraft,
     LastCorrectedSubs,
-    LastSolvedProblems
+    LastSolvedProblems,
+    ProblemView,
 )
 
 app_name = 'problems'
 
 urlpatterns = [
-    #path('',)
     path('last-corrected/', LastCorrectedSubs.as_view(), name='last-corrected'),
     path('last-solved/',LastSolvedProblems.as_view(), name='last-solved'),
-    path('<slug:slug>/', login_required(ProblemsList.as_view()), name = 'list'),
-    path('<slug:slug>/<int:pk>/',login_required(problem_sub), name = 'submit'),
-    path('<slug:slug>/<int:pk>/delete/', DeleteDraft.as_view(), name='delete-sub'),
-
+    path('<slug:topic>/', login_required(ProblemsList.as_view()), name = 'list'),
+    path('<slug:topic>/<int:pb_pk>/', ProblemView.as_view(), name='pb-view'),
+    path('<slug:topic>/<int:pb_pk>/sub=0/', ProblemSubmit.as_view(), name='submit'),
+    path('<slug:topic>/<int:pb_pk>/delete/', DeleteSubmission.as_view(), name='delete-sub'),
 ]

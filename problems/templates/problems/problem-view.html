@@ -1,0 +1,87 @@
+{% extends 'control/base.html' %}
+{% load crispy_forms_tags%}
+{% block content %}
+
+{%include 'problems/problem-statement.html' with show_btn=show_btn btn=btn ltr=ltr%}
+
+{% if user_subs %}
+{% include 'problems/student-subs-list.html' with sub=sub %}
+{%endif%}
+
+{% if all_sols%}
+{%include 'problems/table-of-all-solutions.html' with all_solutions=all_sols %}
+{%endif%}
+
+{% if this_sub%}
+{% include 'problems/solution-box.html' with sub=this_sub %}
+{% endif %}
+
+{%if comments%}
+{%include 'problems/comments.html' with comments=comments %}
+{% endif %}
+
+{% if cmnt %}
+<script>
+    function change_dir(){
+        var elem = document.getElementById("MathInput");
+        if(elem.style.textAlign == "left") {
+            elem.style.textAlign = "right";
+        } else {
+            elem.style.textAlign = "left";
+        }
+        if(elem.dir == "ltr") {
+            elem.dir = "rtl";
+        } else {
+            elem.dir = "ltr";
+        }
+    }
+</script>
+<div class="container">      
+    <div class="form-group">
+        <form method='POST'>
+        {% csrf_token %}
+        {{cmnt|crispy}}
+        <button type ='submit' class="btn btn-outline-secondary">تعليق</button>
+        </form>
+    </div>
+</div>
+{%endif%}
+{% endblock %}
+
+
+{%block javascript%}
+<script>
+    $(document).ready(function(){
+        var $form = $(".comment-form")
+        $form.submit(function(event){
+            event.preventDefault()
+            var $formData = $(this).serialize()
+            var $endpoint = $form.attr("data-url") || window.location.href
+            console.log($formData)
+            $.ajax({
+                method: "POST",
+                url: $endpoint,
+                data: $formData,
+                success: handleFormSuccess,
+                error: handleFormError
+            })
+
+            
+        })
+
+        function handleFormSuccess(data, textStatus, jqXHR){
+            console.log(data)
+            console.log(textStatus)
+            console.log(jqXHR)
+            document.getElementsByClassName('comment')[0].getElementsByTagName('a')[0].text = 'hooll';
+            $form[0].reset();
+        }
+
+        function handleFormError(jqXHR, textStatus, errorThrown){
+            console.log(jqXHR)
+            console.log(textStatus)
+            console.log(errorThrown)
+        }
+    })
+</script>
+{%endblock%}

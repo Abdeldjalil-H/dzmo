@@ -12,6 +12,7 @@
     </thead>
     <tbody>
     {%for sol in sols%}
+    <tr>
         <td>
             {{sol.student.username}}
         </td>
@@ -26,6 +27,7 @@
         <td>
             {{sol.submited_on}}
         </td>
+    </tr>
     {%endfor%}
     </tbody>
 </table>
