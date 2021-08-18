@@ -29,7 +29,8 @@ class SubsList(StaffRequired, ListView):
     context_object_name = 'subs_list'
     
     def get_queryset(self):
-        return Submissions.get_problems_subs_by_level()
+        order = self.request.GET.getlist('order') if self.request.GET.get('order') else []
+        return Submissions.get_problems_subs_by_level(*order)
     '''
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

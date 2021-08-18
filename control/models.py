@@ -76,8 +76,8 @@ class Submissions(models.Model):
     def get_problems_subs(cls, **kwargs):
         return cls.objects.first().problems_subs.filter(**kwargs)
     @classmethod
-    def get_problems_subs_by_level(cls, **kwargs):
-        subs = cls.objects.first().problems_subs.all()
+    def get_problems_subs_by_level(cls, *args):
+        subs = cls.objects.first().problems_subs.all().order_by(*args)
         return [subs.filter(problem__level = k) for k in range(1,6)]
     
     @classmethod
