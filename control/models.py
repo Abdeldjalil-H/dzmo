@@ -92,6 +92,10 @@ class Submissions(models.Model):
         return cls.objects.first().last_correct_subs.filter(**kwargs)
 
 def init_submissions():
-    instance = Submissions.objects.first()
+    if Submissions.objects.first():
+        instance = Submissions.objects.first() 
+    else:
+        instance = Submissions()
+        instance.save()
     instance.problems_subs.add(*ProblemSubmission.objects.filter(status__in = ['submit', 'comment']))
     instance.last_correct_subs.add(*ProblemSubmission.objects.filter(submited_on__gte = timezone.now()-timedelta(days=7)))
