@@ -9,15 +9,11 @@ from .models import(
 )
 class LessonInline(admin.StackedInline):
     model = Lesson
-
-    def get_extra(self, request, obj=None, **kwargs):
-        return 0
+    extra = 0
 
 class ExerciceInline(admin.StackedInline):
     model = Exercice
-
-    def get_extra(self, request, obj=None, **kwargs):
-        return 0
+    extra = 0
 
 class ChapterAdmin(admin.ModelAdmin):
     inlines = [
