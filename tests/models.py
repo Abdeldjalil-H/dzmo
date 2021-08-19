@@ -1,18 +1,23 @@
 from django.db import models
 from django.utils import timezone
 from accounts.models import User
-
+from problems.models import AbstractProblem
+from os.path import join
 class Test(models.Model):
-    problems    = models.TextField()
     starts_at   = models.DateTimeField()
-    ends_at     = models.DateTimeField(blank = True, null = True)
+    ends_at     = models.DateTimeField(blank=True, null=True)
     duration    = models.DurationField()
-    passed_by   = models.ManyToManyField(User, blank = True)
-    total_score = models.IntegerField()
-    long_time   = models.BooleanField(default = False)
+    passed_by   = models.ManyToManyField(User, blank=True)
+    long_time   = models.BooleanField(default=False)
 
-    correction  = models.TextField(blank = True, null = True)
+    def count_problems(self):
+        return self.problems.count()
 
+    def get_problems(self):
+        return self.problems.all()
+
+    def get_participants(self):
+        return self.passed_by.all()
     @property
     def started(self):
         return timezone.now() >= self.starts_at
@@ -28,18 +33,28 @@ class Test(models.Model):
     class Meta:
         verbose_name        = 'اختبار'
         verbose_name_plural = 'اختبارات'
+def parent_file_path(instance):
+    return join('tests', f'test{instance.test.pk}', f'student{instance.student.pk}')
 
+def answer_file_path(instance, filename):
+    ext = filename.split('.')[-1]
+    name = f'{instance.pb_pk}.{ext}'
+    return join(parent_file_path, name)
 class TestAnswer(models.Model):
-    test        = models.ForeignKey(Test, on_delete = models.SET_NULL, null=True)
-    student     = models.ForeignKey(User, on_delete = models.CASCADE)
-    answer_file   = models.URLField(max_length=500, null = True, blank = True) 
-    start_time  = models.DateTimeField(auto_now_add = True)
-    submited_on = models.DateTimeField(blank = True, null = True)
+    test        = models.ForeignKey(Test, on_delete=models.SET_NULL, null=True)
+    student     = models.ForeignKey(User, on_delete=models.CASCADE)
+    answer_file   = models.URLField(max_length=500, null=True, blank=True) 
+    start_time  = models.DateTimeField(auto_now_add=True)
+    submited_on = models.DateTimeField(blank=True, null=True)
     #corrector part
-    mark        = models.IntegerField(default = 0)
-    comment     = models.TextField(blank = True, null = True)
+    mark        = models.IntegerField(default=0)
+    comment     = models.TextField(blank=True, null=True)
     corrected   = models.BooleanField(default = False)
     
+    files = models.FileField(upload_to=answer_file_path, blank=True, null=True)
+    
+    def set_files_path(self):
+        self.files = parent_file_path()
     @property
     def answer_submited(self):
         if self.answer_file:
@@ -61,14 +76,13 @@ class TestAnswer(models.Model):
         self.answer_file = 'https://drive.google.com/uc?export=view&id=' + file
         self.save()
 
-    def submited_now(self):
+    def set_submited_now(self):
         self.submited_on = timezone.now()
-        self.save()
 
     def set_mark(self, mark, comment=''):
         self.mark = mark
         self.comment = comment
-        self.save()
+
     def save(self, *args, **kwargs):
         if self.pk:
             old_mark = TestAnswer.objects.get(pk = self.pk).mark
@@ -82,3 +96,10 @@ class TestAnswer(models.Model):
     class Meta:
         verbose_name        = 'إجابة اختبار'
         verbose_name_plural = 'إجابات الاختبارات'
+
+class TestProblem(AbstractProblem):
+    test        = models.ForeignKey(Test, related_name='problems', null=True, on_delete=models.SET_NULL)
+    solution    = models.TextField(blank=True, null=True)
+
+    class Meta:
+        ordering = ['pk']
