@@ -1,4 +1,4 @@
-import os
+from os.path import join
 from django.conf import settings
 from django.db import models
 from problems.models import ( 
@@ -22,7 +22,7 @@ class TaskProblem(AbstractProblem):
 def file_path_name(instance, filename):
     ext = filename.split('.')[-1]
     name = f'{instance.problem.pk}_u{instance.student.pk}.{ext}'
-    return os.path.join('tasks_subs',f'pb{instance.problem.pk}', name)
+    return join('tasks_subs',f'pb{instance.problem.pk}', name)
 
 class TaskProblemSubmission(AbstractPbSubmission):
     student     = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete = models.CASCADE, related_name='tasks_submissions')
