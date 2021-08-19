@@ -12,21 +12,22 @@
         <br>
         بعد الضغط عليه، سيبدأ عد الوقت لك.
     </p>
-    {%if not take_test and test.available%}
+    {%if show_btn %}
     <form method="POST">
         {%csrf_token%}
         <button class="btn btn-outline-primary" name="take-test" value="yes" type="sumbit">
             إجراء الإختبار
         </button>
     </form>
-    {%elif test.ends or take_test%}
+    {%elif show_test%}
     <div class="py-4">
-        {{test.problems|safe}}
+        {%for problem in test_problems%}
+            {{problem.statement}}
+        {%endfor%}
     </div>
     {%endif%}
     {%if take_test and can_answer%}
-    <iframe class="py-5" src="https://script.google.com/macros/s/AKfycbxBH4V8AyMkdbzK48UjpFSOZ3xHg0h39fYTR_A2xlcU7iqqydVjtT7a/exec" width="100%" frameborder="0" class="d-flex justify-content-right">
-    </iframe>
+
     <form method="POST" enctype="multipart/form-data" class="py-4">
         {%csrf_token%}
         {{form}}
