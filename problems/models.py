@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.conf import settings
 from lessons.models import Chapter
-import os
+from os.path import join
 
 LEVELS = [(1,'1'),(2,'2'),(3,'3'),(4,'4'),(5,'5')]
                              
@@ -155,7 +155,7 @@ class AbstractPbSubmission(models.Model):
 def file_name(instance, filename):
     ext = filename.split('.')[-1]
     name = f'pb{instance.problem.pk}_u{instance.student.pk}.{ext}'
-    return os.path.join('students_subs', f'pb{instance.problem.pk}', name)
+    return join('students_subs', f'pb{instance.problem.pk}', name)
 
 class ProblemSubmission(AbstractPbSubmission):
     ''' 
