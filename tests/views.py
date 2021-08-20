@@ -1,4 +1,3 @@
-from django.http import request
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.views.generic import(
@@ -16,7 +15,6 @@ class TestAnswerView(FormView):
     template_name   = 'tests/test.html'
     form_class      = UploadFileForm
     fields = ['files']
-    context_object_name = 'forms'
 
     def setup(self, request, *args, **kwargs):
         self.test = get_object_or_404(Test, pk=kwargs.get('pk'))
@@ -29,21 +27,43 @@ class TestAnswerView(FormView):
     show take test button if not taken before, and time,
     '''
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = {'duration': self.test.duration, 'starts_at': self.test.starts_at, 'ends_at': self.test.ends_at}
         if not self.test.started:
-            context['forms'] = None
             return context
-        if available := self.test.is_available_for(self.request.user):
-            context['show_test'] = available
-            context['test_problems'] = self.test.get_problems()
-        else:
+        if not self.test.is_available_for(self.request.user):
             context['show_btn'] = True
+            return context
+        
+        context |={'show_test': True, 
+                'ltr': self.test.ltr,
+                'test_problems': self.test.get_problems()
+        }
+        
+        if not self.test.is_over:
+            context['form'] = self.get_form()
+            context['show_link'] = self.test.get_submission(self.request.user).get_files_status()
         return context
+    
+    def get_form(self):
+        if self.request.method == 'GET':
+            return self.form_class(**self.get_form_kwargs())
+        return self.form_class(instance=self.test.get_submission(self.request.user), **self.get_form_kwargs())
+    
+    def post(self, request, *args, **kwargs):
+        if self.test.is_over:
+            return HttpResponseRedirect(self.get_success_url())
+        return super().post(request, *args, **kwargs)
     
     def form_valid(self, form):
         if self.test.is_participant(self.request.user):
-            return super().form_valid(form)  
-        TestAnswer.create(student=self.request.user, test=self.test)
+            try:
+                pb_number = int(self.request.POST.get('pb'))
+                form.save(pb_pk=self.test.get_problems_order()[pb_number], pb_num=pb_number)
+                print('here')
+            except:
+                pass
+        else: 
+            TestAnswer.create(student=self.request.user, test=self.test).save()
         return HttpResponseRedirect(self.get_success_url())
         
 class TestResult(ListView):

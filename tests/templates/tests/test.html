@@ -1,12 +1,13 @@
 {%extends 'control/base.html'%}
-
+{%load crispy_forms_tags%}
+{%load list_tags%}
 {%block content%}
 <div class="container">
     <h2>اختبار</h2>
-    <p>المدة: {{test.duration}}</p>
+    <p>المدة: {{duration}}</p>
     <p>
-        يمكن تقديم إجراء الاختبار من {{test.starts_at}} 
-        إلى غاية {{test.ends_at}} (لا يمكن تسيليم الإجابات بعدها)
+        يمكن تقديم إجراء الاختبار من {{starts_at}} 
+        إلى غاية {{ends_at}} (لا يمكن تسيليم الإجابات بعدها)
     </p>
     <p>سوف يظهر زر إجراء الإختبار عند وصول وقت بداية الإختبار. 
         <br>
@@ -20,19 +21,23 @@
         </button>
     </form>
     {%elif show_test%}
-    <div class="py-4">
+    <div class="py-4" {%if ltr%}dir="ltr" style="text-align:left;"{%endif%}>
         {%for problem in test_problems%}
-            {{problem.statement}}
+        <h5 class="card-title" {%if ltr%}dir="ltr" style="text-align:left;"{%endif%}>Problem {{forloop.counter}}.</h5>
+        <p class="card-text" {%if ltr%}dir="ltr" style="text-align:left;"{%endif%}>  
+            {{problem.statement|safe}}
+        </p>
+        {%if not show_link|index:forloop.counter0%}
+            <form method="POST" enctype="multipart/form-data">
+                {%csrf_token%}
+                    <div class="py-4" style="display: flex; align-items: center;">
+                        <button class="mx-2 input-group-text" name="pb" value="{{forloop.counter0}}" type="submit">رفع</button>
+                        {{form.files}}
+                    </div>
+            </form>
+        {%endif%}
         {%endfor%}
     </div>
-    {%endif%}
-    {%if take_test and can_answer%}
-
-    <form method="POST" enctype="multipart/form-data" class="py-4">
-        {%csrf_token%}
-        {{form}}
-        <button type="submit" class="btn btn-success">تقديم الإجابة</button>
-    </form>
     {%endif%}
 </div>
 {%endblock%}
