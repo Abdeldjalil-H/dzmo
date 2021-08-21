@@ -1,5 +1,7 @@
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
+#from django.core.files.storage import get_storage_class
+#from .models import answer_file_path
 from django.views.generic import(
     FormView, 
     ListView,
@@ -41,7 +43,11 @@ class TestAnswerView(FormView):
         
         if not self.test.is_over:
             context['form'] = self.get_form()
+            #media_storage = get_storage_class()()
+            #sub = 
+            #url = media_storage.url(name=answer_file_path(sub,pb_pk=2))
             context['show_link'] = self.test.get_submission(self.request.user).get_files_status()
+            #context['link'] = url
         return context
     
     def get_form(self):
@@ -56,12 +62,9 @@ class TestAnswerView(FormView):
     
     def form_valid(self, form):
         if self.test.is_participant(self.request.user):
-            try:
-                pb_number = int(self.request.POST.get('pb'))
-                form.save(pb_pk=self.test.get_problems_order()[pb_number], pb_num=pb_number)
-                print('here')
-            except:
-                pass
+            pb_number = int(self.request.POST.get('pb'))
+            if pb_number <= self.test.number_of_pbs:
+                form.save(pb_num=pb_number)
         else: 
             TestAnswer.create(student=self.request.user, test=self.test).save()
         return HttpResponseRedirect(self.get_success_url())

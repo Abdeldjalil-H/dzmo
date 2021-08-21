@@ -31,7 +31,7 @@
             <form method="POST" enctype="multipart/form-data">
                 {%csrf_token%}
                     <div class="py-4" style="display: flex; align-items: center;">
-                        <button class="mx-2 input-group-text" name="pb" value="{{forloop.counter0}}" type="submit">رفع</button>
+                        <button class="mx-2 input-group-text" name="pb" value="{{forloop.counter}}" type="submit">رفع</button>
                         {{form.files}}
                     </div>
             </form>

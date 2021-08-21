@@ -53,10 +53,12 @@ class Test(models.Model):
 def parent_file_path(instance):
     return join('tests', f'test{instance.test.pk}', f'student{instance.student.pk}')
 
-def answer_file_path(instance, filename):
-    ext = filename.split('.')[-1]
-    name = f'{instance.pb_pk}.{ext}'
-    return join(parent_file_path(instance), name)
+def answer_file_path(instance, *args, pb_num=None):
+    if not pb_num:
+        pb_num = instance.pb_num
+    #ext = filename.split('.')[-1]
+    #name = f'{instance.pb_pk}.{ext}'
+    return join(parent_file_path(instance), f'{pb_num}')
 
 class TestAnswer(models.Model):
     test        = models.ForeignKey(Test, on_delete=models.SET_NULL, null=True, related_name='submissions')
@@ -83,7 +85,7 @@ class TestAnswer(models.Model):
 
     def set_file_uploaded(self, pb_num):
         number_of_pbs = self.test.number_of_pbs
-        new = bin(int(self.uploaded_files, 2) | 1 << (number_of_pbs-pb_num-1))
+        new = bin(int(self.uploaded_files, 2) | 1 << (number_of_pbs-pb_num))
         self.uploaded_files = new[2:].zfill(number_of_pbs)
 
     def get_files_status(self):

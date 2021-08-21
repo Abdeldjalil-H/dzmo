@@ -5,7 +5,7 @@ from .models import TestAnswer
 class UploadFileForm(forms.ModelForm):
     
     def save(self, **kwargs):
-        setattr(self.instance, 'pb_pk', kwargs['pb_pk'])
+        setattr(self.instance, 'pb_num', kwargs['pb_num'])
         super().save(commit=True)
         self.instance.set_file_uploaded(kwargs['pb_num'])
         self.instance.set_files_path()
