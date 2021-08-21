@@ -1,4 +1,5 @@
 from django.http import request
+from django.views.generic.base import TemplateView
 from control.views import StaffRequired
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
@@ -81,7 +82,7 @@ class TestAnswersList(StaffRequired, ListView):
         return test.get_non_corrected_subs()
 
 class TestCorrection(StaffRequired, FormView):
-    template_name = 'tests/test-correction.html'
+    template_name = 'tests/problem-correction.html'
     form_class = CorrectionForm
     
     def get_success_url(self):
@@ -107,6 +108,14 @@ class TestCorrection(StaffRequired, FormView):
         self.student_sub.save()
         return HttpResponseRedirect(self.get_success_url())
 
+class TestSolution(TemplateView):
+    template_name = 'tests/test-solution.html'
+
+    def get_context_data(self, **kwargs):
+        test = get_object_or_404(Test, pk=self.kwargs['test_pk'])
+        if test.solution_available():
+            return {'problems': test.get_problems(), 'ltr': test.ltr}
+        return
 class TestResult(ListView):
     template_name = 'tests/test-results.html'
     

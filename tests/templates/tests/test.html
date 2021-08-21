@@ -1,5 +1,4 @@
 {%extends 'control/base.html'%}
-{%load crispy_forms_tags%}
 {%load list_tags%}
 {%block content%}
 <div class="container">
@@ -21,10 +20,11 @@
         </button>
     </form>
     {%elif show_test%}
-    <div class="py-4" {%if ltr%}dir="ltr" style="text-align:left;"{%endif%}>
-        {%for problem in test_problems%}
-        <h5 class="card-title" {%if ltr%}dir="ltr" style="text-align:left;"{%endif%}>Problem {{forloop.counter}}.</h5>
-        <p class="card-text" {%if ltr%}dir="ltr" style="text-align:left;"{%endif%}>  
+    {%with style=ltr|ltr%}
+    {%for problem in test_problems%}
+    <div class="py-4" {{style}}>
+        <h5 class="card-title" {{style}}>Problem {{forloop.counter}}.</h5>
+        <p class="card-text" {{style}}>  
             {{problem.statement|safe}}
         </p>
         {%if not show_link|index:forloop.counter0%}
@@ -36,8 +36,9 @@
                     </div>
             </form>
         {%endif%}
-        {%endfor%}
     </div>
+    {%endfor%}
+    {%endwith%}
     {%endif%}
 </div>
 {%endblock%}

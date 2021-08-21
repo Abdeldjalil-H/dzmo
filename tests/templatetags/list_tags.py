@@ -5,3 +5,9 @@ register = template.Library()
 @register.filter
 def index(sequence, position):
     return sequence[position]
+
+@register.filter
+def ltr(is_ltr):
+    if is_ltr:
+        return 'dir=ltr style=text-align:left'
+    return ''

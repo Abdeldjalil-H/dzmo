@@ -1,0 +1,21 @@
+{%extends 'control/base.html'%}
+
+{%block content%}
+{%load list_tags%}
+<div class="container">
+    {%with style=ltr|ltr%}
+    {%for problem in problems%}
+    <div class="py-4" {{style}}>
+        <h5 class="card-title" {{style}}>Problem {{forloop.counter}}.</h5>
+        <p class="card-text" {{style}}>  
+            {{problem.statement|safe}}
+        </p>
+        <h6 class="card-title" {{style}}>Solution:</h6>
+        <p class="card-text" {{style}}>  
+            {{problem.solution|safe}}
+        </p>
+    </div>
+    {%endfor%}
+    {%endwith%}
+</div>
+{%endblock%}

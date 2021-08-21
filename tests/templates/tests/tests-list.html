@@ -13,8 +13,8 @@
               </a>
             </td>
             <td scope="col">
-                {%if tst.is_over%}
-                <a href="#">
+                {%if tst.solution_available%}
+                <a href="{%url 'tests:solution' tst.pk%}">
                 التصحيح
                 </a>
                 {%endif%}

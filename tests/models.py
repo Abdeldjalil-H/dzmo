@@ -42,6 +42,8 @@ class Test(models.Model):
     def is_available(self):
         return self.started and not self.ends
 
+    def solution_available(self):
+        return timezone.now() > self.ends_at
     def is_available_for(self, user):
         return self.is_over or self.is_participant(user)
     
