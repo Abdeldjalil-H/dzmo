@@ -30,6 +30,12 @@ class Test(models.Model):
         #return self.submissions.
     def get_submission(self, user):
         return self.submissions.filter(student=user).first()
+
+    def get_submissions(self):
+        return self.submissions.all()
+
+    def get_marks(self):
+        pass
     @property
     def started(self):
         return timezone.now() >= self.starts_at
@@ -113,6 +119,9 @@ class TestAnswer(models.Model):
         else:
             return 0
 
+    @property
+    def marks_sum(self):
+        return sum([x if x >= 0 else 0 for x in self.marks])
     @property
     def can_answer(self):
         return self.remaining_time(self.test)
