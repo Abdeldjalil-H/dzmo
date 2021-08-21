@@ -13,19 +13,23 @@
               </a>
             </td>
             <td scope="col">
-                {%if tst.ends%}
+                {%if tst.is_over%}
                 <a href="#">
                 التصحيح
                 </a>
                 {%endif%}
             </td>
             <td scope="col">
-                {%if tst.ends%}
+                {%if tst.is_over%}
                 <a href="{%url 'tests:test-results' tst.pk %}">
                 النتائج
                 </a>
                 {%endif%}
-
+            </td>
+            <td>
+              {%if user.is_staff%}
+                <a href="{%url 'tests:subs-list' tst.pk%}">تصحيح الإجابات</a>
+              {%endif%}
             </td>
           </tr>
           {%endfor%}

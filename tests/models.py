@@ -1,4 +1,6 @@
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
+from django.db.models.fields import SmallIntegerField
 from django.utils import timezone
 from accounts.models import User
 from problems.models import AbstractProblem
@@ -17,8 +19,8 @@ class Test(models.Model):
     def get_problems(self):
         return self.problems.all()
     
-    def get_problems_order(self):
-        return list(self.problems.values_list('pk', flat=True))
+    def get_problem(self, pb_num):
+        return self.problems.get(problem_number=pb_num)
     
     def is_participant(self, user):
         return self.submissions.filter(student=user).exists()
@@ -43,6 +45,8 @@ class Test(models.Model):
     def is_available_for(self, user):
         return self.is_over or self.is_participant(user)
     
+    def get_non_corrected_subs(self):
+        return self.submissions.filter(marks__contains=[-1])
     def __str__(self):
         return f'الاختبار {self.pk}'
     
@@ -66,12 +70,17 @@ class TestAnswer(models.Model):
     start_time  = models.DateTimeField(auto_now_add=True)
     submited_on = models.DateTimeField(blank=True, null=True)
     #corrector part
-    mark        = models.IntegerField(default=0)
+    '''
+    this field
+    -2: no file
+    -1: file submited, will change in correction
+    0-7: mark after correction
+    '''
+    marks       = ArrayField(SmallIntegerField(), null=True)
     comment     = models.TextField(blank=True, null=True)
     corrected   = models.BooleanField(default=False)
     
     files = models.FileField(upload_to=answer_file_path, blank=True, null=True)
-    uploaded_files = models.CharField(max_length=15, blank=True, null=True)
     
     def delete(self):
         self.files.delete(save=False)
@@ -80,19 +89,20 @@ class TestAnswer(models.Model):
     def create(cls, **kwargs):
         instance = cls(**kwargs)
         instance.set_start_now()
-        instance.uploaded_files = '0' * kwargs['test'].number_of_pbs
+        instance.marks = [-2] * kwargs['test'].number_of_pbs
         return instance
 
     def set_file_uploaded(self, pb_num):
-        number_of_pbs = self.test.number_of_pbs
-        new = bin(int(self.uploaded_files, 2) | 1 << (number_of_pbs-pb_num))
-        self.uploaded_files = new[2:].zfill(number_of_pbs)
+        self.marks[pb_num-1] = -1
 
     def get_files_status(self):
-        return [int(x) for x in self.uploaded_files]
+        return [x==-1 for x in self.marks]
+
     def set_files_path(self):
         self.files = parent_file_path(self)
     
+    def has_submited(self, pb_num):
+        return self.marks[pb_num-1] > -2
 
     def remaining_time(self, test):
         remains = self.start_time + test.duration - timezone.now()  
@@ -111,16 +121,10 @@ class TestAnswer(models.Model):
     def set_start_now(self):
         self.start_time = timezone.now()
     
-    def set_mark(self, mark, comment=''):
-        self.mark = mark
-        self.comment = comment
-
-    def save(self, *args, **kwargs):
-        if self.pk:
-            old_mark = TestAnswer.objects.get(pk = self.pk).mark
-            if self.mark - old_mark:
-                self.student.progress.add_points(self.mark - old_mark)
-        super().save(*args, **kwargs)
+    def set_mark(self, pb_num=None, mark=None):
+        self.marks[pb_num-1] = mark
+        level = self.test.get_problem(pb_num).level
+        self.student.add_points(2 * mark * level)
     
     def __str__(self):
         return f'إجابة الاختبار {self.test}: {self.student.username}'
@@ -133,5 +137,6 @@ class TestProblem(AbstractProblem):
     test        = models.ForeignKey(Test, related_name='problems', null=True, on_delete=models.SET_NULL)
     solution    = models.TextField(blank=True, null=True)
     problem_number = models.PositiveSmallIntegerField(default=1)
+    
     class Meta:
         ordering = ['problem_number']

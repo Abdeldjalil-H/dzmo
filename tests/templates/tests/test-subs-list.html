@@ -1,0 +1,30 @@
+{%extends 'control/base.html'%}
+
+{%block content%}
+<div class="container">
+    <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">التلميذ</th>
+            {%for _ in pbs_numbers%}
+            <th scope="col">المسألة {{forloop.counter}}</th>
+            {%endfor%}
+          </tr>
+        </thead>
+        <tbody>
+    {% for sub in subs_list%}
+        <tr>
+            <td>{{sub.student.username}}</td>
+            {%for show in sub.get_files_status%}
+            <td>
+                {%if show%}
+                <a href="{%url 'tests:problem-correction' sub.test.pk forloop.counter%}?student={{sub.student.pk}}">تصحيح</a>
+                {%endif%}
+            </td>
+            {%endfor%}
+        </tr>
+    {% endfor %}
+    </tbody>
+    </table>
+</div>
+{%endblock%}

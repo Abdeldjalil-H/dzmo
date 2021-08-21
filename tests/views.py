@@ -1,14 +1,16 @@
+from django.http import request
+from control.views import StaffRequired
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
-#from django.core.files.storage import get_storage_class
-#from .models import answer_file_path
+from django.core.files.storage import get_storage_class
+from .models import answer_file_path
 from django.views.generic import(
     FormView, 
     ListView,
 )
 from django.urls import reverse_lazy
 from .models import Test, TestAnswer
-from .forms import UploadFileForm
+from .forms import CorrectionForm, UploadFileForm
 class TestsList(ListView):
     template_name = 'tests/tests-list.html'
     queryset = Test.objects.all()
@@ -63,12 +65,48 @@ class TestAnswerView(FormView):
     def form_valid(self, form):
         if self.test.is_participant(self.request.user):
             pb_number = int(self.request.POST.get('pb'))
-            if pb_number <= self.test.number_of_pbs:
+            if 0 < pb_number <= self.test.number_of_pbs:
                 form.save(pb_num=pb_number)
         else: 
             TestAnswer.create(student=self.request.user, test=self.test).save()
         return HttpResponseRedirect(self.get_success_url())
-        
+
+class TestAnswersList(StaffRequired, ListView):
+    template_name = 'tests/test-subs-list.html'
+    context_object_name = 'subs_list'
+    
+    def get_queryset(self):
+        test = get_object_or_404(Test, pk=self.kwargs['test_pk'])
+        self.extra_context = {'pbs_numbers': range(1, test.number_of_pbs + 1)}
+        return test.get_non_corrected_subs()
+
+class TestCorrection(StaffRequired, FormView):
+    template_name = 'tests/test-correction.html'
+    form_class = CorrectionForm
+    
+    def get_success_url(self):
+        return reverse_lazy('tests:subs-list', kwargs={'test_pk': self.kwargs['test_pk']})
+    
+    def setup(self, request, *args, **kwargs):
+        self.student_sub = get_object_or_404(TestAnswer, test__pk=kwargs['test_pk'], student__pk=request.GET.get('student'))
+        return super().setup(request, *args, **kwargs)
+    
+    def get_context_data(self, **kwargs):
+        if not self.student_sub.has_submited(self.kwargs['pb_num']):
+            return
+        media_storage = get_storage_class()()
+        url = media_storage.url(name=answer_file_path(self.student_sub, pb_num=self.kwargs['pb_num']))
+        return {'form': self.form_class(), 
+            'file_url': url, 
+            'student_name': self.student_sub.student.username, 
+            'student_pk': self.kwargs['pb_num']
+        }
+    
+    def post(self, request, *args, **kwargs):
+        self.student_sub.set_mark(pb_num=self.kwargs['pb_num'],mark=int(request.POST.get('mark')))
+        self.student_sub.save()
+        return HttpResponseRedirect(self.get_success_url())
+
 class TestResult(ListView):
     template_name = 'tests/test-results.html'
     
