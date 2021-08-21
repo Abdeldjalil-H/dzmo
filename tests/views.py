@@ -78,7 +78,7 @@ class TestAnswersList(StaffRequired, ListView):
     
     def get_queryset(self):
         test = get_object_or_404(Test, pk=self.kwargs['test_pk'])
-        self.extra_context = {'pbs_numbers': range(1, test.number_of_pbs + 1)}
+        self.extra_context = {'pbs_numbers': range(test.number_of_pbs)}
         return test.get_non_corrected_subs()
 
 class TestCorrection(StaffRequired, FormView):
@@ -116,12 +116,10 @@ class TestSolution(TemplateView):
         if test.solution_available():
             return {'problems': test.get_problems(), 'ltr': test.ltr}
         return
-class TestResult(ListView):
+class TestResult(TemplateView):
     template_name = 'tests/test-results.html'
-    
     context_object_name = 'answers_list'
-    def get_queryset(self, **kwargs):
-        pk = self.kwargs['pk']
-        return TestAnswer.objects.filter(
-                    test_id = pk, 
-                    corrected = True).order_by('-mark') 
+
+    def get_context_data(self, **kwargs):
+        test = get_object_or_404(Test, pk=self.kwargs['test_pk'])
+        return {'subs_list': test.get_submissions(), 'pbs_numbers': range(test.number_of_pbs)}

@@ -1,25 +1,27 @@
 {%extends 'control/base.html'%}
-
+{%load list_tags%}
 {%block content%}
 <div class="container">
     <table class="table">
         <thead>
           <tr>
             <th scope="col">التلميذ</th>
-            <th scope="col">العلامة</th>
-            <th scope="col">الإجابة</th>
+            {%for _ in pbs_numbers%}
+            <th scope="col">المسألة {{forloop.counter}}</th>
+            {%endfor%}
           </tr>
         </thead>
         <tbody>
-    {% for ans in answers_list%}
+    {% for sub in subs_list%}
         <tr>
-            <td><a href="{% url 'accounts:profile' ans.student.pk %}">
-                {{ans.student.username}}
+            <td><a href="{% url 'accounts:profile' sub.student.pk %}">
+                {{sub.student.username}}
             </a></td>
-            <td>{{ans.mark}}</td>
+            {%for mark in sub.marks|as_marks%}
             <td>
-                <a href="#">عرض</a>
+                {{mark}}
             </td>
+            {%endfor%}
         </tr>
     {% endfor %}
     </tbody>

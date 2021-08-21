@@ -14,7 +14,9 @@
         <tbody>
     {% for sub in subs_list%}
         <tr>
-            <td>{{sub.student.username}}</td>
+            <td><a href="{%url 'accounts:profile' sub.student.pk%}">
+                {{sub.student.username}}
+            </a></td>
             {%for show in sub.get_files_status%}
             <td>
                 {%if show%}
