@@ -34,7 +34,7 @@ AWS_S3_REGION_NAME = "eu-west-3"
 AWS_S3_SIGNATURE_VERSION = "s3v4"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = (config.get('DEBUG_VALUE') == 'True')
-ALLOWED_HOSTS = ['dzmo.herokuapp.com']
+ALLOWED_HOSTS = ['127.0.0.1','dzmo.herokuapp.com']
 
 
 #Application definition
@@ -108,11 +108,11 @@ DATABASES = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'dzmodb',
-        'USER': 'dzmoapp',
-        'PASSWORD': '04022001',
+        'NAME': config.get('DB_NAME'),
+        'USER': config.get('DB_USER'),
+        'PASSWORD': config.get('DB_PWD'),
         'HOST': 'localhost',
-        'PORT': 5432,
+        'PORT': '',
     }
 }
 
