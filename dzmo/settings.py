@@ -9,9 +9,14 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
-import os
+from os.path import join
 from pathlib import Path
 #import django_heroku
+
+from json import load
+
+with open('/etc/dzmo_config.json') as config_file:
+    config = load(config_file)
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -20,15 +25,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY=os.getenv('SECRET_KEY')
-AWS_ACCESS_KEY_ID=os.getenv('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY=os.getenv('AWS_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME=os.getenv('AWS_STORAGE_BUCKET_NAME')
+SECRET_KEY=config.get('SECRET_KEY')
+AWS_ACCESS_KEY_ID=config.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY=config.get('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME=config.get('AWS_STORAGE_BUCKET_NAME')
 
 AWS_S3_REGION_NAME = "eu-west-3"
 AWS_S3_SIGNATURE_VERSION = "s3v4"
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = (os.getenv('DEBUG_VALUE') == 'True')
+DEBUG = (config.get('DEBUG_VALUE') == 'True')
 ALLOWED_HOSTS = ['dzmo.herokuapp.com']
 
 
@@ -103,9 +108,9 @@ DATABASES = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': '1234',
+        'NAME': 'dzmodb',
+        'USER': 'dzmoapp',
+        'PASSWORD': '04022001',
         'HOST': 'localhost',
         'PORT': 5432,
     }
@@ -149,18 +154,18 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = join(BASE_DIR, 'staticfiles')
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = os.getenv('DEFAULT_EMAIL')
-EMAIL_HOST_PASSWORD = os.getenv('GMAIL_KEY')#'oldoulhemzkvrsof'
+EMAIL_HOST_USER = config.get('DEFAULT_EMAIL')
+EMAIL_HOST_PASSWORD = config.get('GMAIL_KEY')#'oldoulhemzkvrsof'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_EMAIL')
+DEFAULT_FROM_EMAIL = config.get('DEFAULT_EMAIL')
 
 VERIFICATION_SUCCESS_TEMPLATE = None
 
@@ -169,7 +174,7 @@ LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 #Absolute filesystem path to the directory that will hold user-uploaded files.
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = join(BASE_DIR, 'media')
 
 #django_heroku.settings(locals())
 
