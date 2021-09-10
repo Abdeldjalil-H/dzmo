@@ -7,11 +7,13 @@ from .views import (
     TestAnswersList,
     TestCorrection,
     TestSolution,
+    create_test_answer,
 )
 app_name = 'tests'
 urlpatterns = [
     path('', TestsList.as_view(), name='tests-list'),
     path('<int:pk>/', login_required(TestAnswerView.as_view()), name = 'test'),
+    path('<int:test_pk>/create_ans/', login_required(create_test_answer), name = 'create_ans'),
     path('<int:test_pk>/results/', login_required(TestResult.as_view()), name='test-results'),
     path('solution/test<int:test_pk>/', login_required(TestSolution.as_view()), name='solution'),
     path('correction/test<int:test_pk>/', TestAnswersList.as_view(), name='subs-list'),

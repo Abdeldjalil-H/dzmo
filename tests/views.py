@@ -16,6 +16,13 @@ class TestsList(ListView):
     template_name = 'tests/tests-list.html'
     queryset = Test.objects.all()
     context_object_name = 'tests_list'
+
+def create_test_answer(request, test_pk):
+    test = get_object_or_404(Test, pk=test_pk)
+    if not test.is_participant(request.user):
+        TestAnswer.create(student=request.user, test=test).save()
+    return HttpResponseRedirect(request.path)
+    
 class TestAnswerView(FormView):
     template_name   = 'tests/test.html'
     form_class      = UploadFileForm
@@ -64,12 +71,9 @@ class TestAnswerView(FormView):
         return super().post(request, *args, **kwargs)
     
     def form_valid(self, form):
-        if self.test.is_participant(self.request.user):
-            pb_number = int(self.request.POST.get('pb'))
-            if 0 < pb_number <= self.test.number_of_pbs:
-                form.save(pb_num=pb_number)
-        else: 
-            TestAnswer.create(student=self.request.user, test=self.test).save()
+        pb_number = int(self.request.POST.get('pb'))
+        if 0 < pb_number <= self.test.number_of_pbs:
+            form.save(pb_num=pb_number)
         return HttpResponseRedirect(self.get_success_url())
 
 class TestAnswersList(StaffRequired, ListView):
