@@ -21,7 +21,7 @@ def create_test_answer(request, test_pk):
     test = get_object_or_404(Test, pk=test_pk)
     if not test.is_participant(request.user):
         TestAnswer.create(student=request.user, test=test).save()
-    return HttpResponseRedirect(request.path)
+    return HttpResponseRedirect(reverse_lazy('tests:test', kwargs={'pk':test_pk}))
     
 class TestAnswerView(FormView):
     template_name   = 'tests/test.html'
