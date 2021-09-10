@@ -13,7 +13,7 @@
         بعد الضغط عليه، سيبدأ عد الوقت لك.
     </p>
     {%if show_btn %}
-    <form method="POST">
+    <form method="POST" action="{%url 'tests:create_ans'%}">
         {%csrf_token%}
         <button class="btn btn-outline-primary" name="take-test" value="yes" type="sumbit">
             إجراء الإختبار
