@@ -6,14 +6,14 @@
     <p>المدة: {{duration}}</p>
     <p>
         يمكن تقديم إجراء الاختبار من {{starts_at}} 
-        إلى غاية {{ends_at}} (لا يمكن تسيليم الإجابات بعدها)
+        إلى غاية {{ends_at}} (لا يمكن تسليم الإجابات بعدها)
     </p>
     <p>سوف يظهر زر إجراء الإختبار عند وصول وقت بداية الإختبار. 
         <br>
         بعد الضغط عليه، سيبدأ عد الوقت لك.
     </p>
     {%if show_btn %}
-    <form method="POST" action="{%url 'tests:create_ans'%}">
+    <form method="POST" action="{%url 'tests:create_ans' test_id%}">
         {%csrf_token%}
         <button class="btn btn-outline-primary" name="take-test" value="yes" type="sumbit">
             إجراء الإختبار

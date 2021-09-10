@@ -44,6 +44,7 @@ class TestAnswerView(FormView):
             return context
         if not self.test.is_available_for(self.request.user):
             context['show_btn'] = True
+            context['test_id'] = self.test.id
             return context
         
         context |={'show_test': True, 
