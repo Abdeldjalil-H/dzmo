@@ -34,7 +34,7 @@ class SubsList(CorrectorsOnly, ListView):
     
     def get_queryset(self):
         order = self.request.GET.getlist('order') if self.request.GET.get('order') else []
-        return Submissions.get_problems_subs_by_level(order=order, filters=request.user.corrector.get_filters())
+        return Submissions.get_problems_subs_by_level(order=order, filters=self.request.user.corrector.get_filters())
     '''
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
