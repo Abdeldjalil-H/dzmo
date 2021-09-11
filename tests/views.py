@@ -1,6 +1,6 @@
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.http import request
 from django.views.generic.base import TemplateView
-from control.views import StaffRequired
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.core.files.storage import get_storage_class
@@ -12,6 +12,11 @@ from django.views.generic import(
 from django.urls import reverse_lazy
 from .models import Test, TestAnswer
 from .forms import CorrectionForm, UploadFileForm
+
+class TestsCorrectorsOnly(UserPassesTestMixin):
+    def test_func(self):
+        return self.request.user.is_corrector and self.request.user.corrector.tests
+
 class TestsList(ListView):
     template_name = 'tests/tests-list.html'
     queryset = Test.objects.all()
@@ -77,7 +82,7 @@ class TestAnswerView(FormView):
             form.save(pb_num=pb_number)
         return HttpResponseRedirect(self.get_success_url())
 
-class TestAnswersList(StaffRequired, ListView):
+class TestAnswersList(TestsCorrectorsOnly, ListView):
     template_name = 'tests/test-subs-list.html'
     context_object_name = 'subs_list'
     
@@ -86,7 +91,7 @@ class TestAnswersList(StaffRequired, ListView):
         self.extra_context = {'pbs_numbers': range(test.number_of_pbs)}
         return test.get_non_corrected_subs()
 
-class TestCorrection(StaffRequired, FormView):
+class TestCorrection(TestsCorrectorsOnly, FormView):
     template_name = 'tests/problem-correction.html'
     form_class = CorrectionForm
     

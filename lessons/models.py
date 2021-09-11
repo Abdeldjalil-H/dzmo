@@ -7,21 +7,24 @@ class PrereqChapter(models.Model):
     def __str__(self):
         return self.name
 
-
-TOPICS = [
-	('a', 'جبر'),
-	('g', 'هندسة'),
-	('nt', 'نظرية الأعداد'),
-	('c', 'توفيقات'),
-	('b','أساسيات')
-]
+class TopicField(models.CharField):
+    def __init__(self, *args, **kwargs):
+        TOPICS = [
+            ('a', 'جبر'),
+            ('g', 'هندسة'),
+            ('nt', 'نظرية الأعداد'),
+            ('c', 'توفيقات'),
+            ('b','أساسيات')
+        ]
+        kwargs['max_length'] = 2
+        kwargs['choices'] = TOPICS
+        super().__init__(*args, **kwargs)
 
 class Chapter(models.Model):
     name    = models.CharField( max_length = 150, 
                                 verbose_name = 'عنوان المحور')
     slug    = models.SlugField(verbose_name='الرابط')
-    topic   = models.CharField( max_length = 20, choices = TOPICS, 
-                                verbose_name ='المادة')
+    topic   = TopicField(verbose_name ='المادة')
     descr   = models.TextField(verbose_name = 'لمحة عن المحور')
     prereq  = models.ManyToManyField(PrereqChapter, blank = True, 
                                     verbose_name = 'المكتسبات اللازمة')
