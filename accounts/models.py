@@ -184,14 +184,14 @@ class Corrector(models.Model):
     def __str__(self):
         return self.user.username
     def get_filters(self):
-        filters = []
+        q = Q()
         if len(self.topics) != 5:
-            filters.append(Q(problem__chapter__topic__in=self.topics))
+            q &= Q(problem__chapter__topic__in=self.topics)
         if not self.self_correction:
-            filters.append(~Q(student=self.user))
+            q &= ~Q(student=self.user)
         if self.solved_only:
-            filters.append(Q(problems__pk__in=self.user.get_correct_pks()))
-        return filters
+            q &= Q(problem__pk__in=self.user.progress.solved_problems.all())
+        return q
 
     def can_correct(self, problem):
         return not self.solved_only or (problem.chapter.topic in self.topics or problem.has_solved(self.user))
