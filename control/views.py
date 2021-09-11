@@ -1,3 +1,4 @@
+from django.http.response import HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
 from django.urls import reverse_lazy
@@ -7,30 +8,33 @@ from django.views.generic import(
     ListView,
     CreateView,
     FormView,
-    UpdateView,
 )
 from django.contrib.auth.mixins import UserPassesTestMixin
+from requests.api import request
 from problems.models import(
     ProblemSubmission,
     Comment,
-    Problem
-    
+    Problem    
 )
 from accounts.models import User
-from tests.models import Test, TestAnswer
 from .models import MainPagePost, Submissions
 from .forms import AddProblemsForm, SendMailForm
+
 class StaffRequired(UserPassesTestMixin):
     def test_func(self):
-        return self.request.user.is_staff or self.request.user.is_corrector
-#class SubsList(UserPassesTestMixin, ListView):
-class SubsList(StaffRequired, ListView):
+        return self.request.user.is_staff
+
+class CorrectorsOnly(UserPassesTestMixin):
+    def test_func(self):
+        return self.request.user.is_corrector and self.request.user.corrector.problems
+
+class SubsList(CorrectorsOnly, ListView):
     template_name       = 'control/submissions-list.html'
     context_object_name = 'subs_list'
     
     def get_queryset(self):
         order = self.request.GET.getlist('order') if self.request.GET.get('order') else []
-        return Submissions.get_problems_subs_by_level(*order)
+        return Submissions.get_problems_subs_by_level(order=order, filters=request.user.corrector.get_filters())
     '''
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -41,7 +45,7 @@ class SubsList(StaffRequired, ListView):
         return context
         '''
 
-class ProblemCorrection(StaffRequired, CreateView):
+class ProblemCorrection(CorrectorsOnly, CreateView):
     template_name       = 'control/problem-correction.html'
     model               = Comment
     need_form           = False
@@ -55,6 +59,8 @@ class ProblemCorrection(StaffRequired, CreateView):
         return super().setup(request, *args, **kwargs)
     
     def get(self, request, *args, **kwargs):
+        if not request.user.corrector.can_correct(self.submission.problem):
+            return HttpResponseForbidden()
         if self.decide != 'to_correct' and self.decide:
             self.submission.set_correcting(False)
             self.submission.save()

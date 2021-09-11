@@ -6,7 +6,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .forms import UserAdminCreationForm, UserAdminChangeForm
 # Register your models here.
 
-from .models import StudentProgress, Team
+from .models import StudentProgress, Team, Corrector
 User = get_user_model()
 
 class ProgressInline(admin.StackedInline):
@@ -42,3 +42,4 @@ class UserAdmin(BaseUserAdmin):
 
 admin.site.register(User, UserAdmin)
 admin.site.register(Team)
+admin.site.register(Corrector)

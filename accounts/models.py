@@ -1,9 +1,12 @@
 from django.db import models
+from django.db.models import Q
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.postgres.fields import ArrayField
 from django.conf import settings
 from datetime import timedelta
+from django.db.models.fields import CharField
 from django.utils import timezone
-from lessons.models import Chapter, Exercice
+from lessons.models import Chapter, Exercice, TopicField
 from problems.models import Problem, ProblemSubmission, STATUS
 from control.models import Submissions
 TEAMS_COLORS = [('white','white'),
@@ -166,6 +169,32 @@ class User(AbstractBaseUser):
     class Meta:
         verbose_name        = 'مستخدم'
         verbose_name_plural = 'المستخدمون'
+
+def default_topics():
+    return ['a','c','g','nt','b']
+class Corrector(models.Model):
+    user    = models.OneToOneField(User, on_delete=models.CASCADE)
+    problems= models.BooleanField(default=True)        
+    tasks   = models.BooleanField(default=False)        
+    tests   = models.BooleanField(default=False) 
+    self_correction = models.BooleanField(default=False)
+    solved_only = models.BooleanField(default=False)
+    topics = ArrayField(TopicField(), default=default_topics, null=True, blank=True) 
+
+    def __str__(self):
+        return self.user.username
+    def get_filters(self):
+        filters = []
+        if len(self.topics) != 5:
+            filters.append(Q(problem__chapter__topic__in=self.topics))
+        if not self.self_correction:
+            filters.append(~Q(student=self.user))
+        if self.solved_only:
+            filters.append(Q(problems__pk__in=self.user.get_correct_pks()))
+        return filters
+
+    def can_correct(self, problem):
+        return not self.solved_only or (problem.chapter.topic in self.topics or problem.has_solved(self.user))
 
 class StudentProgress(models.Model):
     student             = models.OneToOneField(settings.AUTH_USER_MODEL, related_name = 'progress', on_delete = models.CASCADE)
