@@ -63,7 +63,7 @@ class TaskPbSubmit(CheckTeam, _ProblemSubmit):
         return url
     
 class TaskPbView(CheckTeam, _ProblemView):
-    template_name = 'tasks/task-problem.html'
+    template_name = 'tasks/task-problem-view.html'
     form_class = CommentForm
     problem_model = TaskProblem
     def get_success_url(self, sub_pk):
