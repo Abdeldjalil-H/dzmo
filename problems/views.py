@@ -142,6 +142,8 @@ class _ProblemSubmit(CreateView):
 			context['show_del'] = True
 		return context
 
+	def add_to_subs(self, sub):
+		pass
 	def form_valid(self, form):
 		obj = form.save(commit=False)
 		if self.draft_sub:
@@ -154,7 +156,7 @@ class _ProblemSubmit(CreateView):
 			obj.set_submited_now()
 			obj.save()
 		if obj.status == 'submit':
-			Submissions.add_sub(obj)
+			self.add_to_subs(obj)
 			pk = obj.pk
 		else:
 			pk = None
@@ -172,6 +174,8 @@ class ProblemSubmit(HaveAccessToProblem, _ProblemSubmit):
 			return url + f'?sub={sub_pk}'
 		return url
 
+	def add_to_subs(self, sub):
+		Submissions.add_sub(sub)
 class DeleteSubmission(DeleteView):
 	template_name = 'problems/delete-draft.html'
 	problem_model = Problem

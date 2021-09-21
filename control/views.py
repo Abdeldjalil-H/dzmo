@@ -111,6 +111,8 @@ class ProblemCorrection(CorrectorsOnly, CreateView):
     def notify_student(self):
         self.submission.student.progress.last_submissions.add(self.submission)
 
+    def remove_from_subs(self):
+        Submissions.remove_sub(self.submission)
     def form_valid(self, form, **kwargs):
         pk = self.submission.pk
         form.instance.user = self.request.user
@@ -126,7 +128,7 @@ class ProblemCorrection(CorrectorsOnly, CreateView):
         else:
             self.handle_comment_correct_sub()
         
-        Submissions.remove_sub(self.submission)
+        self.remove_from_subs()
         self.notify_student()
         return super().form_valid(form, **kwargs)
         

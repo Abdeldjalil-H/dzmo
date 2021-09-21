@@ -75,7 +75,7 @@ class DeleteSubmission(DeleteSubmission):
     def get_success_url(self):
         return reverse_lazy(('tasks:pb-view'), kwargs={'task_pk':self.kwargs['task_pk'], 'pb_pk':self.kwargs['pb_pk']})
 class TaskSubsList(SubsList):
- 
+
     def get_context_data(self, **kwargs):
         return {self.context_object_name:Task.objects.get(pk = self.kwargs['task_pk']).get_subs_by_level()}
 
@@ -84,12 +84,17 @@ class TaskPbsCorrection(ProblemCorrection):
     model               = TaskComment
     pk_url_kwarg = 'sub_pk'
     template_name = 'tasks/correction-subs-list.html'
+    
     def get_success_url(self):
         return reverse_lazy(('tasks:task-subs-list'), kwargs={'task_pk':self.kwargs['task_pk']})
+    
     def handle_correct_sub(self):
         self.submission.correct = True
         self.submission.save()
         self.submission.student.add_points(self.submission.problem.points)
+    
+    def remove_from_subs(self):
+        pass
 
     def notify_student(self):
         self.submission.student.add_task_correction_notif(self.submission)

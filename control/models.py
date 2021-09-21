@@ -56,7 +56,6 @@ class Submissions(models.Model):
     @classmethod
     def add_sub(cls, sub):
         return cls.objects.first().problems_subs.add(sub)
-    
     @classmethod
     def remove_sub(cls, sub):
         cls.objects.first().problems_subs.remove(sub)
