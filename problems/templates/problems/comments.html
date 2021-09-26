@@ -1,11 +1,11 @@
 {% for comment in comments%}
 <div class="card my-4 comment">
-    <div class="card-header" style="background-color: rgb(253, 255, 163) ;">
+    <div class="card-header">
         {{comment.date}}
         <a href="{%url 'accounts:profile' comment.user.pk%}">{{comment.user.username}}</a>
     </div>
     <div class="card-body">
-        <p class="card-text" {{comment.get_dir_style}}>
+        <p class="card-text {%if comment.ltr_dir%}ltr{%endif%}">
         {{comment.content|safe}}
         </p>
     </div>

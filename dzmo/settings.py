@@ -23,7 +23,7 @@ AWS_S3_REGION_NAME = "eu-west-3"
 AWS_S3_SIGNATURE_VERSION = "s3v4"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = (config.get('DEBUG_VALUE') == 'True')
-ALLOWED_HOSTS = ['algerianmo.com', 'www.algerianmo.com']
+ALLOWED_HOSTS = ['algerianmo.com', 'www.algerianmo.com', 'localhost']
 
 
 #Application definition
@@ -144,6 +144,9 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [
+    join(BASE_DIR, 'static')
+]
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 

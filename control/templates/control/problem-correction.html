@@ -1,21 +1,4 @@
-{% load crispy_forms_tags %}
 {% include 'problems/problem-view.html' %}
-<script>
-    function change_dir(id){
-        var elem = document.getElementById(id);
-        if(elem.style.textAlign == "left") {
-            elem.style.textAlign = "right";
-        } else {
-            elem.style.textAlign = "left";
-        }
-        if(elem.dir == "ltr") {
-            elem.dir = "rtl";
-        } else {
-            elem.dir = "ltr";
-        }
-    }
-</script>
-
 {% if can_correct %}
 <div class="container my-4">
     {%if not form%}
@@ -27,19 +10,8 @@
         <button type="submit" name="decide" value="cancel_correction" class="btn btn-outline-secondary my-4">تراجع</button>
     </form>
     {%endif%}
-
     {%if form%}
-    <form method='POST'>
-        {% csrf_token %}
-        {{ form|crispy }}
-        {% if not this_sub.correct %}
-        <button type='submit' name='status' value='correct' class="btn btn-success">إجابة صحيحة</button>
-        <button type='submit' name='status' value='wrong' class="btn btn-danger">إجابة خاطئة</button>
-        {% else %}
-        <button type='submit' class="btn btn-outline-secondary">إرسال التعليق</button>
-        {%endif%}
-    </form>
+        {%include 'control/correction-form.html'%}
     {%endif%}
-
     </div>
 {%endif%}

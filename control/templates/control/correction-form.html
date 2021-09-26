@@ -1,0 +1,10 @@
+{%extends 'problems/submit-form.html'%}
+{%block form_fields%}
+    <textarea name="content" class="form-control my-4" required id="MathInput"></textarea>
+    {%if not this_sub.correct%}
+    <button type='submit' name='status' value='correct' class="btn btn-success">إجابة صحيحة</button>
+    <button type='submit' name='status' value='wrong' class="btn btn-danger">إجابة خاطئة</button>
+    {% else %}
+    <button type='submit' class="btn btn-outline-secondary">إرسال التعليق</button>
+    {%endif%}
+{%endblock form_fields%}

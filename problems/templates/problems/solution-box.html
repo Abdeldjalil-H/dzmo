@@ -1,19 +1,19 @@
 <div class="container">
     <h3>الإجابة</h3>
-<div class="card my-4">
-    <div class="card-header" style="background-color: rgb(253, 255, 163) ;">
+<div class="card my-4 solution-card">
+    <div class="card-header">
     {{sub.submited_on}}
-    <a class="card-link" href="{%url 'accounts:profile' sub.student.pk%}"> {{sub.student.username}} </a>
+    <a class="card-link" href="{%url 'accounts:profile' sub.student.pk%}">{{sub.student.username}}</a>
     </div>
     <div class="card-body">
-        <p class="card-text" {{ sub.get_dir_style }}>
-        {{ sub.solution|safe }}
+        <p class="card-text{%if sub.ltr_dir%} ltr{%endif%}">
+        {{sub.solution|safe}}
         </p>
         {%if sub.file%}
         {%if '.pdf' in sub.file.name%}
-            <iframe class="embed-responsive" src="{{sub.file.url}}" type="{{sub.file.content_type}}" width="100%" style="height:85vh"></iframe>
+            <iframe class="embed-responsive" src="{{sub.file.url}}" type="{{sub.file.content_type}}" width="100%"></iframe>
         {%else%}
-            <img src="{{sub.file.url}}" alt="{{sub.file.name}}" style="width:100%; max-width:100%"/>
+            <img src="{{sub.file.url}}" alt="{{sub.file.name}}"/>
         {%endif%}
         {%endif%}
     </div>

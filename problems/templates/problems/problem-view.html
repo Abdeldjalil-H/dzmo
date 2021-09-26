@@ -1,5 +1,4 @@
 {% extends 'control/base.html' %}
-{% load crispy_forms_tags%}
 {% block content %}
 
 {%include 'problems/problem-statement.html' with show_btn=show_btn btn=btn ltr=ltr%}
@@ -21,48 +20,9 @@
     <h2>التعليقات</h2>
     {%include 'problems/comments.html' with comments=comments %}
 </div>
-{% endif %}
+{%endif%}
 
 {% if cmnt %}
-<script>
-    $(document).ready(function(){
-        var $form = $("#comment-form")
-        $form.submit(function(event){
-            event.preventDefault()
-            var $formData = $(this).serialize()
-            var $endpoint = $form.attr("data-url") || window.location.href
-            $.ajax({
-                method: "POST",
-                url: $endpoint,
-                data: $formData,
-                success: function(data){
-                    $form.parent().html(data)
-                }
-            })  
-        })
-    })
-    function change_dir(){
-        var elem = document.getElementById("MathInput");
-        if(elem.style.textAlign == "left") {
-            elem.style.textAlign = "right";
-        } else {
-            elem.style.textAlign = "left";
-        }
-        if(elem.dir == "ltr") {
-            elem.dir = "rtl";
-        } else {
-            elem.dir = "ltr";
-        }
-    }
-</script>
-<div class="container">      
-    <div class="form-group">
-        <form method='POST' id="comment-form">
-        {% csrf_token %}
-        {{cmnt|crispy}}
-        <button type ='submit' class="btn btn-outline-secondary">تعليق</button>
-        </form>
-    </div>
-</div>
+{%include 'problems/comment-form.html'%}
 {%endif%}
 {% endblock %}
