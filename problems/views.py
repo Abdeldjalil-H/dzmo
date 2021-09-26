@@ -136,9 +136,11 @@ class _ProblemSubmit(CreateView):
 
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
+		print(context['form'].errors.values())
 		context['problem'] = self.problem
 		if self.draft_sub:
-			context['preview_dir'] = self.draft_sub.get_dir_style
+			context['solution'] = self.draft_sub.solution
+			context['ltr_dir'] = self.draft_sub.ltr_dir
 			context['show_del'] = True
 		return context
 

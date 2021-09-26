@@ -1,0 +1,23 @@
+{%extends 'problems/submit-form.html'%}
+{%block form_fields%}
+    <textarea name="content" class="form-control my-4" required id="MathInput"></textarea>
+    <button type ='submit' class="btn btn-outline-secondary">تعليق</button>
+{%endblock form_fields%}
+<script>
+    $(document).ready(function(){
+        let $form = $("form")[0];
+        $form.submit(function(event){
+            event.preventDefault();
+            var $formData = $(this).serialize();
+            var $endpoint = $form.attr("data-url") || window.location.href;
+            $.ajax({
+                method: "POST",
+                url: $endpoint,
+                data: $formData,
+                success: function(data){
+                    $form.parent().html(data);
+                }
+            })  
+        })
+    })
+</script>

@@ -6,8 +6,8 @@
 			<tr>
 				<th scope="col">الرتبة</th>
 				<th scope="col">التلميذ</th>
-				<th scope="col">النقاط</th>
-				<th scope="col">النقاط هذا الأسبوع</th>
+				<th scope="col" class="order-cell">النقاط</th>
+				<th scope="col" class="order-cell">النقاط هذا الأسبوع</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -26,4 +26,17 @@
 		</tbody>
 	</table>
 </div>
+<script>
+	let tbody = document.querySelector("tbody");
+	let rows = Array.from(document.querySelectorAll("tbody tr"));
+	Array.from(document.querySelectorAll(".order-cell")).forEach(e => {
+		e.setAttribute("data-order", "sort");
+		e.addEventListener("click", function(e) {
+		let c = e.target.cellIndex;
+		rows[this.dataset.order]((a,b) => b.children[c].innerText - a.children[c].innerText);
+		tbody.innerHTML = "";
+		tbody.append(...rows);
+		this.dataset.order === "sort" ? this.setAttribute("data-order", "reverse") : this.setAttribute("data-order", "sort");
+	})}, this);
+</script>
 {%endblock%}

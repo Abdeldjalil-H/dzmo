@@ -1,28 +1,25 @@
 <div class = "container">
-    <h3>
-    محاولاتك في هذه المسألة
-    </h3>
-<table class="table col-lg-9 my-4">
-    <thead>
-      <tr>
-        <th scope="col">تقييم المحاولة</th>
-        <th scope="col">تاريخ الإرسال</th>
-        <th scope="col"></th>
-      </tr>
-    </thead>
-    <tbody>
-{% for sub in user_subs%}
-    <tr class="table-{% if sub.status == 'submit' %}warning{% elif sub.correct %}success{% else %}danger{%endif%}">
-        <td>
-            {% if sub.status == 'submit' %}
-            {% elif sub.correct %}صحيحة
-            {% else %}خاطئة{%endif%}
-        </td>
-        <td> {{ sub.submited_on}} </td>
-        <td><a href="?sub={{sub.pk}}"> عرض </a></td>
-    </tr>
-
-{%endfor%}
-</tbody>
-</table>
+    <h3>محاولاتك في هذه المسألة</h3>
+    <table class="table col-lg-9 my-4">
+        <thead>
+            <tr>
+                <th scope="col">تقييم المحاولة</th>
+                <th scope="col">تاريخ الإرسال</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for sub in user_subs%}
+            <tr class="table-{% if sub.status == 'submit' %}warning{% elif sub.correct %}success{% else %}danger{%endif%}">
+                <td>
+                    {% if sub.status == 'submit' %}
+                    {% elif sub.correct %}صحيحة
+                    {% else %}خاطئة{%endif%}
+                </td>
+                <td>{{sub.submited_on}}</td>
+                <td><a href="?sub={{sub.pk}}"> عرض </a></td>
+            </tr>
+        {%endfor%}
+        </tbody>
+    </table>
 </div>
