@@ -69,8 +69,8 @@ class Profile(DetailView):
         return user.progress
 
 class PasswordChangeView(PasswordChangeView):
-    template_name='accounts/edit-profile.html',
-    extra_context ={'btn':'تغير كلمة المرور'},
+    template_name='accounts/edit-profile.html'
+    extra_context ={'btn':'تغير كلمة المرور'}
     success_url = reverse_lazy('accounts:account')
     
 @method_decorator(cant_use_when_logged, name='dispatch')
