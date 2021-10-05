@@ -4,9 +4,11 @@ from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import(
+    LoginView,
     PasswordResetView,
     PasswordResetConfirmView,
-    PasswordResetDoneView
+    PasswordResetDoneView,
+    PasswordChangeView,
 )
 
 from .models import User
@@ -27,19 +29,19 @@ def signup(request):
         form = SignUpForm(request.POST)
         if form.is_valid():
             inactive_user = send_verification_email(request, form)
-            # form.save()
-            # email       = form.cleaned_data.get('email')
-            # password    = form.cleaned_data.get('password1')
-            # user        = authenticate(username = email, password = password)
-            # #login(request, user)
             return redirect ('/')
-
     else:
         form = SignUpForm()
 
     template = 'accounts/signup.html'
     return render(request, template, {'form': form})
 
+class LoginView(LoginView):
+    template_name='accounts/login.html',
+    extra_context = {
+        'title':'الدخول إلى الموقع', 
+        'btn':'تسجيل الدخول'
+    }
 
 class PersonalAccount(UpdateView):
     template_name       = 'accounts/edit-profile.html'
@@ -66,23 +68,32 @@ class Profile(DetailView):
         user = get_object_or_404(User, pk = self.kwargs['pk'])
         return user.progress
 
+class PasswordChangeView(PasswordChangeView):
+    template_name='accounts/edit-profile.html',
+    extra_context ={'btn':'تغير كلمة المرور'},
+    success_url = reverse_lazy('accounts:account')
+    
 @method_decorator(cant_use_when_logged, name='dispatch')
 class ResetPW(PasswordResetView):
     template_name = 'accounts/login.html'
-    extra_context = {'title':'إعادة تعيين كلمة السر','btn':'إرسال'}
-    success_url = reverse_lazy('accounts:pw_reset_done')
+    email_template_name = 'accounts/pw_reset_email.html'
+    extra_context = {
+        'title':'إعادة تعيين كلمة السر',
+        'btn':'إرسال'
+    }
+
+    def get_success_url(self):
+        return reverse_lazy('accounts:pw_reset_done')
 
 @method_decorator(cant_use_when_logged, name='dispatch')
 class ResetPWConfirm(PasswordResetConfirmView):
     template_name       = 'accounts/login.html'
-    extra_context       = {'title':'تعيين كلمة المرور الجديدة',
-                            'btn': 'تعيين كلمة السر'}
+    extra_context       = {'title':'تعيين كلمة المرور الجديدة', 'btn': 'تعيين كلمة السر'}
     success_url         = reverse_lazy('accounts:login')
 
 @method_decorator(cant_use_when_logged, name='dispatch')
 class ResetDone(PasswordResetDoneView):
-    #set a template_name
-    pass
+    template_name = 'accounts/pw_reset_done.html'
 
 @method_decorator(login_required, name='dispatch')
 class StudentsRanking(ListView):
