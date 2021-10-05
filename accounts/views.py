@@ -37,7 +37,7 @@ def signup(request):
     return render(request, template, {'form': form})
 
 class LoginView(LoginView):
-    template_name='accounts/login.html',
+    template_name = 'accounts/login.html'
     extra_context = {
         'title':'الدخول إلى الموقع', 
         'btn':'تسجيل الدخول'
