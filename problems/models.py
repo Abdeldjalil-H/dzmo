@@ -127,13 +127,12 @@ class AbstractPbSubmission(models.Model):
         self.save()
     
     def delete(self):
-        self.file.delete(save=False)
+        # self.file.delete(save=False)
         super().delete()
 
     def soft_delete(self):
-        self.file.delete(save=False)
-        for cmnt in self.get_comments():
-            cmnt.delete()
+        # self.file.delete(save=False)
+        Comment.objects.filter(submission=self).delete()
         self.solution=''
         self.submited_on=self.correct=self.status= None 
         self.correction_in_progress = False
