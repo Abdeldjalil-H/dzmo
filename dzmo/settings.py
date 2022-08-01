@@ -3,7 +3,7 @@ from pathlib import Path
 
 from json import load
 
-with open('dzmo_config.json') as config_file:
+with open('/etc/dzmo_config.json') as config_file:
     config = load(config_file)
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
