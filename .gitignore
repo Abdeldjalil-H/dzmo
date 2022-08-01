@@ -103,7 +103,8 @@ celerybeat.pid
 
 # SageMath parsed files
 *.sage.py
-
+*.dump
+dzmo_config.json
 # Environments
 .env
 .venv

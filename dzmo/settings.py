@@ -1,10 +1,9 @@
 from os.path import join
 from pathlib import Path
-#import django_heroku
 
 from json import load
 
-with open('/etc/dzmo_config.json') as config_file:
+with open('dzmo_config.json') as config_file:
     config = load(config_file)
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,7 +22,7 @@ AWS_S3_REGION_NAME = "eu-west-3"
 AWS_S3_SIGNATURE_VERSION = "s3v4"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = (config.get('DEBUG_VALUE') == 'True')
-ALLOWED_HOSTS = ['algerianmo.com', 'www.algerianmo.com', 'localhost']
+ALLOWED_HOSTS = ['algerianmo.com', 'www.algerianmo.com', 'localhost', '127.0.0.1']
 
 
 #Application definition
