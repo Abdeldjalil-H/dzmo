@@ -1,9 +1,12 @@
+import os
 from os.path import join
 from pathlib import Path
 
 from json import load
 
-with open('/etc/dzmo_config.json') as config_file:
+configs_file_path = 'dzmo_config.json' if os.getenv('DEV') else '/etc/dzmo_config.json'
+
+with open(configs_file_path) as config_file:
     config = load(config_file)
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
