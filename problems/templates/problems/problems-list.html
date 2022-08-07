@@ -1,61 +1,61 @@
-{% extends 'control/base.html' %}
-{% load mathfilters %}
-{%block content %}
+{% extends 'control/base.html' %} {% load mathfilters %} {%block content %}
 <div class="container my-4 my-md-5">
-    <h1>مسائل <span id="topic"></span></h1>
-{% for level in problems_list %}
-    <h3>المستوى {{ forloop.counter }}</h3>
-    <p> لكل مسألة {{ forloop.counter|mul:15 }} نقطة.</p>
-    {% for problem in level %}
-        <div class="card my-4" id="{{problem.pk}}">     
-        <div class="card-header" style="background-color:#f8ffb2;">
-					<h3><a href="{{request.path}}{{problem.pk}}/">
-							مسألة {{problem.id}}
-					</a></h3>
-            </div>                 
-            <div class="card-body" style="background-color:#feffba;">
-                <p {%if ltr%} dir="ltr" style="text-align:left;" {%endif%} class="card-text">
-                {{problem.statement|safe}}
-                </p>
-            </div>
-        </div>
-    {% endfor %}
-{% endfor %}
+  <h1>مسائل <span id="topic"></span></h1>
+  {% for level in problems_list %}
+  <h3>المستوى {{ forloop.counter }}</h3>
+  <p>لكل مسألة {{ forloop.counter|mul:15 }} نقطة.</p>
+  {% for problem in level %}
+  <div class="card my-4" id="{{problem.pk}}">
+    <div class="card-header" style="background-color: #f8ffb2">
+      <h3>
+        <a href="{{request.path}}{{problem.pk}}/"> مسألة {{problem.id}} </a>
+      </h3>
+    </div>
+    <div class="card-body" style="background-color: #feffba">
+      <p{% if ltr%}
+        dir="ltr"
+        style="text-align: left"
+        {%endif%}
+        class="card-text"
+      >
+        {{problem.statement|safe}}
+      </p>
+    </div>
+  </div>
+  {% endfor %} {% endfor %}
 </div>
 <script>
-    changeBg = (indicies, color1, color2) => {
-        for(let index of indicies) {
-        card = document.getElementById(index);
-        card.getElementsByClassName('card-header')[0].style.backgroundColor = color1;
-        card.getElementsByClassName('card-body')[0].style.backgroundColor = color2;
-        }
-        card.id += 'c';
-    }
-    var str = '{{topic}}';
-    var topic = '';
-    switch(str) {
-    case 'a':
-        topic = 'الجبر'
-        break;
-    case 'b':
-        topic = 'الأساسيات'
-        break;
-    case 'c':
-        topic = 'التوفيقات'
-        break;
-    case 'g':
-        topic = 'الهندسة'
-        break;
-    case 'nt':
-        topic = 'نظريات الأعداد'
-        break;
-    }
-    document.getElementById('topic').innerHTML = topic;
+  changeBg = (indicies, color1, color2) => {
+      for(let index of indicies) {
+      card = document.getElementById(index);
+      card.getElementsByClassName('card-header')[0].style.backgroundColor = color1;
+      card.getElementsByClassName('card-body')[0].style.backgroundColor = color2;
+      }
+      card.id += 'c';
+  }
+  var str = '{{topic}}';
+  var topic = '';
+  switch(str) {
+  case 'a':
+      topic = 'الجبر'
+      break;
+  case 'b':
+      topic = 'الأساسيات'
+      break;
+  case 'c':
+      topic = 'التوفيقات'
+      break;
+  case 'g':
+      topic = 'الهندسة'
+      break;
+  case 'nt':
+      topic = 'نظريات الأعداد'
+      break;
+  }
+  document.getElementById('topic').innerHTML = topic;
 
-    changeBg({{solved_problems }}, '#9ff99c','#bcffba');
-    changeBg({{ wrong_problems }}, '#ed969e','#f5c6cb');
-    changeBg({{pending_problems}}, '#ffe469','#fff57b');
-    
+  changeBg({{solved_problems }}, '#9ff99c','#bcffba');
+  changeBg({{ wrong_problems }}, '#ed969e','#f5c6cb');
+  changeBg({{pending_problems}}, '#ffe469','#fff57b');
 </script>
 {% endblock %}
-

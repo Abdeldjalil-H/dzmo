@@ -1,13 +1,19 @@
 <div class="container my-4">
-    <h2 {%if ltr%}style="text-align:left;" {%endif%}>
-        {{problem.get_name}}
-    </h2>
-<p {%if ltr%} dir="ltr" style="text-align:left;" {%endif%} class="my-4">
-    {{problem.statement|safe}}
-</p>
-{%if show_btn %}
-<form >
-    <button type = 'submit' name = 'sub' value="0" class="btn btn-outline-secondary" >{{btn}}</button>
-</form>
-{% endif%}
+  <h2 {%if ltr%}style="text-align:left;" {%endif%}>{{problem.get_name}}</h2>
+  <p {%if ltr%} dir="ltr" style="text-align: left" {%endif%} class="my-4">
+    {{problem.statement|safe}} {%if all_sols or user.is_staff%}
+    <br /><span style="font-weight: bold">{{problem.source}}</span>{%endif%}
+  </p>
+  {%if show_btn %}
+  <form>
+    <button
+      type="submit"
+      name="sub"
+      value="0"
+      class="btn btn-outline-secondary"
+    >
+      {{btn}}
+    </button>
+  </form>
+  {% endif%}
 </div>
