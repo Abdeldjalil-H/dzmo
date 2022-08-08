@@ -155,10 +155,6 @@ class AbstractPbSubmission(models.Model):
         self.submited_on = timezone.now()
         self.save()
 
-    def delete(self):
-        # self.file.delete(save=False)
-        super().delete()
-
     def soft_delete(self):
         # self.file.delete(save=False)
         self.solution = ''
@@ -223,7 +219,7 @@ class AbstractComment(models.Model):
     content = models.TextField()
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         null=True,
     )
     date = models.DateTimeField(auto_now_add=True)
