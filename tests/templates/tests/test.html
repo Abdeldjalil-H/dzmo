@@ -1,45 +1,93 @@
-{%extends 'control/base.html'%}
-{%load list_tags%}
-{%load style_tags%}
+{%extends 'control/base.html'%} {% load list_tags %} {% load style_tags %}
 {%block content%}
 <div class="container">
-    <h2>اختبار</h2>
-    <p>المدة: {{duration}}</p>
-    <p>
-        يمكن تقديم إجراء الاختبار من {{starts_at}} 
-        إلى غاية {{ends_at}} (لا يمكن تسليم الإجابات بعدها)
-    </p>
-    <p>سوف يظهر زر إجراء الإختبار عند وصول وقت بداية الإختبار. 
-        <br>
-        بعد الضغط عليه، سيبدأ عد الوقت لك.
-    </p>
-    {%if show_btn %}
-    <form method="POST" action="{%url 'tests:create_ans' test_id%}">
-        {%csrf_token%}
-        <button class="btn btn-outline-primary" name="take-test" value="yes" type="sumbit">
-            إجراء الإختبار
+  <h2>اختبار</h2>
+  <p>المدة: {{duration}}</p>
+  <p>
+    يمكن إجراء الاختبار من {{starts_at}} إلى غاية {{ends_at}} (لا يمكن تسليم
+    الإجابات بعدها)
+  </p>
+  <p>
+    سوف يظهر زر إجراء الإختبار عند وصول وقت بداية الإختبار.
+    <br />
+    بعد الضغط عليه، سيبدأ عد الوقت لك.
+  </p>
+  {%if show_btn %}
+  <form method="POST" action="{%url 'tests:create_ans' test_id%}">
+    {%csrf_token%}
+    <button
+      class="btn btn-outline-primary"
+      name="take-test"
+      value="yes"
+      type="sumbit"
+    >
+      إجراء الإختبار
+    </button>
+  </form>
+  {%elif show_test%} {%with style=ltr|ltr%} {%for problem in test_problems%}
+  <div class="py-4" {{style}}>
+    <h5 class="card-title" {{style}}>Problem {{forloop.counter}}.</h5>
+    <p class="card-text" {{style}}>{{problem.statement|safe}}</p>
+    {%if not show_link|index:forloop.counter0%}
+    <form method="POST" enctype="multipart/form-data">
+      {%csrf_token%}
+      <div class="py-4" style="display: flex; align-items: center">
+        <button
+          class="mx-2 input-group-text"
+          name="pb"
+          value="{{forloop.counter}}"
+          type="submit"
+        >
+          رفع
         </button>
+        {{form.files}}
+      </div>
     </form>
-    {%elif show_test%}
-    {%with style=ltr|ltr%}
-    {%for problem in test_problems%}
-    <div class="py-4" {{style}}>
-        <h5 class="card-title" {{style}}>Problem {{forloop.counter}}.</h5>
-        <p class="card-text" {{style}}>  
-            {{problem.statement|safe}}
-        </p>
-        {%if not show_link|index:forloop.counter0%}
-            <form method="POST" enctype="multipart/form-data">
-                {%csrf_token%}
-                    <div class="py-4" style="display: flex; align-items: center;">
-                        <button class="mx-2 input-group-text" name="pb" value="{{forloop.counter}}" type="submit">رفع</button>
-                        {{form.files}}
-                    </div>
-            </form>
-        {%endif%}
-    </div>
-    {%endfor%}
-    {%endwith%}
     {%endif%}
+  </div>
+  {%endfor%}
+  <script>
+    function getCookie(name) {
+      if (document?.cookie === "") return;
+      for (let cookie of document.cookie.split(";")) {
+        cookie = cookie.trim();
+        if (cookie.startsWith(name + "=")) {
+          return decodeURIComponent(cookie.substring(name.length + 1));
+        }
+      }
+    }
+    document.querySelectorAll("form").forEach((form) => {
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const file = e.target.files.files[0];
+        console.log(file);
+        const data = new FormData();
+        data.append("file", file);
+        data.append("pb_num", e.target.pb.value);
+        const p = document.createElement("p");
+        p.innerText = "Uploading...";
+        form.hidden = true;
+        form.parentElement.appendChild(p);
+        response = await fetch("add-answer/", {
+          method: "PUT",
+          headers: {
+            "x-CSRFtoken": getCookie("csrftoken"),
+          },
+          body: data,
+        });
+        if (response.ok) {
+          p.innerText = "Uploaded!";
+          form.remove();
+        } else if (response.status === 403) {
+          p.innerText = "Time over.";
+          document.querySelectorAll("form").forEach((f) => f.remove());
+        } else {
+          p.remove();
+          form.hidden = false;
+        }
+      });
+    });
+  </script>
+  {%endwith%} {%endif%}
 </div>
 {%endblock%}

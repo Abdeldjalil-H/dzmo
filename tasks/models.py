@@ -1,8 +1,11 @@
 from os.path import join
 from django.conf import settings
 from django.db import models
-from problems.models import (AbstractComment, AbstractPbSubmission,
-                             AbstractProblem)
+from problems.models import (
+    AbstractComment,
+    AbstractPbSubmission,
+    AbstractProblem,
+)
 from accounts.models import Team
 
 
