@@ -1,71 +1,92 @@
 <div class="container">
-    <div class="preview-demo">
-        <input type="checkbox" id="enablePreview" checked>
-        <div id="MathOutput" class="border rounded p-4 math-output">{{solution}}</div>
+  <div class="preview-demo">
+    <input type="checkbox" id="enablePreview" checked />
+    <div
+      id="MathOutput"
+      class="border rounded p-4 math-output"
+      style="white-space: pre-wrap"
+    >
+      {{solution}}
     </div>
-    <form method='POST' enctype="multipart/form-data" class="my-4">
-        {% csrf_token %}
-        {%with errors=form.non_field_errors%}
-        {%if errors%}
-        <ul>
-        {%for error in errors%}
-            <li class="alert alert-danger">{{error}}</li>
-        {%endfor%}
-        {%endif%}
-        {%endwith%}
-        </ul>
-        <div class="form-group">
-            <input type="checkbox" name="ltr_dir" id="ltr_dir" {%if ltr_dir%}checked{%endif%}>
-            <label for="ltr_dir" class="form-check-label">
-            الكتابة من اليسار
-            </label>
-        </div>
-        {%block form_fields%}
-        <textarea name="solution" id="MathInput" class="form-control my-4">{{solution}}</textarea>
-        <div class="custom-file d-flex col-lg-4 col-md-6 px-0 mb-4">
-            <div class="input-group-text">ملف</div>
-            <input type="file" name="file" class="custom-file-input" id="sol-file">
-            <label class="form-control" for="sol-file">اختيار ملف</label>
-        </div>
-        <div>
-            <button type='submit' name ='sub' value ='submit' class="btn btn-outline-success"> تقديم الحل</button>
-            <button type='submit' name ='sub' value ='draft' class="btn btn-outline-warning">حفظ كمسودة</button>
-            {% if show_del %}
-            <a href="delete/" class="btn btn-outline-danger">حذف المسودة </a>
-            {%endif%}
-        </div>
-        {%endblock form_fields%} 
-    </form>	
+  </div>
+  <form method="POST" enctype="multipart/form-data" class="my-4">
+    {% csrf_token %} {%with errors=form.non_field_errors%} {%if errors%}
+    <ul>
+      {%for error in errors%}
+      <li class="alert alert-danger">{{error}}</li>
+      {%endfor%} {%endif%} {%endwith%}
+    </ul>
+    <div class="form-group">
+      <input
+        type="checkbox"
+        name="ltr_dir"
+        id="ltr_dir"
+        {%if ltr_dir %}checked{%endif%}
+      />
+      <label for="ltr_dir" class="form-check-label"> الكتابة من اليسار </label>
+    </div>
+    {%block form_fields%}
+    <textarea name="solution" id="MathInput" class="form-control my-4">
+{{solution}}</textarea
+    >
+    <div class="custom-file d-flex col-lg-4 col-md-6 px-0 mb-4">
+      <div class="input-group-text">ملف</div>
+      <input type="file" name="file" class="custom-file-input" id="sol-file" />
+      <label class="form-control" for="sol-file">اختيار ملف</label>
+    </div>
+    <div>
+      <button
+        type="submit"
+        name="sub"
+        value="submit"
+        class="btn btn-outline-success"
+      >
+        تقديم الحل
+      </button>
+      <button
+        type="submit"
+        name="sub"
+        value="draft"
+        class="btn btn-outline-warning"
+      >
+        حفظ كمسودة
+      </button>
+      {% if show_del %}
+      <a href="delete/" class="btn btn-outline-danger">حذف المسودة </a>
+      {%endif%}
+    </div>
+    {%endblock form_fields%}
+  </form>
 </div>
 <script>
-    let input = document.getElementById("MathInput");
-    let output = document.getElementById("MathOutput");
-    input.addEventListener("input", typesetInput);
-    document.getElementById("ltr_dir").addEventListener("change", changeDir);
-    {%if ltr_dir%}
-    changeDir();
-    {%endif%}
-    function typesetInput() {
-        output.innerHTML = input.value.trim();
-        MathJax.texReset();
-        MathJax.typesetClear();
-        MathJax.typesetPromise([output]).catch((err) => {
-        output.innerHTML = '';
-        output.appendChild(document.createTextNode(err.message));
-        console.error(err);
-        }).then();
-    }
-    function changeDir() {
-        input.classList.toggle("ltr");
-        output.classList.toggle("ltr");
-    }
-    document.getElementById("enablePreview").addEventListener("change", function() {
-            if (this.checked) {
-                input.addEventListener("input", typesetInput);
-                typesetInput();
-            } else {
-                input.removeEventListener("input", typesetInput);
-            }
-        }
-    );
+  let input = document.getElementById("MathInput");
+  let output = document.getElementById("MathOutput");
+  input.addEventListener("input", typesetInput);
+  document.getElementById("ltr_dir").addEventListener("change", changeDir);
+  {%if ltr_dir%}
+  changeDir();
+  {%endif%}
+  function typesetInput() {
+      output.innerHTML = input.value.trim();
+      MathJax.texReset();
+      MathJax.typesetClear();
+      MathJax.typesetPromise([output]).catch((err) => {
+      output.innerHTML = '';
+      output.appendChild(document.createTextNode(err.message));
+      console.error(err);
+      }).then();
+  }
+  function changeDir() {
+      input.classList.toggle("ltr");
+      output.classList.toggle("ltr");
+  }
+  document.getElementById("enablePreview").addEventListener("change", function() {
+          if (this.checked) {
+              input.addEventListener("input", typesetInput);
+              typesetInput();
+          } else {
+              input.removeEventListener("input", typesetInput);
+          }
+      }
+  );
 </script>
