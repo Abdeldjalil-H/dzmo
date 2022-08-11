@@ -1,32 +1,34 @@
 import os
 from os.path import join
 from pathlib import Path
-
+import datetime
+from django.utils import timezone
 from json import load
 
-configs_file_path = 'dzmo_config.json' if os.getenv('DEV') else '/etc/dzmo_config.json'
+configs_file_path = 'dzmo_config.json' if os.getenv(
+    'DEV') else '/etc/dzmo_config.json'
 
 with open(configs_file_path) as config_file:
     config = load(config_file)
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY=config.get('SECRET_KEY')
-AWS_ACCESS_KEY_ID=config.get('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY=config.get('AWS_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME=config.get('AWS_STORAGE_BUCKET_NAME')
+SECRET_KEY = config.get('SECRET_KEY')
+AWS_ACCESS_KEY_ID = config.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = config.get('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = config.get('AWS_STORAGE_BUCKET_NAME')
 
 AWS_S3_REGION_NAME = "eu-west-3"
 AWS_S3_SIGNATURE_VERSION = "s3v4"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = (config.get('DEBUG_VALUE') == 'True')
-ALLOWED_HOSTS = ['algerianmo.com', 'www.algerianmo.com', 'localhost', '127.0.0.1']
-
+ALLOWED_HOSTS = [
+    'algerianmo.com', 'www.algerianmo.com', 'localhost', '127.0.0.1'
+]
 
 #Application definition
 
@@ -37,22 +39,19 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
     'lessons.apps.LessonsConfig',
     'problems.apps.ProblemsConfig',
     'accounts.apps.AccountsConfig',
     'control.apps.ControlConfig',
     'tests.apps.TestsConfig',
     'tasks.apps.TasksConfig',
-
     'crispy_forms',
     'mathfilters',
     'verify_email',
     'storages',
 ]
 
-AUTH_USER_MODEL = 'accounts.User' #changes the default user model to ours
-
+AUTH_USER_MODEL = 'accounts.User'  #changes the default user model to ours
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -84,7 +83,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'dzmo.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
@@ -107,25 +105,27 @@ DATABASES = {
     }
 }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'NAME':
+        'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'NAME':
+        'django.contrib.auth.password_validation.MinimumLengthValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        'NAME':
+        'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'NAME':
+        'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
@@ -140,29 +140,24 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
 STATIC_ROOT = join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [
-    join(BASE_DIR, 'static')
-]
+STATICFILES_DIRS = [join(BASE_DIR, 'static')]
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
-
 
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = config.get('DEFAULT_EMAIL')
-EMAIL_HOST_PASSWORD = config.get('GMAIL_KEY')#'oldoulhemzkvrsof'
+EMAIL_HOST_PASSWORD = config.get('GMAIL_KEY')  #'oldoulhemzkvrsof'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 DEFAULT_FROM_EMAIL = config.get('DEFAULT_EMAIL')
 
 VERIFICATION_SUCCESS_TEMPLATE = None
-
 
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'
@@ -175,3 +170,8 @@ MEDIA_ROOT = join(BASE_DIR, 'media')
 AWS_S3_FILE_OVERWRITE = True
 AWS_DEFAULT_ACL = None
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+LAST_SAFE_SOL_DATE = timezone.make_aware(
+    datetime.datetime(2022, 8, 10),
+    timezone.get_default_timezone(),
+)

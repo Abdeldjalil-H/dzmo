@@ -108,6 +108,10 @@ class AbstractPbSubmission(models.Model):
     correction_in_progress = models.BooleanField(default=False, editable=False)
     ltr_dir = models.BooleanField(default=False)
 
+    @property
+    def safe(self):
+        return self.submited_on <= settings.LAST_SAFE_SOL_DATE
+
     def set_dir(self, dir):
         if dir:
             if dir == 'left':
@@ -227,6 +231,10 @@ class AbstractComment(models.Model):
         default=False,
         verbose_name='الكتابة من اليسار',
     )
+
+    @property
+    def safe(self):
+        return self.date <= settings.LAST_SAFE_SOL_DATE
 
     @property
     def get_dir_style(self):

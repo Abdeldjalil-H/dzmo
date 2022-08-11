@@ -124,11 +124,13 @@ class ProblemView(HaveAccessToProblem, _ProblemView):
     problem_model = Problem
 
     def get_success_url(self, sub_pk):
-        return reverse_lazy(('problems:pb-view'),
-                            kwargs={
-                                'topic': self.kwargs['topic'],
-                                'pb_pk': self.kwargs['pb_pk']
-                            }) + f'?sub={sub_pk}'
+        return reverse_lazy(
+            ('problems:pb-view'),
+            kwargs={
+                'topic': self.kwargs['topic'],
+                'pb_pk': self.kwargs['pb_pk']
+            },
+        ) + f'?sub={sub_pk}'
 
 
 class _ProblemSubmit(CreateView):
@@ -173,9 +175,12 @@ class _ProblemSubmit(CreateView):
     def form_valid(self, form):
         obj = form.save(commit=False)
         if self.draft_sub:
-            self.draft_sub.update(obj.solution, obj.ltr_dir,
-                                  self.request.POST['sub'],
-                                  self.request.FILES.get('file'))
+            self.draft_sub.update(
+                obj.solution,
+                obj.ltr_dir,
+                self.request.POST['sub'],
+                self.request.FILES.get('file'),
+            )
             obj = self.draft_sub
         else:
             obj.set_student(self.request.user)

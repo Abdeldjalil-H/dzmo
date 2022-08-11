@@ -5,9 +5,8 @@
         <a href="{%url 'accounts:profile' comment.user.pk%}">{{comment.user.username}}</a>
     </div>
     <div class="card-body">
-        <p class="card-text {%if comment.ltr_dir%}ltr{%endif%}">
-        {{comment.content|safe}}
-        </p>
+        <p class="card-text {%if comment.ltr_dir%}ltr{%endif%}"{%if not comment.safe%}style="white-space:pre-wrap;"{%endif%}
+        >{% if comment.safe %}{{comment.content|safe}}{% else %}{{comment.content}}{%endif%}</p>
     </div>
 </div>
 {%endfor%}
