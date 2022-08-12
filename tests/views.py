@@ -51,7 +51,7 @@ class SolutionUploadView(APIView):
         if test.is_over:
             return Response(status=403)
         pb_num = int(request.data.get('pb_num', None))
-        if pb_num < 0 or pb_num >= test.number_of_pbs:
+        if pb_num < 0 or pb_num > test.number_of_pbs:
             return Response(status=400)
         answer = get_object_or_404(
             TestAnswer,
