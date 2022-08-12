@@ -81,6 +81,17 @@ TEMPLATES = [
     },
 ]
 
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient"
+        },
+        # "KEY_PREFIX": "dzmo"
+    }
+}
+
 WSGI_APPLICATION = 'dzmo.wsgi.application'
 
 # Database
@@ -172,6 +183,6 @@ AWS_DEFAULT_ACL = None
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 LAST_SAFE_SOL_DATE = timezone.make_aware(
-    datetime.datetime(2022, 8, 10),
+    datetime.datetime(2022, 8, 11),
     timezone.get_default_timezone(),
 )

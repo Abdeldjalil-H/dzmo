@@ -4,7 +4,7 @@
     <div
       id="MathOutput"
       class="border rounded p-4 math-output"
-      style="white-space: pre-wrap"
+      style="white-space: pre-wrap;"
     >
       {{solution}}
     </div>
@@ -67,11 +67,11 @@
   changeDir();
   {%endif%}
   function typesetInput() {
-      output.innerHTML = input.value.trim();
+      output.innerText= input.value.trim();
       MathJax.texReset();
       MathJax.typesetClear();
       MathJax.typesetPromise([output]).catch((err) => {
-      output.innerHTML = '';
+      output.innerText = '';
       output.appendChild(document.createTextNode(err.message));
       console.error(err);
       }).then();
