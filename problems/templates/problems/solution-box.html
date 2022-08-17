@@ -1,6 +1,6 @@
 <div class="container">
   <h3>الإجابة</h3>
-  <div class="card my-4 solution-card">
+  <div class="card mt-4 solution-card">
     <div class="card-header">
       {{sub.submited_on}}
       <a class="card-link" href="{%url 'accounts:profile' sub.student.pk%}"
@@ -11,7 +11,7 @@
       <p
         class="card-text{%if sub.ltr_dir%} ltr{%endif%}"
         {%if not sub.safe%}style="white-space:pre-wrap;"{%endif%}
-      >{% if sub.safe %}{{sub.solution|safe}}{% else %}{{sub.solution}}{%endif%}</p>
+      ></p>
       {%if sub.file%} {%if '.pdf' in sub.file.name%}
       <iframe
         class="embed-responsive"
@@ -23,5 +23,32 @@
       <img src="{{sub.file.url}}" alt="{{sub.file.name}}" />
       {%endif%} {%endif%}
     </div>
+  </div>
+  <div class="mt-1 d-flex justify-content-end">
+    <span id="toggle-code-btn" class="small btn btn-link" style="font-size:14px">إظهار الكود</span>
+    <script>
+      const solution = `{% if sub.safe %}{{sub.solution|escapejs|safe}}{% else %}{{sub.solution|escapejs}}{%endif%}`;
+      const solutionContainer = document.querySelector('.card-text');
+      solutionContainer.innerHTML = solution;
+      let renderedSolution;
+      let isCodeVisible = false;
+      const toggleBtn = document.querySelector('#toggle-code-btn');
+      toggleBtn.onclick = () => {
+        if (isCodeVisible) {
+          solutionContainer.innerHTML = renderedSolution;
+          isCodeVisible = false;
+          toggleBtn.innerText = 'إظهار الكود';
+        } else {
+          renderedSolution = solutionContainer.innerHTML;
+          solutionContainer.innerText = solution;
+          isCodeVisible = true;
+          toggleBtn.innerText = 'إخفاء الكود';
+        }
+      } ;
+      window.addEventListener('load', () => {
+        console.log('loaded');
+        renderedSolution = solutionContainer.innerHTML;
+      });
+    </script>
   </div>
 </div>
