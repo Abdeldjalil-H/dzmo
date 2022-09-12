@@ -86,7 +86,7 @@ class User(AbstractBaseUser):
     is_admin        = models.BooleanField(default = False)
     is_corrector    = models.BooleanField(default = False)
 
-    team            = models.ManyToManyField(Team, on_delete=models.SET_NULL, null=True, blank=True)
+    team            = models.ManyToManyField(Team, null=True, blank=True)
     USERNAME_FIELD  = 'email'
     #USERNAME and password are required by default
     REQUIRED_FIELDS = []         #['first_name', 'last_name']
@@ -173,7 +173,7 @@ class User(AbstractBaseUser):
 
     def tasks_subs_notif(self):
         return self.progress.last_tasks_subs.count()
-        
+
     def get_last_tasks_subs(self):
         return self.progress.last_tasks_subs.all()
     class Meta:
