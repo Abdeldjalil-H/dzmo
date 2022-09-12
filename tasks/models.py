@@ -71,7 +71,7 @@ class TaskProblemSubmission(AbstractPbSubmission):
 
 class Task(models.Model):
     name = models.CharField(max_length=100, null=True)
-    team = models.ForeignKey(Team, related_name='tasks', on_delete=models.SET_NULL, null=True)
+    team = models.ManyToManyField(Team, related_name='tasks', null=True)
     problems = models.ManyToManyField(
         TaskProblem,
         related_name='task',
