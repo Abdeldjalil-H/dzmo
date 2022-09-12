@@ -1,7 +1,7 @@
 {%extends 'control/base.html'%}
 {%block content%}
 <div class="container">
-<table class="table col-lg-9 my-4">
+  <table class="table col-lg-9 my-4">
     <thead>
       <tr>
         <th scope="col">تقييم المحاولة</th>
@@ -11,22 +11,22 @@
       </tr>
     </thead>
     <tbody>
-{% for sub in user_subs%}
-       
-    <tr class="table-{% if sub.status == 'submit' %}warning{% elif sub.correct %}success{% else %}danger{%endif%}">
+      {% for sub in user_subs%}
+
+      <tr class="table-{% if sub.status == 'submit' %}warning{% elif sub.correct %}success{% else %}danger{%endif%}">
         <td>
-            {% if sub.status == 'submit' %}
-            {% elif sub.correct %}صحيحة
-            {% else %}خاطئة{%endif%}
+          {% if sub.status == 'submit' %}
+          {% elif sub.correct %}صحيحة
+          {% else %}خاطئة{%endif%}
         </td>
         <td> {{ sub.submited_on}} </td>
         {%with task=sub.get_task pb=sub.problem%}
         <td>{{task}}</td>
-        <td><a href="{%url 'tasks:pb-view' task.pk pb.pk%}?sub={{sub.pk}}">{{pb.get_code}}</a></td>
+        <td><a href="{%url 'tasks:pb-view' task.pk pb.pk%}?sub={{sub.pk}}">{{pb.code}}</a></td>
         {%endwith%}
-    </tr>
-{%endfor%}
-</tbody>
-</table>
+      </tr>
+      {%endfor%}
+    </tbody>
+  </table>
 </div>
 {%endblock%}
