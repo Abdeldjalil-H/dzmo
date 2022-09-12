@@ -6,36 +6,36 @@
         <h3>المستوى {{ forloop.counter }}</h3>
         <table class="table">
             <thead>
-              <tr>
-                <th scope="col">#</th>
-                <th scope="col"><a href="?order=problem">
-                    المسألة
-                </a></th>
-                <th scope="col"><a href="?order=student">
-                    التلميذ
-                </a></th>
-                <th scope="col">الحالة</th>
-              </tr>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col"><a href="?order=problem">
+                            المسألة
+                        </a></th>
+                    <th scope="col"><a href="?order=student">
+                            التلميذ
+                        </a></th>
+                    <th scope="col">الحالة</th>
+                </tr>
             </thead>
             <tbody>
-        {% for sub in level %}
-            <tr>
-                <th scope="row">{{ forloop.counter }}</th>
-                {% url 'problems:submit' sub.problem.chapter.topic sub.problem.pk as the_url%}
-                <td class=""><a href="{{the_url}}">
-                    {{ sub.problem.get_code }}
-                </a></td>
-                <td class=""><a href="">
-                    {{ sub.student.username }}
-                </a></td>
-                <td class=""><a href="{{sub.pk}}">
-                    {% if sub.status == 'submit' %} إجابة جديدة
-                    {% else %} تعليق جديد
-                    {% endif %}
-                </a></td>
-            </tr>
-        {% endfor %}
-        </tbody>
+                {% for sub in level %}
+                <tr>
+                    <th scope="row">{{ forloop.counter }}</th>
+                    {% url 'problems:submit' sub.problem.chapter.topic sub.problem.pk as the_url%}
+                    <td class=""><a href="{{the_url}}">
+                            {{ sub.problem.code }}
+                        </a></td>
+                    <td class=""><a href="">
+                            {{ sub.student.username }}
+                        </a></td>
+                    <td class=""><a href="{{sub.pk}}">
+                            {% if sub.status == 'submit' %} إجابة جديدة
+                            {% else %} تعليق جديد
+                            {% endif %}
+                        </a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
         </table>
     </div>
     {% endfor %}

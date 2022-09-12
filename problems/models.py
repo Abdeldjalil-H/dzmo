@@ -71,7 +71,8 @@ class Problem(AbstractProblem):
     def has_solved(self, user):
         return user.progress.solved_problems.filter(pk=self.pk).exists()
 
-    def get_code(self):
+    @property
+    def code(self):
         return f'{self.chapter.topic} {self.pk}'
 
     def get_topic(self):

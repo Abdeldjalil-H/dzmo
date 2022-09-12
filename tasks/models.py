@@ -8,13 +8,20 @@ from problems.models import (
 )
 from accounts.models import Team
 
-
+TASKS_MAX_LEVEL = 6
+TASKS_LEVELS = [(i, str(i)) for i in range(1, TASKS_MAX_LEVEL+1)]
 class TaskProblem(AbstractProblem):
+
+    level = models.IntegerField(
+        choices=TASKS_LEVELS,
+        verbose_name='المستوى',
+    )
 
     def get_name(self):
         return f'Problem'
 
-    def get_code(self):
+    @property
+    def code(self):
         return f'{self.pk}'
 
     class Meta:
@@ -22,6 +29,8 @@ class TaskProblem(AbstractProblem):
         verbose_name_plural = 'مسائل الواجبات'
         ordering = ['pk']
 
+    def __str__(self):
+        return self.source if self.source else f'pb {self.pk}'
 
 def file_path_name(instance, filename):
     ext = filename.split('.')[-1]
@@ -62,7 +71,7 @@ class TaskProblemSubmission(AbstractPbSubmission):
 
 class Task(models.Model):
     name = models.CharField(max_length=100, null=True)
-    team = models.ManyToManyField(Team, related_name='tasks')
+    team = models.ForeignKey(Team, related_name='tasks')
     problems = models.ManyToManyField(
         TaskProblem,
         related_name='task',
@@ -75,19 +84,17 @@ class Task(models.Model):
         return f'الواجب {self.pk}'
 
     def get_name(self):
-        if self.name:
-            return self.name
-        return ''
+        return self.name or ''
 
     def get_problems_by_level(self):
-        return [self.problems.filter(level=k) for k in range(1, 6)]
+        return [self.problems.filter(level=k) for k in range(1, TASKS_MAX_LEVEL+1)]
 
     def get_subs_by_level(self):
         all_subs = TaskProblemSubmission.objects.filter(
             problem__in=self.problems.all(),
             student__team__in=self.team.all(),
             status__in=['submit', 'comment'])
-        return [all_subs.filter(problem__level=k) for k in range(1, 6)]
+        return [all_subs.filter(problem__level=k) for k in range(1, TASKS_MAX_LEVEL+1)]
 
     def get_correct_pks(self, user):
         return list(

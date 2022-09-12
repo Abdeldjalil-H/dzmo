@@ -4,13 +4,12 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.contrib.postgres.fields import ArrayField
 from django.conf import settings
 from datetime import timedelta
-from django.db.models.fields import CharField
 from django.utils import timezone
 from lessons.models import Chapter, Exercice, TopicField
 from problems.models import Problem, ProblemSubmission, STATUS
 from control.models import Submissions
 TEAMS_COLORS = [('white','white'),
-('green', 'green'), ('red','red'), ('black','black')
+('green', 'green'), ('red','red'), ('black','black'),
 ]
 class Team(models.Model):
     color = models.CharField(max_length=100, choices=TEAMS_COLORS, unique=True)
@@ -87,7 +86,7 @@ class User(AbstractBaseUser):
     is_admin        = models.BooleanField(default = False)
     is_corrector    = models.BooleanField(default = False)
 
-    team            = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, blank=True)
+    team            = models.ManyToManyField(Team, on_delete=models.SET_NULL, null=True, blank=True)
     USERNAME_FIELD  = 'email'
     #USERNAME and password are required by default
     REQUIRED_FIELDS = []         #['first_name', 'last_name']
@@ -95,20 +94,25 @@ class User(AbstractBaseUser):
     objects = UserManager()
     def __str__(self):
         return self.email
+
     def get_full_name(self):
         if self.first_name or self.last_name:
             return self.first_name + ' ' + self.last_name
         return self.email
+
     def get_short_name(self):
         if self.username_abrv == 'f':
             return self.first_name + ' ' + self.last_name[0]
         elif self.username_abrv == 'l':
             return self.last_name + ' ' + self.first_name[0]
         return self.first_name + ' ' + self.last_name
+
     def has_perm(self, perm, obj = None):
         return True
+
     def has_module_perms(self, app_label):
         return True
+
     @property
     def username(self):
         if self.username_abrv == 'f':
@@ -125,11 +129,13 @@ class User(AbstractBaseUser):
     
     def get_all_subs_by_problem(self, problem):
         return self.submissions.filter(problem=problem)
+
     def is_tasks_corrector(self):
         return self.is_staff
 
     def has_submit(self, problem):
         return self.submissions.filter(problem=problem).exists()
+
     def add_solved_problem(self, problem):
         self.progress.solved_problems.add(problem)
         for sub in self.get_all_subs_by_problem(problem):
@@ -138,11 +144,13 @@ class User(AbstractBaseUser):
 
     def add_points(self, points):
         self.progress.add_points(points)
+
     def is_team_member(self):
         return self.team is not None
 
     def get_school_grade(self):
         return dict(GRADES)[self.grade] if self.grade < 4 else ''
+
     @property
     def count_last_points(self, period=7):
         start_day = timezone.now() - timedelta(days=period)
@@ -162,8 +170,10 @@ class User(AbstractBaseUser):
    
     def add_task_correction_notif(self, sub):
         self.progress.last_tasks_subs.add(sub)
+
     def tasks_subs_notif(self):
         return self.progress.last_tasks_subs.count()
+        
     def get_last_tasks_subs(self):
         return self.progress.last_tasks_subs.all()
     class Meta:
