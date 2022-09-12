@@ -86,7 +86,7 @@ class User(AbstractBaseUser):
     is_admin        = models.BooleanField(default = False)
     is_corrector    = models.BooleanField(default = False)
 
-    team            = models.ManyToManyField(Team, null=True, blank=True)
+    team            = models.ForeignKey(Team, null=True, blank=True, on_delete=models.SET_NULL)
     USERNAME_FIELD  = 'email'
     #USERNAME and password are required by default
     REQUIRED_FIELDS = []         #['first_name', 'last_name']
