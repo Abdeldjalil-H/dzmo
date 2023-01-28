@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
-    Task, 
-    TaskProblem, 
+    Task,
+    TaskProblem,
     TaskProblemSubmission,
     TaskComment,
 )

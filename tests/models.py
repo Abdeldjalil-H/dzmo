@@ -29,7 +29,8 @@ class Test(models.Model):
 
     def get_participants(self):
         pass
-        #return self.submissions.
+        # return self.submissions.
+
     def get_submission(self, user):
         return self.submissions.filter(student=user).first()
 
@@ -61,24 +62,23 @@ class Test(models.Model):
         return self.submissions.filter(marks__contains=[-1])
 
     def __str__(self):
-        return f'الاختبار {self.pk}'
+        return f"الاختبار {self.pk}"
 
     class Meta:
-        verbose_name = 'اختبار'
-        verbose_name_plural = 'اختبارات'
+        verbose_name = "اختبار"
+        verbose_name_plural = "اختبارات"
 
 
 def parent_file_path(instance):
-    return join('tests', f'test{instance.test.pk}',
-                f'student{instance.student.pk}')
+    return join("tests", f"test{instance.test.pk}", f"student{instance.student.pk}")
 
 
 def answer_file_path(instance, *args, pb_num=None):
     if not pb_num:
         pb_num = instance.pb_num
-    #ext = filename.split('.')[-1]
-    #name = f'{instance.pb_pk}.{ext}'
-    return join(parent_file_path(instance), f'{pb_num}')
+    # ext = filename.split('.')[-1]
+    # name = f'{instance.pb_pk}.{ext}'
+    return join(parent_file_path(instance), f"{pb_num}")
 
 
 class TestAnswer(models.Model):
@@ -86,18 +86,18 @@ class TestAnswer(models.Model):
         Test,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='submissions',
+        related_name="submissions",
     )
     student = models.ForeignKey(User, on_delete=models.CASCADE)
     start_time = models.DateTimeField(auto_now_add=True)
     submited_on = models.DateTimeField(blank=True, null=True)
-    #corrector part
-    '''
+    # corrector part
+    """
     this field
     -2: no file
     -1: file submited, will change in correction
     0-7: mark after correction
-    '''
+    """
     marks = ArrayField(SmallIntegerField(), null=True)
     comment = models.TextField(blank=True, null=True)
     corrected = models.BooleanField(default=False)
@@ -116,7 +116,7 @@ class TestAnswer(models.Model):
     def create(cls, **kwargs):
         instance = cls(**kwargs)
         instance.set_start_now()
-        instance.marks = [-2] * kwargs['test'].number_of_pbs
+        instance.marks = [-2] * kwargs["test"].number_of_pbs
         return instance
 
     def set_file_uploaded(self, pb_num):
@@ -158,20 +158,19 @@ class TestAnswer(models.Model):
         self.student.add_points(2 * mark * level)
 
     def __str__(self):
-        return f'إجابة الاختبار {self.test}: {self.student.username}'
+        return f"إجابة الاختبار {self.test}: {self.student.username}"
 
     class Meta:
-        verbose_name = 'إجابة اختبار'
-        verbose_name_plural = 'إجابات الاختبارات'
+        verbose_name = "إجابة اختبار"
+        verbose_name_plural = "إجابات الاختبارات"
 
 
 class TestProblem(AbstractProblem):
-    test = models.ForeignKey(Test,
-                             related_name='problems',
-                             null=True,
-                             on_delete=models.SET_NULL)
+    test = models.ForeignKey(
+        Test, related_name="problems", null=True, on_delete=models.SET_NULL
+    )
     solution = models.TextField(blank=True, null=True)
     problem_number = models.PositiveSmallIntegerField(default=1)
 
     class Meta:
-        ordering = ['problem_number']
+        ordering = ["problem_number"]

@@ -9,23 +9,24 @@ LEVELS = [(i, str(i)) for i in range(1, 6)]
 
 
 class AbstractProblem(models.Model):
-    statement = models.TextField(verbose_name='المسألة')
+    statement = models.TextField(verbose_name="المسألة")
     level = models.IntegerField(
         choices=LEVELS,
-        verbose_name='المستوى',
+        verbose_name="المستوى",
     )
     source = models.CharField(
         max_length=200,
         blank=True,
-        verbose_name='المصدر',
+        verbose_name="المصدر",
     )
 
     def has_draft_sub(self, user):
-        return self.submissions.filter(student=user, status='draft').exists()
+        return self.submissions.filter(student=user, status="draft").exists()
 
     def get_user_subs(self, user):
-        return self.submissions.filter(
-            student=user, status__isnull=False).exclude(status='draft')
+        return self.submissions.filter(student=user, status__isnull=False).exclude(
+            status="draft"
+        )
 
     def has_submited(self, user):
         return self.submissions.filter(student=user).exists()
@@ -34,9 +35,9 @@ class AbstractProblem(models.Model):
         return self.submissions.filter(student=user, correct=True).exists()
 
     def can_submit(self, user):
-        #if draft or no sub
+        # if draft or no sub
         sub = self.get_user_subs(user).first()
-        return not sub or sub.status == 'draft'
+        return not sub or sub.status == "draft"
 
     def get_correct_subs(self):
         return self.submissions.filter(correct=True)
@@ -58,10 +59,10 @@ class AbstractProblem(models.Model):
 class Problem(AbstractProblem):
     chapter = models.ForeignKey(
         Chapter,
-        related_name='problems',
+        related_name="problems",
         on_delete=models.SET_NULL,
         null=True,
-        verbose_name='المحور',
+        verbose_name="المحور",
     )
     added_on = models.DateTimeField(auto_now_add=True)
 
@@ -73,32 +74,32 @@ class Problem(AbstractProblem):
 
     @property
     def code(self):
-        return f'{self.chapter.topic} {self.pk}'
+        return f"{self.chapter.topic} {self.pk}"
 
     def get_topic(self):
         return self.chapter.get_topic()
 
     def get_name(self):
-        return f'مسألة {self.get_topic()} مستوى {self.level}'
+        return f"مسألة {self.get_topic()} مستوى {self.level}"
 
     def __str__(self):
         if self.chapter:
-            return f'مسألة {self.id}. {self.chapter.name}'
-        return f'مسألة {self.id} (محور محذوف)'
+            return f"مسألة {self.id}. {self.chapter.name}"
+        return f"مسألة {self.id} (محور محذوف)"
 
     class Meta:
-        ordering = ['added_on']
-        verbose_name = 'مسألة'
-        verbose_name_plural = 'مسائل'
+        ordering = ("added_on",)
+        verbose_name = "مسألة"
+        verbose_name_plural = "مسائل"
 
 
-STATUS = [
-    ('draft', 'مسودة'),
-    ('submit', 'تقديم الحل'),
-    ('wrong', 'إجابة خاطئة'),
-    ('comment', 'يوجد تعليق'),
-    ('correct', 'إجابة صحيحة'),
-]
+STATUS = (
+    ("draft", "مسودة"),
+    ("submit", "تقديم الحل"),
+    ("wrong", "إجابة خاطئة"),
+    ("comment", "يوجد تعليق"),
+    ("correct", "إجابة صحيحة"),
+)
 
 
 class AbstractPbSubmission(models.Model):
@@ -115,7 +116,7 @@ class AbstractPbSubmission(models.Model):
 
     def set_dir(self, dir):
         if dir:
-            if dir == 'left':
+            if dir == "left":
                 self.ltr_dir = True
             else:
                 self.ltr_dir = False
@@ -123,13 +124,13 @@ class AbstractPbSubmission(models.Model):
     @property
     def get_dir_style(self):
         if self.ltr_dir:
-            return 'dir=ltr style=text-align:left;'
-        return 'dir=rtl style=text-align:right;'
+            return "dir=ltr style=text-align:left;"
+        return "dir=rtl style=text-align:right;"
 
     def get_dir_attrs(self):
         if self.ltr_dir:
-            return {'dir': 'ltr', 'style': 'text-align:left;'}
-        return {'dir': 'rtl', 'style': 'text-align:right;'}
+            return {"dir": "ltr", "style": "text-align:left;"}
+        return {"dir": "rtl", "style": "text-align:right;"}
 
     def set_status(self, status):
         self.status = status
@@ -162,49 +163,48 @@ class AbstractPbSubmission(models.Model):
 
     def soft_delete(self):
         # self.file.delete(save=False)
-        self.solution = ''
+        self.solution = ""
         self.submited_on = self.correct = self.status = None
         self.correction_in_progress = False
         self.save()
 
     def can_be_deleted(self, user):
-        return user == self.student and not self.correct and self.status == 'wrong'
+        return user == self.student and not self.correct and self.status == "wrong"
 
     def can_comment(self, user):
-        return user == self.student and self.status == 'wrong'
+        return user == self.student and self.status == "wrong"
 
     def get_time_since_submit(self):
         return timezone.now() - self.submited_on
 
     def __str__(self):
-        return f'إجابة {self.pk}: مسألة {self.problem.pk} {self.student.get_full_name()}'
+        return (
+            f"إجابة {self.pk}: مسألة {self.problem.pk} {self.student.get_full_name()}"
+        )
 
     class Meta:
         abstract = True
 
 
 def file_name(instance, filename):
-    ext = filename.split('.')[-1]
-    name = f'pb{instance.problem.pk}_u{instance.student.pk}.{ext}'
-    return join('students_subs', f'pb{instance.problem.pk}', name)
+    ext = filename.split(".")[-1]
+    name = f"pb{instance.problem.pk}_u{instance.student.pk}.{ext}"
+    return join("students_subs", f"pb{instance.problem.pk}", name)
 
 
 class ProblemSubmission(AbstractPbSubmission):
-    ''' 
+    """
     the status 'draft', 'submit', 'correct', 'wrong', 'comment'
     will appear to others iff correct
     will appear to the correcter if: submit or comment
     student take notif if wrong or correct
-    '''
+    """
+
     problem = models.ForeignKey(
-        Problem,
-        on_delete=models.CASCADE,
-        related_name='submissions',
+        Problem, on_delete=models.CASCADE, related_name="submissions"
     )
     student = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='submissions',
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="submissions"
     )
     file = models.FileField(blank=True, null=True, upload_to=file_name)
 
@@ -212,26 +212,21 @@ class ProblemSubmission(AbstractPbSubmission):
         user.progress.last_submissions.remove(self)
 
     def __str__(self):
-        return 'submission ' + str(self.id)
+        return f"submission {self.id}"
 
     class Meta:
-        ordering = ['submited_on']
-        verbose_name = 'إجابة مسألة'
-        verbose_name_plural = 'إجابات المسائل'
+        ordering = ("submited_on",)
+        verbose_name = "إجابة مسألة"
+        verbose_name_plural = "إجابات المسائل"
 
 
 class AbstractComment(models.Model):
     content = models.TextField()
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        null=True,
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True
     )
     date = models.DateTimeField(auto_now_add=True)
-    ltr_dir = models.BooleanField(
-        default=False,
-        verbose_name='الكتابة من اليسار',
-    )
+    ltr_dir = models.BooleanField(default=False, verbose_name="الكتابة من اليسار")
 
     @property
     def safe(self):
@@ -240,9 +235,9 @@ class AbstractComment(models.Model):
     @property
     def get_dir_style(self):
         if self.ltr_dir:
-            return 'dir=ltr style=text-align:left;'
+            return "dir=ltr style=text-align:left;"
 
-        return 'dir=rtl style=text-align:right;'
+        return "dir=rtl style=text-align:right;"
 
     def set_sub(self, sub):
         self.submission_id = sub.pk
@@ -256,12 +251,10 @@ class AbstractComment(models.Model):
 
 class Comment(AbstractComment):
     submission = models.ForeignKey(
-        ProblemSubmission,
-        related_name='comments',
-        on_delete=models.CASCADE,
+        ProblemSubmission, related_name="comments", on_delete=models.CASCADE
     )
 
     class Meta:
-        ordering = ['date']
-        verbose_name = 'تعليق'
-        verbose_name_plural = 'التعليقات'
+        ordering = ("date",)
+        verbose_name = "تعليق"
+        verbose_name_plural = "التعليقات"

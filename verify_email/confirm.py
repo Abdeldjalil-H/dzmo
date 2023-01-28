@@ -20,8 +20,8 @@ class _UserActivationProcess:
 
     def verify_token(self, useremail, usertoken):
         try:
-            email = urlsafe_b64decode(useremail).decode('utf-8')
-            token = urlsafe_b64decode(usertoken).decode('utf-8')
+            email = urlsafe_b64decode(useremail).decode("utf-8")
+            token = urlsafe_b64decode(usertoken).decode("utf-8")
         except BASE64ERROR:
             return False
 

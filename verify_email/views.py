@@ -5,13 +5,13 @@ from django.urls import reverse
 from django.shortcuts import render, redirect
 
 
-success_redirect = GetFieldFromSettings().get('verification_success_redirect')
+success_redirect = GetFieldFromSettings().get("verification_success_redirect")
 
-success_msg = GetFieldFromSettings().get('verification_success_msg')
-failed_msg = GetFieldFromSettings().get('verification_failed_msg')
+success_msg = GetFieldFromSettings().get("verification_success_msg")
+failed_msg = GetFieldFromSettings().get("verification_failed_msg")
 
-failed_template = GetFieldFromSettings().get('verification_failed_template')
-success_template = GetFieldFromSettings().get('verification_success_template')
+failed_template = GetFieldFromSettings().get("verification_failed_template")
+success_template = GetFieldFromSettings().get("verification_success_template")
 
 
 def verify_user_and_activate(request, useremail, usertoken):
@@ -30,19 +30,17 @@ def verify_user_and_activate(request, useremail, usertoken):
             request,
             template_name=success_template,
             context={
-                'msg': success_msg,
-                'status': 'Verification Successful!',
-                'link': reverse(success_redirect)
-            }
+                "msg": success_msg,
+                "status": "Verification Successful!",
+                "link": reverse(success_redirect),
+            },
         )
     else:
         return render(
             request,
             template_name=failed_template,
             context={
-                'msg': failed_msg,
-                'status': 'Verification Failed!',
-            }
+                "msg": failed_msg,
+                "status": "Verification Failed!",
+            },
         )
-
-

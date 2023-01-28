@@ -21,11 +21,13 @@ class _VerifyEmail:
         self.settings = GetFieldFromSettings()
 
     def __get_hashed_token(self, user):
-        return urlsafe_b64encode(str(default_token_generator.make_token(user)).encode('utf-8')).decode('utf-8')
+        return urlsafe_b64encode(
+            str(default_token_generator.make_token(user)).encode("utf-8")
+        ).decode("utf-8")
 
     def __make_verification_url(self, current_site, inactive_user, useremail):
         token = self.__get_hashed_token(inactive_user)
-        email_enc = urlsafe_b64encode(str(useremail).encode('utf-8')).decode('utf-8')
+        email_enc = urlsafe_b64encode(str(useremail).encode("utf-8")).decode("utf-8")
         link = f"http://{current_site}/accounts/verification/user/verify-email/{email_enc}/{token}/"
 
         return link
@@ -37,22 +39,31 @@ class _VerifyEmail:
         try:
             current_site = get_current_site(request)
             try:
-                useremail = form.cleaned_data[self.settings.get('email_field_name')]
+                useremail = form.cleaned_data[self.settings.get("email_field_name")]
             except:
                 raise KeyError(
                     'No key named "email" in your form. Your field should be named as email in form OR set a variable'
                     ' "EMAIL_FIELD_NAME" with the name of current field in settings.py if you want to use current name '
-                    'as email field.'
+                    "as email field."
                 )
 
-            verification_url = self.__make_verification_url(current_site, inactive_user, useremail)
-            subject = self.settings.get('subject')
-            msg = render_to_string(self.settings.get('html_message_template', raise_exception=True),
-                                   {"link": verification_url})
+            verification_url = self.__make_verification_url(
+                current_site, inactive_user, useremail
+            )
+            subject = self.settings.get("subject")
+            msg = render_to_string(
+                self.settings.get("html_message_template", raise_exception=True),
+                {"link": verification_url},
+            )
 
             try:
-                send_mail(subject, strip_tags(msg), from_email=self.settings.get('from_alias'),
-                          recipient_list=[useremail], html_message=msg)
+                send_mail(
+                    subject,
+                    strip_tags(msg),
+                    from_email=self.settings.get("from_alias"),
+                    recipient_list=[useremail],
+                    html_message=msg,
+                )
                 return inactive_user
             except (BadHeaderError, SMTPException):
                 inactive_user.delete()
@@ -60,7 +71,7 @@ class _VerifyEmail:
 
         except Exception as error:
             inactive_user.delete()
-            if self.settings.get('debug_settings'):
+            if self.settings.get("debug_settings"):
                 raise Exception(error)
 
 

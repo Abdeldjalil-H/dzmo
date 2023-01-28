@@ -2,5 +2,5 @@ from django.apps import AppConfig
 
 
 class LessonsConfig(AppConfig):
-    name = 'lessons'
-    verbose_name = 'القسم النظري'
+    name = "lessons"
+    verbose_name = "القسم النظري"
