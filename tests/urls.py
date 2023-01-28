@@ -11,38 +11,38 @@ from .views import (
     SolutionUploadView,
 )
 
-app_name = 'tests'
+app_name = "tests"
 urlpatterns = [
     path(
-        '<int:test_pk>/add-answer/',
+        "<int:test_pk>/add-answer/",
         login_required(SolutionUploadView.as_view()),
-        name='upload-solution',
+        name="upload-solution",
     ),
-    path('', TestsList.as_view(), name='tests-list'),
-    path('<int:pk>/', login_required(TestAnswerView.as_view()), name='test'),
+    path("", TestsList.as_view(), name="tests-list"),
+    path("<int:pk>/", login_required(TestAnswerView.as_view()), name="test"),
     path(
-        '<int:test_pk>/create_ans/',
+        "<int:test_pk>/create_ans/",
         login_required(create_test_answer),
-        name='create_ans',
+        name="create_ans",
     ),
     path(
-        '<int:test_pk>/results/',
+        "<int:test_pk>/results/",
         login_required(TestResult.as_view()),
-        name='test-results',
+        name="test-results",
     ),
     path(
-        'solution/test<int:test_pk>/',
+        "solution/test<int:test_pk>/",
         login_required(TestSolution.as_view()),
-        name='solution',
+        name="solution",
     ),
     path(
-        'correction/test<int:test_pk>/',
+        "correction/test<int:test_pk>/",
         TestAnswersList.as_view(),
-        name='subs-list',
+        name="subs-list",
     ),
     path(
-        'correction/test<int:test_pk>/pb<int:pb_num>',
+        "correction/test<int:test_pk>/pb<int:pb_num>",
         TestCorrection.as_view(),
-        name='problem-correction',
+        name="problem-correction",
     ),
 ]
