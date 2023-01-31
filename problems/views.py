@@ -79,13 +79,15 @@ class _ProblemView(DetailView):
         context = super().get_context_data(**kwargs)
         context["problem"] = self.problem
         context["show_btn"] = self.problem.can_submit(self.user)
-
         context["user_subs"] = self.problem.get_user_subs(self.user)
+        context["show_other_sols"] = False
         if self.object:
             self.object.mark_as_seen(self.user)
             context["comments"] = self.object.get_comments()
-        if self.problem.has_solved(self.user):
+        if not("comments" in context) or self.problem.has_solved(self.user):
             context["all_sols"] = self.problem.get_correct_subs()
+        if self.problem.has_solved(self.user):
+            context["show_other_sols"] = True
             context["show_btn"] = False
         elif self.problem.has_draft_sub(self.user):
             context["btn"] = "إكمال المحاولة السابقة"

@@ -15,7 +15,9 @@
             <tr>
                 <td><a href="{%url 'accounts:profile' sol.student.pk%}">{{sol.student.username}}</a></td>
                 <td>{{ sol.submited_on}}</td>
-                <td><a href="{{request.path}}?sub={{sol.pk}}">عرض</a></td>
+                {% if show_other_sols %}
+                    <td><a href="{{request.path}}?sub={{sol.pk}}">عرض</a></td>
+                {% endif %}
             </tr>
         {%endfor%}
         </tbody>
