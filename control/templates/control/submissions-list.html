@@ -1,8 +1,9 @@
 {%extends 'control/base.html'%}
 {% block content %}
 <div class="">
-    {% for level in subs_list %}
     <div class="container">
+    <input type="text" class="form-control my-2" onkeyup="onSearch()" id="searchBar" placeholder="🔎 ابحث عن...">
+    {% for level in subs_list %}
         <h3>المستوى {{ forloop.counter }}</h3>
         <table class="table">
             <thead>
@@ -37,7 +38,33 @@
                 {% endfor %}
             </tbody>
         </table>
-    </div>
     {% endfor %}
+    </div>
 </div>
+<script>
+function onSearch() {
+  var input, filter, table, tr, i, txtValue;
+  input = document.getElementById("searchBar");
+  filter = input.value.toUpperCase();
+  let tables = document.getElementsByTagName("tbody");
+  for(let t = 0; t < tables.length; t++){
+    table = tables[t];
+  tr = table.getElementsByTagName("tr");
+  for (i = 0; i < tr.length; i++) {
+    let tds = tr[i].getElementsByTagName("td");
+    if (tds) {
+      txtValue = "";
+      for(let j = 0; j < tds.length; j++){
+            txtValue += tds[j].textContent || td.innerText;
+      }
+      if (txtValue.toUpperCase().indexOf(filter) > -1) {
+        tr[i].style.display = "";
+      } else {
+        tr[i].style.display = "none";
+      }
+    }
+  }
+  }
+}
+</script>
 {%endblock%}
