@@ -16,7 +16,6 @@ from accounts.models import User
 from .models import MainPagePost, Submissions
 from .forms import AddProblemsForm, SendMailForm
 
-
 class StaffRequired(UserPassesTestMixin):
     def test_func(self):
         return self.request.user.is_staff
@@ -66,6 +65,8 @@ class ProblemCorrection(CorrectorsOnly, CreateView):
         return super().setup(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
+        if not Submissions.get_problems_subs_bis(filters=self.request.user.corrector.get_filters()).filter(id=self.submission.id).exists():
+            return HttpResponseForbidden()
         if not request.user.corrector.can_correct(self.submission.problem):
             return HttpResponseForbidden()
         if self.decide != "to_correct" and self.decide:

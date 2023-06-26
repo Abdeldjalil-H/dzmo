@@ -101,12 +101,13 @@ class _ProblemView(DetailView):
         sub.set_status("comment")
         sub.save()
         Submissions.add_sub(sub)
-        if self.request.is_ajax():
-            return HttpResponse(
-                render_to_string(
-                    "problems/comments.html", {"comments": [form.instance]}
+        if getattr(self.request,'is_ajax', None) != None:
+            if self.request.is_ajax():
+                return HttpResponse(
+                    render_to_string(
+                        "problems/comments.html", {"comments": [form.instance]}
+                    )
                 )
-            )
         return HttpResponseRedirect(self.get_success_url(sub.pk))
 
     def handle_non_correct_sub(self, sub):
