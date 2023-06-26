@@ -250,7 +250,7 @@ class Corrector(models.Model):
 
     def can_correct(self, problem):
         return not self.solved_only or (
-            problem.chapter.topic in self.topics or problem.has_solved(self.user)
+            problem.chapter.topic in self.topics and problem.has_solved(self.user)
         )
 
 
