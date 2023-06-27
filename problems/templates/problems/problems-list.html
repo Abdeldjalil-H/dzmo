@@ -27,11 +27,14 @@
 <script>
   changeBg = (indicies, color1, color2) => {
       for(let index of indicies) {
-      card = document.getElementById(index);
-      card.getElementsByClassName('card-header')[0].style.backgroundColor = color1;
-      card.getElementsByClassName('card-body')[0].style.backgroundColor = color2;
+        card = document.getElementById(index);
+        if(card != null){
+          card.getElementsByClassName('card-header')[0].style.backgroundColor = color1;
+          card.getElementsByClassName('card-body')[0].style.backgroundColor = color2;
+          card.id += 'c';
+        }
       }
-      card.id += 'c';
+      
   }
   var str = '{{topic}}';
   var topic = '';
