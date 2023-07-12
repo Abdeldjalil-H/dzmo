@@ -1,70 +1,71 @@
 {%extends 'control/base.html'%}
 {% block content %}
 <div class="">
-    <div class="container">
+  <div class="container">
     <input type="text" class="form-control my-2" onkeyup="onSearch()" id="searchBar" placeholder="🔎 ابحث عن...">
     {% for level in subs_list %}
-        <h3>المستوى {{ forloop.counter }}</h3>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col"><a href="?order=problem">
-                            المسألة
-                        </a></th>
-                    <th scope="col"><a href="?order=student">
-                            التلميذ
-                        </a></th>
-                    <th scope="col">الحالة</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for sub in level %}
-                <tr>
-                    <th scope="row">{{ forloop.counter }}</th>
-                    {% url 'problems:submit' sub.problem.chapter.topic sub.problem.pk as the_url%}
-                    <td class=""><a href="{{the_url}}">
-                            {{ sub.problem.code }}
-                        </a></td>
-                    <td class=""><a href="">
-                            {{ sub.student.username }}
-                        </a></td>
-                    <td class=""><a href="{{sub.pk}}">
-                            {% if sub.status == 'submit' %} إجابة جديدة
-                            {% else %} تعليق جديد
-                            {% endif %}
-                        </a></td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <h3>المستوى {{ forloop.counter }}</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col"><a href="?order=problem">
+              المسألة
+            </a></th>
+          <th scope="col"><a href="?order=student">
+              التلميذ
+            </a></th>
+          <th scope="col">الحالة</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sub in level %}
+        <tr>
+          <th scope="row">{{ forloop.counter }}</th>
+          {% url 'problems:submit' sub.problem.chapter.topic sub.problem.pk as the_url%}
+          <td class=""><a href="{{the_url}}">
+              {{ sub.problem.code }}
+            </a></td>
+          <td class=""><a href="{%url 'accounts:profile' sub.student.pk%}">
+              {{ sub.student.username }}
+            </a></td>
+          <td class=""><a href="{{sub.pk}}">
+              {% if sub.status == 'submit' %} إجابة جديدة
+              {% else %} تعليق جديد
+              {% endif %}
+            </a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
     {% endfor %}
-    </div>
+  </div>
 </div>
+
 <script>
-function onSearch() {
-  var input, filter, table, tr, i, txtValue;
-  input = document.getElementById("searchBar");
-  filter = input.value.toUpperCase();
-  let tables = document.getElementsByTagName("tbody");
-  for(let t = 0; t < tables.length; t++){
-    table = tables[t];
-  tr = table.getElementsByTagName("tr");
-  for (i = 0; i < tr.length; i++) {
-    let tds = tr[i].getElementsByTagName("td");
-    if (tds) {
-      txtValue = "";
-      for(let j = 0; j < tds.length; j++){
+  function onSearch() {
+    var input, filter, table, tr, i, txtValue;
+    input = document.getElementById("searchBar");
+    filter = input.value.toUpperCase();
+    let tables = document.getElementsByTagName("tbody");
+    for (let t = 0; t < tables.length; t++) {
+      table = tables[t];
+      tr = table.getElementsByTagName("tr");
+      for (i = 0; i < tr.length; i++) {
+        let tds = tr[i].getElementsByTagName("td");
+        if (tds) {
+          txtValue = "";
+          for (let j = 0; j < tds.length; j++) {
             txtValue += tds[j].textContent || td.innerText;
-      }
-      if (txtValue.toUpperCase().indexOf(filter) > -1) {
-        tr[i].style.display = "";
-      } else {
-        tr[i].style.display = "none";
+          }
+          if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            tr[i].style.display = "";
+          } else {
+            tr[i].style.display = "none";
+          }
+        }
       }
     }
   }
-  }
-}
 </script>
 {%endblock%}
