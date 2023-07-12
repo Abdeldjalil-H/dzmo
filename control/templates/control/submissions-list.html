@@ -25,7 +25,7 @@
                     <td class=""><a href="{{the_url}}">
                             {{ sub.problem.code }}
                         </a></td>
-                    <td class=""><a href="">
+                    <td class=""><a href="{%url 'accounts:profile' sub.student.pk%}">
                             {{ sub.student.username }}
                         </a></td>
                     <td class=""><a href="{{sub.pk}}">
