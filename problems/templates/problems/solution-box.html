@@ -27,7 +27,7 @@
   <div class="mt-1 d-flex justify-content-end">
     <span id="toggle-code-btn" class="small btn btn-link" style="font-size:14px">إظهار الكود</span>
     <script>
-      const solution = `{% if sub.safe %}{{sub.solution|escapejs|safe}}{% else %}{{sub.solution|escapejs}}{%endif%}`;
+      const solution = "{% if sub.safe %}{{sub.solution|escapejs|safe}}{% else %}{{sub.solution|escapejs}}{%endif%}";
       const solutionContainer = document.querySelector('.card-text');
       solutionContainer.innerHTML = solution;
       let renderedSolution;
