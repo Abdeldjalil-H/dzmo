@@ -1,27 +1,38 @@
-[tool.poetry]
+[project]
 name = "dzmo"
 version = "0.1.0"
 description = "Website for training algerian students for mathematical olympiads competitions"
-authors = ["Abdeldjalil Hezouat <djaloulehez3@gmail.com>"]
+authors = [{name = "Abdeldjalil Hezouat",email = "djaloulehez3@gmail.com"}]
 readme = "README.md"
+dependencies = [
+    "django>=4.2.3,<5.0.0",
+    "gunicorn>=22.0.0,<23.0.0",
+    "psycopg2>=2.9.6,<3.0.0",
+    "djangorestframework>=3.14.0,<4.0.0",
+    "boto3>=1.28.3,<2.0.0",
+    "pillow>=9.5.0,<10.0.0",
+    "django-crispy-forms>=1.14.0,<2.0.0",
+    "django-mathfilters>=1.0.0,<2.0.0",
+    "requests>=2.31.0,<3.0.0",
+    "django-redis>=5.3.0,<6.0.0",
+    "django-storages>=1.13.2,<2.0.0",
+]
+requires-python = ">=3.12,<4.0"
 
-[tool.poetry.dependencies]
-python = "^3.11"
-django = "^4.1.5"
-gunicorn = "^20.1.0"
-psycopg2 = "^2.9.5"
-djangorestframework = "^3.14.0"
-boto3 = "^1.26.58"
-pillow = "^9.4.0"
-django-crispy-forms = "^1.14.0"
-django-mathfilters = "^1.0.0"
-requests = "^2.28.2"
-django-redis = "^5.2.0"
-django-storages = "^1.13.2"
 
-[tool.poetry.group.dev.dependencies]
-black = "^22.12.0"
+[tool.rye]
+managed = true
+dev-dependencies = [
+    "ruff>=0.5.5",
+]
+
+[tool.hatch]
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/dzmo"]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
