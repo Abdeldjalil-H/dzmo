@@ -91,3 +91,5 @@ dmypy.json
 
 #sqlite files
 *.sqlite3
+
+*.pem
