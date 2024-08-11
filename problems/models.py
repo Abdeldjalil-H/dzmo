@@ -1,3 +1,4 @@
+from datetime import timedelta
 from django.db import models
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -19,6 +20,8 @@ class AbstractProblem(models.Model):
         blank=True,
         verbose_name="المصدر",
     )
+
+    submissions: models.QuerySet["AbstractPbSubmission"]
 
     def has_draft_sub(self, user):
         return self.submissions.filter(student=user, status="draft").exists()
@@ -70,7 +73,9 @@ class Problem(AbstractProblem):
         return self.chapter in user.progress.completed_chapters.all()
 
     def has_solved(self, user):
-        return user.progress.solved_problems.filter(pk=self.pk).exists()
+        return ProblemSubmission.correct_submissions.filter(
+            problem_id=self.pk, student=user
+        ).exists()
 
     @property
     def code(self):
@@ -109,6 +114,7 @@ class AbstractPbSubmission(models.Model):
     submited_on = models.DateTimeField(blank=True, null=True)
     correction_in_progress = models.BooleanField(default=False, editable=False)
     ltr_dir = models.BooleanField(default=False)
+    comments: models.QuerySet["AbstractComment"]
 
     @property
     def safe(self):
@@ -192,6 +198,19 @@ def file_name(instance, filename):
     return join("students_subs", f"pb{instance.problem.pk}", name)
 
 
+class PendingSubmissionsManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(status__in=["submit", "comment"])
+
+
+class CorrectSubmissionsManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(correct=True)
+
+    def last_week(self):
+        return self.filter(submited_on__gte=timezone.now() - timedelta(days=7))
+
+
 class ProblemSubmission(AbstractPbSubmission):
     """
     the status 'draft', 'submit', 'correct', 'wrong', 'comment'
@@ -207,6 +226,10 @@ class ProblemSubmission(AbstractPbSubmission):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="submissions"
     )
     file = models.FileField(blank=True, null=True, upload_to=file_name)
+
+    objects = models.Manager()
+    pending = PendingSubmissionsManager()
+    correct_submissions = CorrectSubmissionsManager()
 
     def mark_as_seen(self, user):
         user.progress.last_submissions.remove(self)

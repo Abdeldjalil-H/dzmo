@@ -1,13 +1,12 @@
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, Subquery, Sum
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.contrib.postgres.fields import ArrayField
 from django.conf import settings
 from datetime import timedelta
 from django.utils import timezone
 from lessons.models import Chapter, Exercice, TopicField
-from problems.models import Problem, ProblemSubmission, STATUS
-from control.models import Submissions
+from problems.models import Problem, ProblemSubmission
 
 TEAMS_COLORS = (
     ("white", "white"),
@@ -19,6 +18,8 @@ TEAMS_COLORS = (
 
 class Team(models.Model):
     color = models.CharField(max_length=100, choices=TEAMS_COLORS, unique=True)
+
+    tasks: models.QuerySet
 
     def __str__(self):
         return f"{self.color} team"
@@ -107,6 +108,9 @@ class User(AbstractBaseUser):
     # USERNAME and password are required by default
     REQUIRED_FIELDS = []  # ['first_name', 'last_name']
 
+    progress: models.OneToOneField["StudentProgress"]
+    submissions: models.QuerySet["ProblemSubmission"]
+    tasks_submissions: models.QuerySet["tasks.TaskProblemSubmission"]
     objects = UserManager()
 
     def __str__(self):
@@ -138,9 +142,6 @@ class User(AbstractBaseUser):
             return self.last_name + " " + self.first_name[0]
         return self.first_name + " " + self.last_name
 
-    def get_solved_problems_by_topic(self, topic):
-        return self.progress.solved_problems.filter(chapter__topic=topic)
-
     def get_opened_problems_by_topic(self, topic):
         return self.progress.opened_problems(topic=topic)
 
@@ -152,12 +153,6 @@ class User(AbstractBaseUser):
 
     def has_submit(self, problem):
         return self.submissions.filter(problem=problem).exists()
-
-    def add_solved_problem(self, problem):
-        self.progress.solved_problems.add(problem)
-        for sub in self.get_all_subs_by_problem(problem):
-            sub.set_status("correct")
-            sub.save()
 
     def add_points(self, points):
         self.progress.add_points(points)
@@ -173,39 +168,39 @@ class User(AbstractBaseUser):
         start_day = timezone.now() - timedelta(days=period)
 
         return 15 * (
-            sum(
-                Submissions.get_last_correct(student=self).values_list(
-                    "problem__level", flat=True
-                )
+            (
+                ProblemSubmission.correct_submissions.last_week()
+                .filter(student=self)
+                .aggregate(total_level=Sum("problem__level"))["total_level"]
+                or 0
             )
             + (
-                sum(
-                    self.tasks_submissions.filter(
-                        submited_on__gte=start_day, correct=True
-                    ).values_list("problem__level", flat=True)
-                )
+                self.tasks_submissions.filter(
+                    submited_on__gte=start_day, correct=True
+                ).aggregate(total_level=Sum("problem__level"))["total_level"]
+                or 0
             )
         )
 
     def get_correct_pks(self, topic):
         return list(
-            self.progress.solved_problems.filter(chapter__topic=topic).values_list(
-                "pk", flat=True
-            )
+            ProblemSubmission.correct_submissions.filter(
+                problem__chapter__topic=topic, student=self
+            ).values_list("problem_id", flat=True)
         )
 
     def get_pending_pks(self, topic):
         return list(
-            Submissions.get_problems_subs(
+            ProblemSubmission.pending.filter(
                 student=self, problem__chapter__topic=topic
-            ).values_list("problem__pk", flat=True)
+            ).values_list("problem_id", flat=True)
         )
 
     def get_wrong_pks(self, topic):
         return list(
             self.submissions.filter(
                 correct=False, problem__chapter__topic=topic
-            ).values_list("problem__pk", flat=True)
+            ).values_list("problem_id", flat=True)
         )
 
     def add_task_correction_notif(self, sub):
@@ -245,7 +240,14 @@ class Corrector(models.Model):
         if not self.self_correction:
             q &= ~Q(student=self.user)
         if self.solved_only:
-            q &= Q(problem__pk__in=self.user.progress.solved_problems.all())
+            # TODO: optimize this
+            q &= Q(
+                problem_id__in=Subquery(
+                    ProblemSubmission.correct_submissions.filter(
+                        student=self.user_id
+                    ).values_list("problem_id", flat=True)
+                )
+            )
         return q
 
     def can_correct(self, problem):
@@ -255,14 +257,11 @@ class Corrector(models.Model):
 
 
 class StudentProgress(models.Model):
-    student = models.OneToOneField(
+    student: models.OneToOneField["User"] = models.OneToOneField(
         settings.AUTH_USER_MODEL, related_name="progress", on_delete=models.CASCADE
     )
     completed_chapters = models.ManyToManyField(
         Chapter, blank=True, verbose_name="المحاور المتمة"
-    )
-    solved_problems = models.ManyToManyField(
-        Problem, blank=True, verbose_name="المسائل المحلولة"
     )
     solved_exercices = models.ManyToManyField(
         Exercice, blank=True, verbose_name="التمارين المحلولة"
@@ -282,8 +281,6 @@ class StudentProgress(models.Model):
     def add_points(self, points):
         self.points += points
         self.save()
-
-    # solved problems: either I make a M2M or a method (exercices also)
 
     def opened_problems(self, topic=None):
         if topic:

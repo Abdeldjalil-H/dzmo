@@ -6,7 +6,6 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView, DeleteView, CreateView
 from django.views.generic.detail import DetailView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from control.models import Submissions
 from .models import Problem, ProblemSubmission
 from .forms import CommentForm, SubmitForm
 
@@ -100,7 +99,6 @@ class _ProblemView(DetailView):
         form.save()
         sub.set_status("comment")
         sub.save()
-        Submissions.add_sub(sub)
         if self.request.is_ajax():
             return HttpResponse(
                 render_to_string(
@@ -167,9 +165,6 @@ class _ProblemSubmit(CreateView):
             context["show_del"] = True
         return context
 
-    def add_to_subs(self, sub):
-        pass
-
     def form_valid(self, form):
         obj = form.save(commit=False)
         if self.draft_sub:
@@ -187,7 +182,6 @@ class _ProblemSubmit(CreateView):
             obj.set_submited_now()
             obj.save()
         if obj.status == "submit":
-            self.add_to_subs(obj)
             pk = obj.pk
         else:
             pk = None
@@ -208,9 +202,6 @@ class ProblemSubmit(HaveAccessToProblem, _ProblemSubmit):
         if sub_pk:
             return url + f"?sub={sub_pk}"
         return url
-
-    def add_to_subs(self, sub):
-        Submissions.add_sub(sub)
 
 
 class DeleteSubmission(DeleteView):
@@ -247,5 +238,6 @@ class LastSolvedProblems(ListView):
     context_object_name = "last_solved_problems"
 
     def get_queryset(self):
-        Submissions.update_last_correct()
-        return Submissions.get_last_correct().order_by("-submited_on")
+        return ProblemSubmission.correct_submissions.last_week().order_by(
+            "-submited_on"
+        )

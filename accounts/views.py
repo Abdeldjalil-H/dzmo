@@ -1,4 +1,3 @@
-from control.models import Submissions
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
@@ -29,7 +28,7 @@ def signup(request):
     if request.method == "POST":
         form = SignUpForm(request.POST)
         if form.is_valid():
-            inactive_user = send_verification_email(request, form)
+            send_verification_email(request, form)
             return redirect("/")
     else:
         form = SignUpForm()
@@ -108,5 +107,4 @@ class StudentsRanking(ListView):
     context_object_name = "students_list"
 
     def get(self, request, *args, **kwargs):
-        Submissions.update_last_correct()
         return super().get(request, *args, **kwargs)
