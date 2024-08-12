@@ -87,14 +87,11 @@ class ProblemCorrection(CorrectorsOnly, CreateView):
         return context
 
     def handle_correct_sub(self):
-        self.submission.correct = True
         self.submission.set_status("correct")
         self.submission.save()
-        # make sure one submission by problem
         self.submission.student.add_points(self.submission.problem.points)
 
     def handle_wrong_sub(self):
-        self.submission.correct = False
         self.submission.set_correcting(False)
         self.submission.save()
 

@@ -7,6 +7,7 @@ from datetime import timedelta
 from django.utils import timezone
 from lessons.models import Chapter, Exercice, TopicField
 from problems.models import Problem, ProblemSubmission
+from tasks.models import TaskProblemSubmission
 
 TEAMS_COLORS = (
     ("white", "white"),
@@ -110,7 +111,7 @@ class User(AbstractBaseUser):
 
     progress: models.OneToOneField["StudentProgress"]
     submissions: models.QuerySet["ProblemSubmission"]
-    tasks_submissions: models.QuerySet["tasks.TaskProblemSubmission"]
+    tasks_submissions: models.QuerySet["TaskProblemSubmission"]
     objects = UserManager()
 
     def __str__(self):
@@ -169,22 +170,22 @@ class User(AbstractBaseUser):
 
         return 15 * (
             (
-                ProblemSubmission.correct_submissions.last_week()
+                ProblemSubmission.correct.last_week()
                 .filter(student=self)
                 .aggregate(total_level=Sum("problem__level"))["total_level"]
                 or 0
             )
             + (
-                self.tasks_submissions.filter(
-                    submited_on__gte=start_day, correct=True
-                ).aggregate(total_level=Sum("problem__level"))["total_level"]
+                TaskProblemSubmission.correct.last_week()
+                .filter(student=self)
+                .aggregate(total_level=Sum("problem__level"))["total_level"]
                 or 0
             )
         )
 
     def get_correct_pks(self, topic):
         return list(
-            ProblemSubmission.correct_submissions.filter(
+            ProblemSubmission.correct.filter(
                 problem__chapter__topic=topic, student=self
             ).values_list("problem_id", flat=True)
         )
@@ -199,7 +200,7 @@ class User(AbstractBaseUser):
     def get_wrong_pks(self, topic):
         return list(
             self.submissions.filter(
-                correct=False, problem__chapter__topic=topic
+                status__in=["wrong", "comment"], problem__chapter__topic=topic
             ).values_list("problem_id", flat=True)
         )
 
@@ -243,9 +244,9 @@ class Corrector(models.Model):
             # TODO: optimize this
             q &= Q(
                 problem_id__in=Subquery(
-                    ProblemSubmission.correct_submissions.filter(
-                        student=self.user_id
-                    ).values_list("problem_id", flat=True)
+                    ProblemSubmission.correct.filter(student=self.user_id).values_list(
+                        "problem_id", flat=True
+                    )
                 )
             )
         return q

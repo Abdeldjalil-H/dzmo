@@ -6,7 +6,7 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView, DeleteView, CreateView
 from django.views.generic.detail import DetailView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from .models import Problem, ProblemSubmission
+from .models import AbstractProblem, Problem, ProblemSubmission
 from .forms import CommentForm, SubmitForm
 
 
@@ -47,7 +47,9 @@ class _ProblemView(DetailView):
     context_object_name = "this_sub"
 
     def setup(self, request, *args, **kwargs):
-        self.problem = get_object_or_404(self.problem_model, pk=kwargs["pb_pk"])
+        self.problem: AbstractProblem = get_object_or_404(
+            self.problem_model, pk=kwargs["pb_pk"]
+        )
         self.sub = int(request.GET.get("sub")) if request.GET.get("sub") else None
         self.user = request.user
         return super().setup(request, *args, **kwargs)
@@ -68,7 +70,7 @@ class _ProblemView(DetailView):
         if not self.sub:
             return None
         if self.problem.has_solved(self.request.user):
-            return self.problem.get_sub(pk=self.sub, correct=True)
+            return self.problem.get_sub(pk=self.sub, status="correct")
 
         obj = get_object_or_404(self.problem.get_user_subs(self.user), pk=self.sub)
         self.handle_non_correct_sub(obj)
@@ -131,6 +133,8 @@ class ProblemView(HaveAccessToProblem, _ProblemView):
 
 
 class _ProblemSubmit(CreateView):
+    problem_model: AbstractProblem
+
     def setup(self, request, *args, **kwargs):
         self.problem = get_object_or_404(self.problem_model, pk=kwargs["pb_pk"])
         self.draft_sub = self.problem_model.objects.get(
@@ -238,6 +242,4 @@ class LastSolvedProblems(ListView):
     context_object_name = "last_solved_problems"
 
     def get_queryset(self):
-        return ProblemSubmission.correct_submissions.last_week().order_by(
-            "-submited_on"
-        )
+        return ProblemSubmission.correct.last_week().order_by("-submited_on")
