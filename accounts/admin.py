@@ -7,20 +7,15 @@ from .forms import UserAdminCreationForm, UserAdminChangeForm
 
 # Register your models here.
 
-from .models import StudentProgress, Team, Corrector
+from .models import Team, Corrector
 
 User = get_user_model()
-
-
-class ProgressInline(admin.StackedInline):
-    model = StudentProgress
 
 
 class UserAdmin(BaseUserAdmin):
     # The forms to add and change user instances
     form = UserAdminChangeForm
     add_form = UserAdminCreationForm
-    inlines = [ProgressInline]
     # The fields to be used in displaying the User model.
     # These override the definitions on the base UserAdmin
     # that reference specific fields on auth.User.

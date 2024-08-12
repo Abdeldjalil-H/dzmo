@@ -13,10 +13,11 @@
     <tbody>
       {% for sub in user_subs%}
 
-      <tr class="table-{% if sub.status == 'submit' %}warning{% elif sub.correct %}success{% else %}danger{%endif%}">
+      <tr
+        class="table-{% if sub.status == 'submit' %}warning{% elif sub.status == 'correct' %}success{% else %}danger{%endif%}">
         <td>
           {% if sub.status == 'submit' %}
-          {% elif sub.correct %}صحيحة
+          {% elif sub.status == 'correct' %}صحيحة
           {% else %}خاطئة{%endif%}
         </td>
         <td> {{ sub.submited_on}} </td>

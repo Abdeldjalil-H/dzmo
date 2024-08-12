@@ -1,13 +1,13 @@
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, Subquery, Sum
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.contrib.postgres.fields import ArrayField
 from django.conf import settings
 from datetime import timedelta
 from django.utils import timezone
 from lessons.models import Chapter, Exercice, TopicField
-from problems.models import Problem, ProblemSubmission, STATUS
-from control.models import Submissions
+from problems.models import Problem, ProblemSubmission
+from tasks.models import TaskProblemSubmission
 
 TEAMS_COLORS = (
     ("white", "white"),
@@ -19,6 +19,8 @@ TEAMS_COLORS = (
 
 class Team(models.Model):
     color = models.CharField(max_length=100, choices=TEAMS_COLORS, unique=True)
+
+    tasks: models.QuerySet
 
     def __str__(self):
         return f"{self.color} team"
@@ -102,11 +104,27 @@ class User(AbstractBaseUser):
     is_admin = models.BooleanField(default=False)
     is_corrector = models.BooleanField(default=False)
 
+    points = models.IntegerField(default=0, editable=False, db_index=True)
     team = models.ForeignKey(Team, null=True, blank=True, on_delete=models.SET_NULL)
     USERNAME_FIELD = "email"
     # USERNAME and password are required by default
-    REQUIRED_FIELDS = []  # ['first_name', 'last_name']
+    REQUIRED_FIELDS = []
 
+    completed_chapters = models.ManyToManyField(
+        Chapter, blank=True, verbose_name="المحاور المتمة"
+    )
+    solved_exercices = models.ManyToManyField(
+        Exercice, blank=True, verbose_name="التمارين المحلولة"
+    )
+    last_submissions = models.ManyToManyField(
+        ProblemSubmission,
+        blank=True,
+        verbose_name="آخر المحاولات المقدمة",
+    )
+    last_tasks_subs = models.ManyToManyField("tasks.TaskProblemSubmission", blank=True)
+
+    submissions: models.QuerySet["ProblemSubmission"]
+    tasks_submissions: models.QuerySet["TaskProblemSubmission"]
     objects = UserManager()
 
     def __str__(self):
@@ -138,11 +156,13 @@ class User(AbstractBaseUser):
             return self.last_name + " " + self.first_name[0]
         return self.first_name + " " + self.last_name
 
-    def get_solved_problems_by_topic(self, topic):
-        return self.progress.solved_problems.filter(chapter__topic=topic)
-
-    def get_opened_problems_by_topic(self, topic):
-        return self.progress.opened_problems(topic=topic)
+    def get_opened_problems_by_topic(self, topic=None):
+        if topic:
+            chapters = self.completed_chapters.filter(topic=topic)
+            problems = Problem.objects.filter(chapter__in=chapters)
+        else:
+            problems = Problem.objects.filter(chapter__in=self.completed_chapters.all())
+        return problems
 
     def get_all_subs_by_problem(self, problem):
         return self.submissions.filter(problem=problem)
@@ -153,14 +173,9 @@ class User(AbstractBaseUser):
     def has_submit(self, problem):
         return self.submissions.filter(problem=problem).exists()
 
-    def add_solved_problem(self, problem):
-        self.progress.solved_problems.add(problem)
-        for sub in self.get_all_subs_by_problem(problem):
-            sub.set_status("correct")
-            sub.save()
-
     def add_points(self, points):
-        self.progress.add_points(points)
+        self.points += points
+        self.save()
 
     def is_team_member(self):
         return self.team is not None
@@ -169,53 +184,55 @@ class User(AbstractBaseUser):
         return dict(GRADES)[self.grade] if self.grade < 4 else ""
 
     @property
-    def count_last_points(self, period=7):
-        start_day = timezone.now() - timedelta(days=period)
+    def rank(self):
+        return User.objects.filter(points__gt=self.points).count() + 1
 
+    @property
+    def count_last_points(self, period=7):
         return 15 * (
-            sum(
-                Submissions.get_last_correct(student=self).values_list(
-                    "problem__level", flat=True
-                )
+            (
+                ProblemSubmission.correct.last_week()
+                .filter(student=self)
+                .aggregate(total_level=Sum("problem__level"))["total_level"]
+                or 0
             )
             + (
-                sum(
-                    self.tasks_submissions.filter(
-                        submited_on__gte=start_day, correct=True
-                    ).values_list("problem__level", flat=True)
-                )
+                TaskProblemSubmission.correct.last_week()
+                .filter(student=self)
+                .aggregate(total_level=Sum("problem__level"))["total_level"]
+                or 0
             )
         )
 
     def get_correct_pks(self, topic):
         return list(
-            self.progress.solved_problems.filter(chapter__topic=topic).values_list(
-                "pk", flat=True
-            )
+            ProblemSubmission.correct.filter(
+                problem__chapter__topic=topic, student=self
+            ).values_list("problem_id", flat=True)
         )
 
     def get_pending_pks(self, topic):
         return list(
-            Submissions.get_problems_subs(
+            ProblemSubmission.pending.filter(
                 student=self, problem__chapter__topic=topic
-            ).values_list("problem__pk", flat=True)
+            ).values_list("problem_id", flat=True)
         )
 
     def get_wrong_pks(self, topic):
         return list(
             self.submissions.filter(
-                correct=False, problem__chapter__topic=topic
-            ).values_list("problem__pk", flat=True)
+                status__in=["wrong", "comment"], problem__chapter__topic=topic
+            ).values_list("problem_id", flat=True)
         )
 
     def add_task_correction_notif(self, sub):
-        self.progress.last_tasks_subs.add(sub)
+        self.last_tasks_subs.add(sub)
 
     def tasks_subs_notif(self):
-        return self.progress.last_tasks_subs.count()
+        return self.last_tasks_subs.count()
 
     def get_last_tasks_subs(self):
-        return self.progress.last_tasks_subs.all()
+        return self.last_tasks_subs.all()
 
     class Meta:
         verbose_name = "مستخدم"
@@ -245,57 +262,17 @@ class Corrector(models.Model):
         if not self.self_correction:
             q &= ~Q(student=self.user)
         if self.solved_only:
-            q &= Q(problem__pk__in=self.user.progress.solved_problems.all())
+            # TODO: optimize this
+            q &= Q(
+                problem_id__in=Subquery(
+                    ProblemSubmission.correct.filter(student=self.user_id).values_list(
+                        "problem_id", flat=True
+                    )
+                )
+            )
         return q
 
     def can_correct(self, problem):
         return not self.solved_only or (
             problem.chapter.topic in self.topics and problem.has_solved(self.user)
         )
-
-
-class StudentProgress(models.Model):
-    student = models.OneToOneField(
-        settings.AUTH_USER_MODEL, related_name="progress", on_delete=models.CASCADE
-    )
-    completed_chapters = models.ManyToManyField(
-        Chapter, blank=True, verbose_name="المحاور المتمة"
-    )
-    solved_problems = models.ManyToManyField(
-        Problem, blank=True, verbose_name="المسائل المحلولة"
-    )
-    solved_exercices = models.ManyToManyField(
-        Exercice, blank=True, verbose_name="التمارين المحلولة"
-    )
-    last_submissions = models.ManyToManyField(
-        ProblemSubmission,
-        blank=True,
-        verbose_name="آخر المحاولات المقدمة",
-    )
-    last_tasks_subs = models.ManyToManyField("tasks.TaskProblemSubmission", blank=True)
-    points = models.IntegerField(default=0, editable=False)
-
-    @property
-    def rank(self):
-        return StudentProgress.objects.filter(points__gt=self.points).count() + 1
-
-    def add_points(self, points):
-        self.points += points
-        self.save()
-
-    # solved problems: either I make a M2M or a method (exercices also)
-
-    def opened_problems(self, topic=None):
-        if topic:
-            chapters = self.completed_chapters.filter(topic=topic)
-            problems = Problem.objects.filter(chapter__in=chapters)
-        else:
-            problems = Problem.objects.filter(chapter__in=self.completed_chapters.all())
-        return problems
-
-    def __str__(self):
-        return self.student.email
-
-    class Meta:
-        verbose_name = "تقدم التلميذ"
-        verbose_name_plural = "تقدم التلاميذ"
