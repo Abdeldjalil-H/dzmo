@@ -2,28 +2,28 @@
 {%block content%}
 <div class="container">
     <h2 class="my-4">المسائل التي تم حلها هذا الأسبوع</h2>
-	<table class="table">
-		<thead>
-			<tr>
-				<th scope="col">التلميذ</th>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">التلميذ</th>
                 <th scope="col">المسألة</th>
                 <th scope="col">المستوى</th>
-				<th scope="col">التاريخ</th>
-			</tr>
-		</thead>
-		<tbody>
+                <th scope="col">التاريخ</th>
+            </tr>
+        </thead>
+        <tbody>
             {%for sub in last_solved_problems%}
             <tr>
                 <td>
                     <a href="{%url 'accounts:profile' sub.student.pk%}">
-                    {{sub.student.username}}
+                        {{sub.student.username}}
                     </a>
                 </td>
                 <td>
                     {%with topic=sub.problem.chapter.topic pk=sub.problem.pk%}
-                    {%if sub.problem in user.progress.solved_problems.all%}
+                    {%if sub.problem in user.solved_problems.all%}
                     <a href="{%url 'problems:submit' topic pk%}">
-                    {{topic}} {{pk}}
+                        {{topic}} {{pk}}
                     </a>
                     {%else%}
                     {{topic}} {{pk}}

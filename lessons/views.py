@@ -17,12 +17,12 @@ class LessonsList(ListView):
         context = super().get_context_data(**kwargs)
         topic = self.kwargs.get("topic")
         if self.request.user.is_authenticated:
-            context[
-                "completed_chapters"
-            ] = self.request.user.progress.completed_chapters.filter(topic=topic)
-            context[
-                "solved_exercices"
-            ] = self.request.user.progress.solved_exercices.filter(chapter__topic=topic)
+            context["completed_chapters"] = self.request.user.completed_chapters.filter(
+                topic=topic
+            )
+            context["solved_exercices"] = self.request.user.solved_exercices.filter(
+                chapter__topic=topic
+            )
             context["wrong_exercices"] = [
                 sol.exercice
                 for sol in self.request.user.exercicesolution_set.filter(correct=False)
@@ -52,9 +52,9 @@ class LessonDetail(DetailView):
             context["lesson"] = None
             return context
 
-        context[
-            "solved_exercices"
-        ] = self.request.user.progress.solved_exercices.filter(chapter=chapter)
+        context["solved_exercices"] = self.request.user.solved_exercices.filter(
+            chapter=chapter
+        )
         context["wrong_exercices"] = [
             sol.exercice
             for sol in self.request.user.exercicesolution_set.filter(
@@ -124,9 +124,7 @@ def exercice_view(request, pk, chapter_slug, **kwargs):
         "form": form,
         "exercice": exercice,
         "chapter": exercice.chapter,
-        "solved_exercices": request.user.progress.solved_exercices.filter(
-            chapter=chapter
-        ),
+        "solved_exercices": request.user.solved_exercices.filter(chapter=chapter),
         "wrong_exercices": [
             sol.exercice
             for sol in request.user.exercicesolution_set.filter(
@@ -134,7 +132,7 @@ def exercice_view(request, pk, chapter_slug, **kwargs):
             )
         ],
     }
-    if exercice in request.user.progress.solved_exercices.all():
+    if exercice in request.user.solved_exercices.all():
         context["correct"] = True
         if exercice.category != "result":
             context["answer"] = [int(x) for x in exercice.solution.split(",")]
@@ -159,15 +157,14 @@ def exercice_view(request, pk, chapter_slug, **kwargs):
             obj.correct = obj.answer == exercice.solution
             # if all the exercices are soloved, the open new chapter
             if obj.correct:
-                request.user.progress.solved_exercices.add(exercice)
-                request.user.progress.add_points(exercice.points)
+                request.user.solved_exercices.add(exercice)
+                request.user.add_points(exercice.points)
                 ex_of_chapter = chapter.exercice_set.all()
                 if all(
-                    ex in request.user.progress.solved_exercices.all()
-                    for ex in ex_of_chapter
+                    ex in request.user.solved_exercices.all() for ex in ex_of_chapter
                 ):
                     print("hi")
-                    request.user.progress.completed_chapters.add(chapter)
+                    request.user.completed_chapters.add(chapter)
             obj.add_try()
             obj.save()
             return redirect(

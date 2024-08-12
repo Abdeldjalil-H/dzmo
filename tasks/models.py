@@ -6,7 +6,6 @@ from problems.models import (
     AbstractPbSubmission,
     AbstractProblem,
 )
-from accounts.models import Team
 
 TASKS_MAX_LEVEL = 6
 TASKS_LEVELS = [(i, str(i)) for i in range(1, TASKS_MAX_LEVEL + 1)]
@@ -62,7 +61,7 @@ class TaskProblemSubmission(AbstractPbSubmission):
         self.ltr_dir = dir
 
     def mark_as_seen(self, user):
-        user.progress.last_tasks_subs.remove(self)
+        user.last_tasks_subs.remove(self)
 
     def get_task(self):
         return self.problem.task.get(team=self.student.team)
@@ -74,7 +73,7 @@ class TaskProblemSubmission(AbstractPbSubmission):
 
 class Task(models.Model):
     name = models.CharField(max_length=100, null=True)
-    team = models.ManyToManyField(Team, related_name="tasks", null=True)
+    team = models.ManyToManyField("accounts.Team", related_name="tasks")
     problems = models.ManyToManyField(
         TaskProblem,
         related_name="task",
@@ -93,10 +92,9 @@ class Task(models.Model):
         return [self.problems.filter(level=k) for k in range(1, TASKS_MAX_LEVEL + 1)]
 
     def get_subs_by_level(self):
-        all_subs = TaskProblemSubmission.objects.filter(
+        all_subs = TaskProblemSubmission.pending.filter(
             problem__in=self.problems.all(),
             student__team__in=self.team.all(),
-            status__in=["submit", "comment"],
         )
         return [
             all_subs.filter(problem__level=k) for k in range(1, TASKS_MAX_LEVEL + 1)
@@ -104,9 +102,10 @@ class Task(models.Model):
 
     def get_correct_pks(self, user):
         return list(
-            TaskProblemSubmission.objects.filter(
-                problem__in=self.problems.all(), student=user, correct=True
-            ).values_list("problem__pk", flat=True)
+            TaskProblemSubmission.correct.filter(
+                problem__in=self.problems.all(),
+                student=user,
+            ).values_list("problem_id", flat=True)
         )
 
     def get_wrong_pks(self, user):
@@ -114,9 +113,9 @@ class Task(models.Model):
             TaskProblemSubmission.objects.filter(
                 problem__in=self.problems.all(),
                 student=user,
-                correct=False,
+                status__in=["wrong", "comment"],
             ).values_list(
-                "problem__pk",
+                "problem_id",
                 flat=True,
             )
         )
@@ -128,7 +127,7 @@ class Task(models.Model):
                 student=user,
                 status="submit",
             ).values_list(
-                "problem__pk",
+                "problem_id",
                 flat=True,
             )
         )

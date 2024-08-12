@@ -3,17 +3,15 @@ from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
 from django.urls import reverse_lazy
 from django.conf import settings
-from datetime import timedelta
 from django.views.generic import (
     ListView,
     CreateView,
     FormView,
 )
 from django.contrib.auth.mixins import UserPassesTestMixin
-from requests.api import request
 from problems.models import ProblemSubmission, Comment, Problem
 from accounts.models import User
-from .models import MainPagePost, Submissions
+from .models import MainPagePost
 from .forms import AddProblemsForm, SendMailForm
 
 
@@ -32,22 +30,12 @@ class SubsList(CorrectorsOnly, ListView):
     context_object_name = "subs_list"
 
     def get_queryset(self):
-        order = (
-            self.request.GET.getlist("order") if self.request.GET.get("order") else []
-        )
-        return Submissions.get_problems_subs_by_level(
-            order=order, filters=self.request.user.corrector.get_filters()
-        )
+        order = self.request.GET.getlist("order", [])
 
-    """
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        order = self.request.GET.getlist('order') if self.request.GET.get('order') else ['submited_on']
-        old_link = '?order=' + '&order='.join(order)
-        context['link'] = old_link
-        {'pb':'order=problem', 'student':'order=student', 'status':'order=status'}
-        return context
-        """
+        submissions = ProblemSubmission.pending.filter(
+            self.request.user.corrector.get_filters()
+        ).order_by(*order)
+        return [submissions.filter(problem__level=k) for k in range(1, 6)]
 
 
 class ProblemCorrection(CorrectorsOnly, CreateView):
@@ -91,7 +79,6 @@ class ProblemCorrection(CorrectorsOnly, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        pk = self.kwargs.get("pk")
         context["problem"] = self.submission.problem
         context["comments"] = self.submission.get_comments()
         context["this_sub"] = self.submission
@@ -100,15 +87,11 @@ class ProblemCorrection(CorrectorsOnly, CreateView):
         return context
 
     def handle_correct_sub(self):
-        self.submission.correct = True
+        self.submission.set_status("correct")
         self.submission.save()
-        self.submission.student.add_solved_problem(self.submission.problem)
         self.submission.student.add_points(self.submission.problem.points)
-        if self.submission.get_time_since_submit() < timedelta(days=7):
-            Submissions.add_correct_sub(self.submission)
 
     def handle_wrong_sub(self):
-        self.submission.correct = False
         self.submission.set_correcting(False)
         self.submission.save()
 
@@ -117,10 +100,7 @@ class ProblemCorrection(CorrectorsOnly, CreateView):
         self.submission.save()
 
     def notify_student(self):
-        self.submission.student.progress.last_submissions.add(self.submission)
-
-    def remove_from_subs(self):
-        Submissions.remove_sub(self.submission)
+        self.submission.student.last_submissions.add(self.submission)
 
     def form_valid(self, form, **kwargs):
         pk = self.submission.pk
@@ -137,7 +117,6 @@ class ProblemCorrection(CorrectorsOnly, CreateView):
         else:
             self.handle_comment_correct_sub()
 
-        self.remove_from_subs()
         self.notify_student()
         return super().form_valid(form, **kwargs)
 

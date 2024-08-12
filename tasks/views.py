@@ -104,11 +104,6 @@ class TaskPbsCorrection(ProblemCorrection):
             ("tasks:task-subs-list"), kwargs={"task_pk": self.kwargs["task_pk"]}
         )
 
-    def handle_correct_sub(self):
-        self.submission.correct = True
-        self.submission.save()
-        self.submission.student.add_points(self.submission.problem.points)
-
     def remove_from_subs(self):
         pass
 
@@ -130,9 +125,8 @@ class CorrectSolsByTask(CheckTeam, ListView):
 
     def get_queryset(self):
         return get_list_or_404(
-            TaskProblemSubmission,
-            problem__task__pk=self.kwargs["task_pk"],
-            correct=True,
+            TaskProblemSubmission.correct,
+            problem__task_id=self.kwargs["task_pk"],
         )
 
 

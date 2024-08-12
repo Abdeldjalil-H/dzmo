@@ -1,3 +1,4 @@
+from datetime import timedelta
 from django.db import models
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -20,6 +21,8 @@ class AbstractProblem(models.Model):
         verbose_name="المصدر",
     )
 
+    submissions: models.QuerySet["AbstractPbSubmission"]
+
     def has_draft_sub(self, user):
         return self.submissions.filter(student=user, status="draft").exists()
 
@@ -32,7 +35,7 @@ class AbstractProblem(models.Model):
         return self.submissions.filter(student=user).exists()
 
     def has_solved(self, user):
-        return self.submissions.filter(student=user, correct=True).exists()
+        return self.submissions.filter(student=user, status="correct").exists()
 
     def can_submit(self, user):
         # if draft or no sub
@@ -40,7 +43,7 @@ class AbstractProblem(models.Model):
         return not sub or sub.status == "draft"
 
     def get_correct_subs(self):
-        return self.submissions.filter(correct=True)
+        return self.submissions.filter(status="correct")
 
     def get_sub(self, **kwargs):
         return get_object_or_404(self.submissions, **kwargs)
@@ -67,10 +70,12 @@ class Problem(AbstractProblem):
     added_on = models.DateTimeField(auto_now_add=True)
 
     def has_access(self, user):
-        return self.chapter in user.progress.completed_chapters.all()
+        return self.chapter in user.completed_chapters.all()
 
     def has_solved(self, user):
-        return user.progress.solved_problems.filter(pk=self.pk).exists()
+        return ProblemSubmission.correct.filter(
+            problem_id=self.pk, student=user
+        ).exists()
 
     @property
     def code(self):
@@ -102,13 +107,29 @@ STATUS = (
 )
 
 
+class PendingSubmissionsManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(status__in=["submit", "comment"])
+
+
+class CorrectSubmissionsManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(status="correct")
+
+    def last_week(self):
+        return self.filter(submited_on__gte=timezone.now() - timedelta(days=7))
+
+
 class AbstractPbSubmission(models.Model):
     status = models.CharField(max_length=10, choices=STATUS, null=True)
-    correct = models.BooleanField(null=True)
     solution = models.TextField(blank=True, null=True)
     submited_on = models.DateTimeField(blank=True, null=True)
     correction_in_progress = models.BooleanField(default=False, editable=False)
     ltr_dir = models.BooleanField(default=False)
+    comments: models.QuerySet["AbstractComment"]
+    objects = models.Manager()
+    pending = PendingSubmissionsManager()
+    correct = CorrectSubmissionsManager()
 
     @property
     def safe(self):
@@ -164,12 +185,14 @@ class AbstractPbSubmission(models.Model):
     def soft_delete(self):
         # self.file.delete(save=False)
         self.solution = ""
-        self.submited_on = self.correct = self.status = None
+        self.submited_on = self.status = None
         self.correction_in_progress = False
         self.save()
 
     def can_be_deleted(self, user):
-        return user == self.student and not self.correct and self.status == "wrong"
+        return (
+            user == self.student and self.status != "correct" and self.status == "wrong"
+        )
 
     def can_comment(self, user):
         return user == self.student and self.status == "wrong"
@@ -209,7 +232,7 @@ class ProblemSubmission(AbstractPbSubmission):
     file = models.FileField(blank=True, null=True, upload_to=file_name)
 
     def mark_as_seen(self, user):
-        user.progress.last_submissions.remove(self)
+        user.last_submissions.remove(self)
 
     def __str__(self):
         return f"submission {self.id}"

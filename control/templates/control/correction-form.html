@@ -1,7 +1,7 @@
 {%extends 'problems/submit-form.html'%}
 {%block form_fields%}
     <textarea name="content" class="form-control my-4" required id="MathInput"></textarea>
-    {%if not this_sub.correct%}
+{%if this_sub.status != 'correct' %}
     <button type='submit' name='status' value='correct' class="btn btn-success">إجابة صحيحة</button>
     <button type='submit' name='status' value='wrong' class="btn btn-danger">إجابة خاطئة</button>
     {% else %}
