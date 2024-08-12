@@ -104,12 +104,25 @@ class User(AbstractBaseUser):
     is_admin = models.BooleanField(default=False)
     is_corrector = models.BooleanField(default=False)
 
+    points = models.IntegerField(default=0, editable=False, db_index=True)
     team = models.ForeignKey(Team, null=True, blank=True, on_delete=models.SET_NULL)
     USERNAME_FIELD = "email"
     # USERNAME and password are required by default
-    REQUIRED_FIELDS = []  # ['first_name', 'last_name']
+    REQUIRED_FIELDS = []
 
-    progress: models.OneToOneField["StudentProgress"]
+    completed_chapters = models.ManyToManyField(
+        Chapter, blank=True, verbose_name="المحاور المتمة"
+    )
+    solved_exercices = models.ManyToManyField(
+        Exercice, blank=True, verbose_name="التمارين المحلولة"
+    )
+    last_submissions = models.ManyToManyField(
+        ProblemSubmission,
+        blank=True,
+        verbose_name="آخر المحاولات المقدمة",
+    )
+    last_tasks_subs = models.ManyToManyField("tasks.TaskProblemSubmission", blank=True)
+
     submissions: models.QuerySet["ProblemSubmission"]
     tasks_submissions: models.QuerySet["TaskProblemSubmission"]
     objects = UserManager()
@@ -143,8 +156,13 @@ class User(AbstractBaseUser):
             return self.last_name + " " + self.first_name[0]
         return self.first_name + " " + self.last_name
 
-    def get_opened_problems_by_topic(self, topic):
-        return self.progress.opened_problems(topic=topic)
+    def get_opened_problems_by_topic(self, topic=None):
+        if topic:
+            chapters = self.completed_chapters.filter(topic=topic)
+            problems = Problem.objects.filter(chapter__in=chapters)
+        else:
+            problems = Problem.objects.filter(chapter__in=self.completed_chapters.all())
+        return problems
 
     def get_all_subs_by_problem(self, problem):
         return self.submissions.filter(problem=problem)
@@ -156,7 +174,8 @@ class User(AbstractBaseUser):
         return self.submissions.filter(problem=problem).exists()
 
     def add_points(self, points):
-        self.progress.add_points(points)
+        self.points += points
+        self.save()
 
     def is_team_member(self):
         return self.team is not None
@@ -165,9 +184,11 @@ class User(AbstractBaseUser):
         return dict(GRADES)[self.grade] if self.grade < 4 else ""
 
     @property
-    def count_last_points(self, period=7):
-        start_day = timezone.now() - timedelta(days=period)
+    def rank(self):
+        return User.objects.filter(points__gt=self.points).count() + 1
 
+    @property
+    def count_last_points(self, period=7):
         return 15 * (
             (
                 ProblemSubmission.correct.last_week()
@@ -205,13 +226,13 @@ class User(AbstractBaseUser):
         )
 
     def add_task_correction_notif(self, sub):
-        self.progress.last_tasks_subs.add(sub)
+        self.last_tasks_subs.add(sub)
 
     def tasks_subs_notif(self):
-        return self.progress.last_tasks_subs.count()
+        return self.last_tasks_subs.count()
 
     def get_last_tasks_subs(self):
-        return self.progress.last_tasks_subs.all()
+        return self.last_tasks_subs.all()
 
     class Meta:
         verbose_name = "مستخدم"
@@ -255,45 +276,3 @@ class Corrector(models.Model):
         return not self.solved_only or (
             problem.chapter.topic in self.topics and problem.has_solved(self.user)
         )
-
-
-class StudentProgress(models.Model):
-    student: models.OneToOneField["User"] = models.OneToOneField(
-        settings.AUTH_USER_MODEL, related_name="progress", on_delete=models.CASCADE
-    )
-    completed_chapters = models.ManyToManyField(
-        Chapter, blank=True, verbose_name="المحاور المتمة"
-    )
-    solved_exercices = models.ManyToManyField(
-        Exercice, blank=True, verbose_name="التمارين المحلولة"
-    )
-    last_submissions = models.ManyToManyField(
-        ProblemSubmission,
-        blank=True,
-        verbose_name="آخر المحاولات المقدمة",
-    )
-    last_tasks_subs = models.ManyToManyField("tasks.TaskProblemSubmission", blank=True)
-    points = models.IntegerField(default=0, editable=False)
-
-    @property
-    def rank(self):
-        return StudentProgress.objects.filter(points__gt=self.points).count() + 1
-
-    def add_points(self, points):
-        self.points += points
-        self.save()
-
-    def opened_problems(self, topic=None):
-        if topic:
-            chapters = self.completed_chapters.filter(topic=topic)
-            problems = Problem.objects.filter(chapter__in=chapters)
-        else:
-            problems = Problem.objects.filter(chapter__in=self.completed_chapters.all())
-        return problems
-
-    def __str__(self):
-        return self.student.email
-
-    class Meta:
-        verbose_name = "تقدم التلميذ"
-        verbose_name_plural = "تقدم التلاميذ"

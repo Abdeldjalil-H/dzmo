@@ -61,7 +61,7 @@ class TaskProblemSubmission(AbstractPbSubmission):
         self.ltr_dir = dir
 
     def mark_as_seen(self, user):
-        user.progress.last_tasks_subs.remove(self)
+        user.last_tasks_subs.remove(self)
 
     def get_task(self):
         return self.problem.task.get(team=self.student.team)

@@ -70,7 +70,7 @@ class Problem(AbstractProblem):
     added_on = models.DateTimeField(auto_now_add=True)
 
     def has_access(self, user):
-        return self.chapter in user.progress.completed_chapters.all()
+        return self.chapter in user.completed_chapters.all()
 
     def has_solved(self, user):
         return ProblemSubmission.correct.filter(
@@ -232,7 +232,7 @@ class ProblemSubmission(AbstractPbSubmission):
     file = models.FileField(blank=True, null=True, upload_to=file_name)
 
     def mark_as_seen(self, user):
-        user.progress.last_submissions.remove(self)
+        user.last_submissions.remove(self)
 
     def __str__(self):
         return f"submission {self.id}"

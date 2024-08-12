@@ -234,7 +234,7 @@ class LastCorrectedSubs(ListView):
     context_object_name = "user_subs"
 
     def queryset(self, **kwargs):
-        return self.request.user.progress.last_submissions.all()
+        return self.request.user.last_submissions.all()
 
 
 class LastSolvedProblems(ListView):

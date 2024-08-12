@@ -100,7 +100,7 @@ class ProblemCorrection(CorrectorsOnly, CreateView):
         self.submission.save()
 
     def notify_student(self):
-        self.submission.student.progress.last_submissions.add(self.submission)
+        self.submission.student.last_submissions.add(self.submission)
 
     def form_valid(self, form, **kwargs):
         pk = self.submission.pk

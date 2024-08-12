@@ -11,15 +11,15 @@
 			</tr>
 		</thead>
 		<tbody>
-			{%for student in students_list|dictsort:'progress.points' reversed%}
+			{%for student in students_list|dictsort:'points' reversed%}
 			<tr id="student{{student.pk}}">
-				<th scope="row">{{student.progress.rank}}</th>
+				<th scope="row">{{student.rank}}</th>
 				<td>
 					<a href="{%url 'accounts:profile' student.pk%}">
-					{{student.username}}
+						{{student.username}}
 					</a>
 				</td>
-				<td>{{student.progress.points}}</td>
+				<td>{{student.points}}</td>
 				<td>{{student.count_last_points}}</td>
 			</tr>
 			{%endfor%}
@@ -31,12 +31,13 @@
 	let rows = Array.from(document.querySelectorAll("tbody tr"));
 	Array.from(document.querySelectorAll(".sort-cell")).forEach(e => {
 		e.setAttribute("data-sort", "sort");
-		e.addEventListener("click", function(e) {
-		let c = e.target.cellIndex;
-		rows[this.dataset.sort]((a,b) => b.children[c].innerText - a.children[c].innerText);
-		tbody.innerHTML = "";
-		tbody.append(...rows);
-		this.dataset.sort === "sort" ? this.setAttribute("data-sort", "reverse") : this.setAttribute("data-sort", "sort");
-	})}, this);
+		e.addEventListener("click", function (e) {
+			let c = e.target.cellIndex;
+			rows[this.dataset.sort]((a, b) => b.children[c].innerText - a.children[c].innerText);
+			tbody.innerHTML = "";
+			tbody.append(...rows);
+			this.dataset.sort === "sort" ? this.setAttribute("data-sort", "reverse") : this.setAttribute("data-sort", "sort");
+		})
+	}, this);
 </script>
 {%endblock%}

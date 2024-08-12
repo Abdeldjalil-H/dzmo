@@ -54,7 +54,7 @@ class Chapter(models.Model):
         for ch in self.prereq.all():
             if (
                 Chapter.objects.get(id=ch.id)
-                not in request.user.progress.completed_chapters.all()
+                not in request.user.completed_chapters.all()
             ):
                 return False
         return True

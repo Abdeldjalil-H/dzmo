@@ -65,11 +65,11 @@ class PersonalAccount(UpdateView):
 @method_decorator(login_required, name="dispatch")
 class Profile(DetailView):
     template_name = "accounts/profile.html"
-    context_object_name = "progress"
+    context_object_name = "student"
 
     def get_object(self):
         user = get_object_or_404(User, pk=self.kwargs["pk"])
-        return user.progress
+        return user
 
 
 class PasswordChangeView(PasswordChangeView):
