@@ -2,82 +2,87 @@
 {% load mathfilters %}
 {% block content %}
 <div class="container">
-  <div class="row m-0">
-    <div class="card m-3 col-lg-5 col-md-5 col-sm-5 col-xs-12">
+	<div class="row m-0">
+		<div class="card m-3 col-lg-5 col-md-5 col-sm-5 col-xs-12">
 			<table style="margin:0px; margin-top:15px; width:100%; height:90px; padding:0px;">
 				<tbody>
 					<tr>
 						<td style="font-size:20px;">
-							{{progress.student.username}}
+							{{student.username}}
 						</td>
 					</tr>
 					<tr>
 						<td>
-							{{progress.student.get_school_grade}}
+							{{student.get_school_grade}}
 						</td>
-					</tr>			
-				</tbody></table>
-    </div>
-    <div class="card m-3 col-lg-3 col-md-3 col-sm-3 col-xs-12">
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<div class="card m-3 col-lg-3 col-md-3 col-sm-3 col-xs-12">
 			<table style="margin:0px; margin-top:15px; width:100%; height:90px; padding:0px;">
-				<tbody><tr>
-				<td>النقاط</td>
-				<td>{{progress.points}}</td>
-				</tr>
-				<tr>
-				<td>الرتبة</td>
-				<td>{{progress.rank}}</td>
-				</tr>
-			</tbody></table> 
-    </div>
-    <div class="card m-3 col-lg-5 col-md-12 col-sm-12 col-xs-12">
+				<tbody>
+					<tr>
+						<td>النقاط</td>
+						<td>{{student.points}}</td>
+					</tr>
+					<tr>
+						<td>الرتبة</td>
+						<td>{{student.rank}}</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<div class="card m-3 col-lg-5 col-md-12 col-sm-12 col-xs-12">
 			<h3 class="card-title mt-3">المسائل التي قام بحلها</h3>
 			<div class="card-body overflow-auto" style="max-height:50vh;">
-			<table>
-				<tbody>
-			{% for problem in progress.solved_problems.all%}
-				<tr>
-					<td>
-					{%if problem.chapter in user.progress.completed_chapters.all%}
-					<a href="{%url 'problems:submit' problem.chapter.topic problem.pk%}">مسألة {{problem.pk}}</a>
-					{%else%}
-					مسألة {{problem.pk}}
-					{%endif%}
-					</td>
-					<td>
-						+ {{problem.level|mul:15}}
-					</td>
-				</tr>
-			{%endfor%}
-			</tbody>
-			</table>
+				<table>
+					<tbody>
+						{% for problem in student.solved_problems.all%}
+						<tr>
+							<td>
+								{%if problem.chapter in student.completed_chapters.all%}
+								<a href="{%url 'problems:submit' problem.chapter.topic problem.pk%}">مسألة
+									{{problem.pk}}</a>
+								{%else%}
+								مسألة {{problem.pk}}
+								{%endif%}
+							</td>
+							<td>
+								+ {{problem.level|mul:15}}
+							</td>
+						</tr>
+						{%endfor%}
+					</tbody>
+				</table>
+			</div>
 		</div>
-    </div>
-    <div class="card m-3 col-lg-5 col-md-12 col-sm-12 col-xs-12">
+		<div class="card m-3 col-lg-5 col-md-12 col-sm-12 col-xs-12">
 			<h3 class="card-title mt-3">التمارين التي قام بحلها</h3>
 			<div class="card-body overflow-auto" style="max-height:50vh;">
-			<table>
-			<tbody>
-			{% for exercice in progress.solved_exercices.all%}
-				<tr>
-					<td>
-					{%if exercice in user.progress.solved_exercices.all%}
-					<a href="{%url 'lessons:exercice' exercice.chapter.topic exercice.chapter.slug exercice.pk%}">
-					{{exercice}}
-					</a>
-					{%else%}
-					{{exercice}}
-					{%endif%}
-					</td>
-					<td>
-						+ {{exercice.points}}
-					</td>
-				</tr>
-			{%endfor%}
-			</tbody>
-			</table>
+				<table>
+					<tbody>
+						{% for exercice in student.solved_exercices.all%}
+						<tr>
+							<td>
+								{%if exercice in student.solved_exercices.all%}
+								<a
+									href="{%url 'lessons:exercice' exercice.chapter.topic exercice.chapter.slug exercice.pk%}">
+									{{exercice}}
+								</a>
+								{%else%}
+								{{exercice}}
+								{%endif%}
+							</td>
+							<td>
+								+ {{exercice.points}}
+							</td>
+						</tr>
+						{%endfor%}
+					</tbody>
+				</table>
+			</div>
 		</div>
-    </div>
-  </div>
+	</div>
 </div>
 {% endblock %}

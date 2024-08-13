@@ -1,4 +1,4 @@
-<div class = "container">
+<div class="container">
     <h3>محاولاتك في هذه المسألة</h3>
     <table class="table col-lg-9 my-4">
         <thead>
@@ -9,17 +9,18 @@
             </tr>
         </thead>
         <tbody>
-        {% for sub in user_subs%}
-            <tr class="table-{% if sub.status == 'submit' %}warning{% elif sub.correct %}success{% else %}danger{%endif%}">
+            {% for sub in user_subs%}
+            <tr
+                class="table-{% if sub.status == 'submit' %}warning{% elif sub.status == 'correct' %}success{% else %}danger{%endif%}">
                 <td>
                     {% if sub.status == 'submit' %}
-                    {% elif sub.correct %}صحيحة
+                    {% elif sub.status == 'correct' %}صحيحة
                     {% else %}خاطئة{%endif%}
                 </td>
                 <td>{{sub.submited_on}}</td>
                 <td><a href="?sub={{sub.pk}}"> عرض </a></td>
             </tr>
-        {%endfor%}
+            {%endfor%}
         </tbody>
     </table>
 </div>

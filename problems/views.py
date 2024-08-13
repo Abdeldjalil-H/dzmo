@@ -6,8 +6,7 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView, DeleteView, CreateView
 from django.views.generic.detail import DetailView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from control.models import Submissions
-from .models import Problem, ProblemSubmission
+from .models import AbstractProblem, Problem, ProblemSubmission
 from .forms import CommentForm, SubmitForm
 
 
@@ -48,7 +47,9 @@ class _ProblemView(DetailView):
     context_object_name = "this_sub"
 
     def setup(self, request, *args, **kwargs):
-        self.problem = get_object_or_404(self.problem_model, pk=kwargs["pb_pk"])
+        self.problem: AbstractProblem = get_object_or_404(
+            self.problem_model, pk=kwargs["pb_pk"]
+        )
         self.sub = int(request.GET.get("sub")) if request.GET.get("sub") else None
         self.user = request.user
         return super().setup(request, *args, **kwargs)
@@ -69,7 +70,7 @@ class _ProblemView(DetailView):
         if not self.sub:
             return None
         if self.problem.has_solved(self.request.user):
-            return self.problem.get_sub(pk=self.sub, correct=True)
+            return self.problem.get_sub(pk=self.sub, status="correct")
 
         obj = get_object_or_404(self.problem.get_user_subs(self.user), pk=self.sub)
         self.handle_non_correct_sub(obj)
@@ -100,7 +101,6 @@ class _ProblemView(DetailView):
         form.save()
         sub.set_status("comment")
         sub.save()
-        Submissions.add_sub(sub)
         if self.request.is_ajax():
             return HttpResponse(
                 render_to_string(
@@ -133,6 +133,8 @@ class ProblemView(HaveAccessToProblem, _ProblemView):
 
 
 class _ProblemSubmit(CreateView):
+    problem_model: AbstractProblem
+
     def setup(self, request, *args, **kwargs):
         self.problem = get_object_or_404(self.problem_model, pk=kwargs["pb_pk"])
         self.draft_sub = self.problem_model.objects.get(
@@ -167,9 +169,6 @@ class _ProblemSubmit(CreateView):
             context["show_del"] = True
         return context
 
-    def add_to_subs(self, sub):
-        pass
-
     def form_valid(self, form):
         obj = form.save(commit=False)
         if self.draft_sub:
@@ -187,7 +186,6 @@ class _ProblemSubmit(CreateView):
             obj.set_submited_now()
             obj.save()
         if obj.status == "submit":
-            self.add_to_subs(obj)
             pk = obj.pk
         else:
             pk = None
@@ -208,9 +206,6 @@ class ProblemSubmit(HaveAccessToProblem, _ProblemSubmit):
         if sub_pk:
             return url + f"?sub={sub_pk}"
         return url
-
-    def add_to_subs(self, sub):
-        Submissions.add_sub(sub)
 
 
 class DeleteSubmission(DeleteView):
@@ -239,7 +234,7 @@ class LastCorrectedSubs(ListView):
     context_object_name = "user_subs"
 
     def queryset(self, **kwargs):
-        return self.request.user.progress.last_submissions.all()
+        return self.request.user.last_submissions.all()
 
 
 class LastSolvedProblems(ListView):
@@ -247,5 +242,4 @@ class LastSolvedProblems(ListView):
     context_object_name = "last_solved_problems"
 
     def get_queryset(self):
-        Submissions.update_last_correct()
-        return Submissions.get_last_correct().order_by("-submited_on")
+        return ProblemSubmission.correct.last_week().order_by("-submited_on")
