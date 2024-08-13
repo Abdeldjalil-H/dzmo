@@ -1,111 +1,118 @@
 {%block nav-bar%}
 <nav class="navbar navbar-expand-lg navbar-dark bg-success sticky-top">
   <div class="container">
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-  <div class="collapse navbar-collapse" id="navbarSupportedContent">
-    <ul class="navbar-nav mr-auto list-unstyled">
-      {%with n=user.progress.last_submissions.count%}
-      {%if n%}
-      <li>
-      <a href="{%url 'problems:last-corrected'%}" type="button" class="btn btn-info">
-        {{n}}
-      </a>
-      </li>
-      {%endif%}
-    {%endwith%}
-    {%with n=user.tasks_subs_notif%}
-    {%if n%} 
-    <li>
-      <a href="{%url 'tasks:last-corrected'%}" type="button" class="btn btn-warning">
-        {{n}}
-      </a>
-    </li>
-    {%endif%} 
-    {%endwith%}
-      <li class="nav-item">
-        <a class="nav-link" href="/">الرئيسية <span class="sr-only">(current)</span></a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" {%if user.is_team_member%}href="{%url 'tasks:tasks-list'%}" {%else%}aria-disabled="true" href="#" {%endif%}>الواجبات</a>
-      </li>
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          الدروس
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-          <a class="dropdown-item" href="{% url 'lessons:list' 'a' %}">جبر</a>
-          <a class="dropdown-item" href="{% url 'lessons:list' 'g' %}">هندسة</a>
-          <a class="dropdown-item" href="{% url 'lessons:list' 'c' %}">توفيقات</a>
-          <a class="dropdown-item" href="{% url 'lessons:list' 'nt' %}">نظرية الأعداد</a>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="{% url 'lessons:list' 'b' %}">الأساسيات</a>
-        </div>
-      </li>
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          المسائل
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-          <a class="dropdown-item" href="{% url 'problems:list' 'a' %}">جبر</a>
-          <a class="dropdown-item" href="{% url 'problems:list' 'g' %}">هندسة</a>
-          <a class="dropdown-item" href="{% url 'problems:list' 'c' %}">توفيقات</a>
-          <a class="dropdown-item" href="{% url 'problems:list' 'nt' %}">نظرية الأعداد</a>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="{% url 'problems:list' 'b' %}">الأساسيات</a>
-        </div>
-      </li>
-      {% if user.is_authenticated %}
-      <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="statistics" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav mr-auto list-unstyled">
+        {%with n=user.last_submissions.count%}
+        {%if n%}
+        <li>
+          <a href="{%url 'problems:last-corrected'%}" type="button" class="btn btn-info">
+            {{n}}
+          </a>
+        </li>
+        {%endif%}
+        {%endwith%}
+        {%with n=user.tasks_subs_notif%}
+        {%if n%}
+        <li>
+          <a href="{%url 'tasks:last-corrected'%}" type="button" class="btn btn-warning">
+            {{n}}
+          </a>
+        </li>
+        {%endif%}
+        {%endwith%}
+        <li class="nav-item">
+          <a class="nav-link" href="/">الرئيسية <span class="sr-only">(current)</span></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" {%if user.is_team_member%}href="{%url 'tasks:tasks-list'%}" {%else%}aria-disabled="true"
+            href="#" {%endif%}>الواجبات</a>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">
+            الدروس
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="{% url 'lessons:list' 'a' %}">جبر</a>
+            <a class="dropdown-item" href="{% url 'lessons:list' 'g' %}">هندسة</a>
+            <a class="dropdown-item" href="{% url 'lessons:list' 'c' %}">توفيقات</a>
+            <a class="dropdown-item" href="{% url 'lessons:list' 'nt' %}">نظرية الأعداد</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="{% url 'lessons:list' 'b' %}">الأساسيات</a>
+          </div>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">
+            المسائل
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="{% url 'problems:list' 'a' %}">جبر</a>
+            <a class="dropdown-item" href="{% url 'problems:list' 'g' %}">هندسة</a>
+            <a class="dropdown-item" href="{% url 'problems:list' 'c' %}">توفيقات</a>
+            <a class="dropdown-item" href="{% url 'problems:list' 'nt' %}">نظرية الأعداد</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="{% url 'problems:list' 'b' %}">الأساسيات</a>
+          </div>
+        </li>
+        {% if user.is_authenticated %}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="statistics" role="button" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">
             إحصائيات الموقع
           </a>
           <div class="dropdown-menu" aria-labelledby="statistics">
             <a class="dropdown-item" href="{% url 'accounts:ranking'%}">ترتيب الطلاب</a>
             <a class="dropdown-item" href="{%url 'problems:last-solved'%}">آخر المسائل المحلولة</a>
           </div>
-      </li>
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          {{user.username}}
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-          <a class="dropdown-item" href="{% url 'accounts:account' %}">الملف الشخصي</a>
-          <a class="dropdown-item" href="{% url 'accounts:profile' user.progress.pk%}">إنجازاتي</a>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="{% url 'accounts:logout' %}">الخروج</a>
-        </div>
-      </li>
-      {%else%}            
-      <li class="nav-item">
-        <a class="nav-link" href="{% url 'accounts:login' %}">الدخول</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{% url 'accounts:signup' %}">التسجيل</a>
-      </li>
-      {%endif%}
-      {%if user.is_corrector or user.is_staff%}
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          لوحة التحكم
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-          <a class="dropdown-item" href="{%url 'control:subs-list' %}">تصحيح المسائل</a>
-          {%if user.is_staff%}
-          <a class="dropdown-item" href="{%url 'tests:tests-list' %}">تصحيح الاختبارات</a>
-          <a class="dropdown-item" href="/admin/">إدارة الموقع</a>
-          <a class="dropdown-item" href="{%url 'control:add-problems'%}">إضافة مسائل</a>
-          <a class="dropdown-item" href="{%url 'control:send-mails'%}">إرسال بريد</a>
-          <a class="dropdown-item" href="{%url 'tasks:add-pbs'%}">إضافة مسائل الواجبات</a>
-          {%endif%}
-        </div>
-      </li>
-      {%endif%}
-    </ul>
-    
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">
+            {{user.username}}
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="{% url 'accounts:account' %}">الملف الشخصي</a>
+            <a class="dropdown-item" href="{% url 'accounts:profile' user.pk%}">إنجازاتي</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="{% url 'accounts:logout' %}">الخروج</a>
+          </div>
+        </li>
+        {%else%}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'accounts:login' %}">الدخول</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'accounts:signup' %}">التسجيل</a>
+        </li>
+        {%endif%}
+        {%if user.is_corrector or user.is_staff%}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">
+            لوحة التحكم
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="{%url 'control:subs-list' %}">تصحيح المسائل</a>
+            {%if user.is_staff%}
+            <a class="dropdown-item" href="{%url 'tests:tests-list' %}">تصحيح الاختبارات</a>
+            <a class="dropdown-item" href="/admin/">إدارة الموقع</a>
+            <a class="dropdown-item" href="{%url 'control:add-problems'%}">إضافة مسائل</a>
+            <a class="dropdown-item" href="{%url 'control:send-mails'%}">إرسال بريد</a>
+            <a class="dropdown-item" href="{%url 'tasks:add-pbs'%}">إضافة مسائل الواجبات</a>
+            {%endif%}
+          </div>
+        </li>
+        {%endif%}
+      </ul>
+
+    </div>
   </div>
-</div>
 </nav>
 {%endblock%}
