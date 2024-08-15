@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import ListView, DetailView
-
+from django.views.generic import View, ListView, DetailView
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
 from .models import Chapter, Lesson, ExerciceSolution, Exercice
 from django import forms
@@ -75,13 +75,12 @@ class ChapterPreview(DetailView):
         return get_object_or_404(Chapter, slug=self.kwargs["chapter"])
 
 
-def get_ex(category, CHOICES=None):
+def get_exercise_form(category, CHOICES=None):
     if category == "result":
 
         class ExerciceForm(forms.Form):
             question = forms.CharField(label="", required=False)
 
-        return ExerciceForm
     elif category == "one":
 
         class ExerciceForm(forms.Form):
@@ -92,7 +91,6 @@ def get_ex(category, CHOICES=None):
                 required=False,
             )
 
-        return ExerciceForm
     else:
 
         class ExerciceForm(forms.Form):
@@ -103,79 +101,98 @@ def get_ex(category, CHOICES=None):
                 required=False,
             )
 
-        return ExerciceForm
+    return ExerciceForm
 
 
-def exercice_view(request, pk, chapter_slug, **kwargs):
-    exercice = Exercice.objects.get(id=pk)
-    category = exercice.category
-    choices = exercice.get_choices()
-    chapter = Chapter.objects.get(slug=chapter_slug)
-    if not request.user.is_authenticated or not chapter.has_access(request):
-        return redirect(
-            reverse(
-                "lessons:chapter",
-                kwargs={"topic": chapter.topic, "chapter": chapter_slug},
-            )
-        )
-    form = get_ex(category=category, CHOICES=choices)(request.POST or None)
+class ExerciceView(LoginRequiredMixin, View):
     template_name = "lessons/exercice.html"
-    context = {
-        "form": form,
-        "exercice": exercice,
-        "chapter": exercice.chapter,
-        "solved_exercices": request.user.solved_exercices.filter(chapter=chapter),
-        "wrong_exercices": [
-            sol.exercice
-            for sol in request.user.exercicesolution_set.filter(
-                exercice__chapter=chapter
+
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+        self.pk = kwargs.get("pk")
+        self.chapter_slug = kwargs.get("chapter_slug")
+        self.exercice = Exercice.objects.get(id=self.pk)
+        self.category = self.exercice.category
+        self.choices = self.exercice.get_choices()
+        self.chapter = Chapter.objects.get(slug=self.chapter_slug)
+
+    def dispatch(self, request, *args, **kwargs):
+        if not self.chapter.has_access(request):
+            return redirect(
+                reverse(
+                    "lessons:chapter",
+                    kwargs={"topic": self.chapter.topic, "chapter": self.chapter_slug},
+                )
             )
-        ],
-    }
-    if exercice in request.user.solved_exercices.all():
-        context["correct"] = True
-        if exercice.category != "result":
-            context["answer"] = [int(x) for x in exercice.solution.split(",")]
-        return render(request, template_name, context)
-    if request.method == "POST":
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self):
+        context = {
+            "form": get_exercise_form(category=self.category, CHOICES=self.choices)(),
+            "exercice": self.exercice,
+            "chapter": self.exercice.chapter,
+            "solved_exercices": self.request.user.solved_exercices.filter(
+                chapter=self.chapter
+            ),
+            "wrong_exercices": [
+                sol.exercice
+                for sol in self.request.user.exercicesolution_set.filter(
+                    exercice__chapter=self.chapter
+                )
+            ],
+        }
+        if self.exercice in self.request.user.solved_exercices.all():
+            context["correct"] = True
+            if self.exercice.category != "result":
+                context["answer"] = [int(x) for x in self.exercice.solution.split(",")]
+        return context
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data()
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        form = get_exercise_form(category=self.category, CHOICES=self.choices)(
+            request.POST
+        )
         if form.is_valid():
             sols = request.user.exercicesolution_set
-            obj = sols.filter(exercice=exercice)
+            obj = sols.filter(exercice=self.exercice).first()
             if not obj:
-                obj = ExerciceSolution(student=request.user, exercice_id=pk)
-            else:
-                obj = obj.first()
+                obj = ExerciceSolution(student=request.user, exercice_id=self.pk)
+
             ans = ""
-            if exercice.category == "multiple":
-                for char in form.cleaned_data["question"]:
-                    ans += str(char) + ","
-                ans = ans[:-1]
+            if self.exercice.category == "multiple":
+                ans = ",".join(str(char) for char in form.cleaned_data["question"])
             else:
                 ans = str(form.cleaned_data["question"]).replace(" ", "")
 
             obj.answer = ans
-            obj.correct = obj.answer == exercice.solution
-            # if all the exercices are soloved, the open new chapter
+            obj.correct = obj.answer == self.exercice.solution
+
             if obj.correct:
-                request.user.solved_exercices.add(exercice)
-                request.user.add_points(exercice.points)
-                ex_of_chapter = chapter.exercice_set.all()
+                request.user.solved_exercices.add(self.exercice)
+                request.user.add_points(self.exercice.points)
+                ex_of_chapter = self.chapter.exercice_set.all()
                 if all(
                     ex in request.user.solved_exercices.all() for ex in ex_of_chapter
                 ):
-                    print("hi")
-                    request.user.completed_chapters.add(chapter)
+                    request.user.completed_chapters.add(self.chapter)
+
             obj.add_try()
             obj.save()
+
             return redirect(
                 reverse(
                     "lessons:exercice",
                     kwargs={
-                        "topic": chapter.topic,
-                        "chapter_slug": chapter.slug,
-                        "pk": exercice.pk,
+                        "topic": self.chapter.topic,
+                        "chapter_slug": self.chapter.slug,
+                        "pk": self.exercice.pk,
                     },
                 )
             )
 
-    return render(request, template_name, context)
+        context = self.get_context_data()
+        context["form"] = form
+        return render(request, self.template_name, context)
