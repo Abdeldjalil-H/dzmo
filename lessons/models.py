@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.query import QuerySet
 from django.conf import settings
 
 
@@ -33,6 +34,8 @@ class Chapter(models.Model):
     )
     publish = models.BooleanField(default=False, verbose_name="نشر المحور")
     pub_date = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ النشر")
+
+    exercices: QuerySet["Exercice"]
 
     @property
     def prereq_chapters(self):
@@ -152,7 +155,9 @@ class Exercice(models.Model):
 
 
 class ExerciceSolution(models.Model):
-    exercice = models.ForeignKey(Exercice, on_delete=models.CASCADE)
+    exercice = models.ForeignKey(
+        Exercice, on_delete=models.CASCADE, related_name="submissions"
+    )
     student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     correct = models.BooleanField(default=False)
     answer = models.CharField(max_length=30)

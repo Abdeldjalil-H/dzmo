@@ -4,6 +4,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
 from .models import Chapter, Lesson, ExerciceSolution, Exercice
 from django import forms
+from django.db.models import Prefetch
 
 
 class LessonsList(ListView):
@@ -111,13 +112,31 @@ class ExerciceView(LoginRequiredMixin, View):
         super().setup(request, *args, **kwargs)
         self.pk = kwargs.get("pk")
         self.chapter_slug = kwargs.get("chapter_slug")
-        self.exercice = Exercice.objects.get(id=self.pk)
-        self.category = self.exercice.category
-        self.choices = self.exercice.get_choices()
-        self.chapter = Chapter.objects.get(slug=self.chapter_slug)
+        exercice = Exercice.objects.select_related("chapter").get(id=self.pk)
+        self.category = exercice.category
+        self.choices = exercice.get_choices()
+        self.chapter = exercice.chapter
+        chapter_exercises = Exercice.objects.prefetch_related(
+            Prefetch(
+                "submissions",
+                queryset=ExerciceSolution.objects.filter(student=self.request.user),
+                to_attr="user_solutions",
+            )
+        ).filter(chapter=exercice.chapter)
+        for exercise in chapter_exercises:
+            if exercise.user_solutions and (
+                is_correct := exercise.user_solutions[0].correct
+            ):
+                exercise.solved = is_correct
+            else:
+                exercise.solved = None
+        self.chapter_exercises = chapter_exercises
+        self.exercice = next(ex for ex in chapter_exercises if ex.pk == self.pk)
 
     def dispatch(self, request, *args, **kwargs):
-        if not self.chapter.has_access(request):
+        if not self.chapter.has_access(request) or (
+            request.method == "POST" and self.exercice.solved
+        ):
             return redirect(
                 reverse(
                     "lessons:chapter",
@@ -127,21 +146,16 @@ class ExerciceView(LoginRequiredMixin, View):
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self):
+        solved_exercises = [ex for ex in self.chapter_exercises if ex.solved]
+        wrong_exercises = [ex for ex in self.chapter_exercises if ex.solved is False]
         context = {
             "form": get_exercise_form(category=self.category, CHOICES=self.choices)(),
             "exercice": self.exercice,
             "chapter": self.exercice.chapter,
-            "solved_exercices": self.request.user.solved_exercices.filter(
-                chapter=self.chapter
-            ),
-            "wrong_exercices": [
-                sol.exercice
-                for sol in self.request.user.exercicesolution_set.filter(
-                    exercice__chapter=self.chapter
-                )
-            ],
+            "solved_exercices": solved_exercises,
+            "wrong_exercices": wrong_exercises,
         }
-        if self.exercice in self.request.user.solved_exercices.all():
+        if self.exercice.solved:
             context["correct"] = True
             if self.exercice.category != "result":
                 context["answer"] = [int(x) for x in self.exercice.solution.split(",")]
@@ -156,10 +170,11 @@ class ExerciceView(LoginRequiredMixin, View):
             request.POST
         )
         if form.is_valid():
-            sols = request.user.exercicesolution_set
-            obj = sols.filter(exercice=self.exercice).first()
-            if not obj:
-                obj = ExerciceSolution(student=request.user, exercice_id=self.pk)
+            submission = ExerciceSolution.objects.filter(
+                student=request.user, exercice=self.exercice
+            ).first()
+            if not submission:
+                submission = ExerciceSolution(student=request.user, exercice_id=self.pk)
 
             ans = ""
             if self.exercice.category == "multiple":
@@ -167,20 +182,16 @@ class ExerciceView(LoginRequiredMixin, View):
             else:
                 ans = str(form.cleaned_data["question"]).replace(" ", "")
 
-            obj.answer = ans
-            obj.correct = obj.answer == self.exercice.solution
+            submission.answer = ans
+            submission.correct = submission.answer == self.exercice.solution
 
-            if obj.correct:
-                request.user.solved_exercices.add(self.exercice)
+            if submission.correct:
                 request.user.add_points(self.exercice.points)
-                ex_of_chapter = self.chapter.exercice_set.all()
-                if all(
-                    ex in request.user.solved_exercices.all() for ex in ex_of_chapter
-                ):
+                if all(ex.solved for ex in self.chapter_exercises if ex.pk != self.pk):
                     request.user.completed_chapters.add(self.chapter)
 
-            obj.add_try()
-            obj.save()
+            submission.add_try()
+            submission.save()
 
             return redirect(
                 reverse(

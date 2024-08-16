@@ -1,44 +1,49 @@
 {% extends 'control/base.html' %}
 {%block content%}
 {% for chapter in chapters %}
-<div class ="container my-4 my-md-5">
-  
+<div class="container my-4 my-md-5">
+
   <!--#b2ffb6-->
-<div class="card">
-    <div class="card-header d-flex justify-content-center" style="background-color:#{%if chapter in completed_chapters%}9ff99c{%else%}f8ffb2{%endif%};">
+  <div class="card">
+    <div class="card-header d-flex justify-content-center"
+      style="background-color:#{%if chapter in completed_chapters%}9ff99c{%else%}f8ffb2{%endif%};">
       <h2><a href="{% url 'lessons:chapter' chapter.topic chapter.slug %}">
-        {{ chapter.name }}
-      </a></h2>
+          {{ chapter.name }}
+        </a></h2>
     </div>
-<div class="card-body">
-    <div class="d-flex justify-content-center py-2 py-sm-2">
+    <div class="card-body">
+      <div class="d-flex justify-content-center py-2 py-sm-2">
         <p class="card-text">{{chapter.descr}}</p>
-    </div>
-    <div class="d-flex justify-content-center py-2 py-sm-2"><h4>الدروس</h4></div>
-    <div class="d-flex justify-content-center py-2 py-sm-2">
-      
-        <ol class="list-unstyled px-0">   
-            {% for lesson in chapter.lesson_set.all|dictsort:'order' %}
-                <li><a href="{% url 'lessons:detail' chapter.topic chapter.slug lesson.slug %}" class="card-link">
-                    {{lesson.order}}-{{lesson.title}}</a></li>
-            {% endfor %}
-        </ol> 
-      
-    </div>
-    <div class="d-flex justify-content-center py-2 py-sm-2">
-      <h4>التمارين</h4>
-    </div>
-    <div class="d-flex justify-content-center py-2 py-sm-2">
-        <div dir ="ltr" class="btn-group" role="group" aria-label="First group">
-            {% for ex in chapter.exercice_set.all %}
-            <a type="button" class="btn {%if ex in solved_exercices%}btn-success{%elif ex in wrong_exercices%}btn-danger" style="{%else%}background-color: #e0e6e1;{%endif%}" href="{% url 'lessons:exercice' chapter.topic chapter.slug ex.pk%}">
-                {{forloop.counter}} 
-            </a>
-            {%endfor%}
+      </div>
+      <div class="d-flex justify-content-center py-2 py-sm-2">
+        <h4>الدروس</h4>
+      </div>
+      <div class="d-flex justify-content-center py-2 py-sm-2">
+
+        <ol class="list-unstyled px-0">
+          {% for lesson in chapter.lesson_set.all|dictsort:'order' %}
+          <li><a href="{% url 'lessons:detail' chapter.topic chapter.slug lesson.slug %}" class="card-link">
+              {{lesson.order}}-{{lesson.title}}</a></li>
+          {% endfor %}
+        </ol>
+
+      </div>
+      <div class="d-flex justify-content-center py-2 py-sm-2">
+        <h4>التمارين</h4>
+      </div>
+      <div class="d-flex justify-content-center py-2 py-sm-2">
+        <div dir="ltr" class="btn-group" role="group" aria-label="First group">
+          {% for ex in chapter.exercices.all %}
+          <a type="button" class="btn {%if ex in solved_exercices%}btn-success{%elif ex in wrong_exercices%}btn-danger"
+            style="{%else%}background-color: #e0e6e1;{%endif%}"
+            href="{% url 'lessons:exercice' chapter.topic chapter.slug ex.pk%}">
+            {{forloop.counter}}
+          </a>
+          {%endfor%}
         </div>
+      </div>
     </div>
   </div>
-</div>
 </div>
 </div>
 {% endfor %}
