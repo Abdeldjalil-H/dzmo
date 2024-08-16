@@ -113,10 +113,9 @@ class ExerciceView(LoginRequiredMixin, View):
         self.category = exercice.category
         self.choices = exercice.get_choices()
         self.chapter = exercice.chapter
-        from django.db.models import Exists, OuterRef
 
         chapter_exercises = Exercice.objects.with_status(student=request.user).filter(
-            chapter=exercice.chapter, submissions__student_id=request.user.id
+            chapter=exercice.chapter
         )
         self.chapter_exercises = chapter_exercises
         self.exercice = next(ex for ex in chapter_exercises if ex.pk == self.pk)

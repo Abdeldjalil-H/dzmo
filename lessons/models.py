@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import Exists, OuterRef
+from django.db.models import OuterRef, Subquery
 from django.db.models.query import QuerySet
 from django.conf import settings
 
@@ -126,10 +126,11 @@ EX_POINTS = (
 class ExerciseManager(models.Manager):
     def with_status(self, *, student):
         return self.annotate(
-            solved=Exists(
+            solved=Subquery(
                 ExerciceSolution.objects.filter(
-                    exercice=OuterRef("pk"), student=student
-                )
+                    exercice=OuterRef("pk"),
+                    student=student,
+                ).values_list("correct")
             )
         )
 
