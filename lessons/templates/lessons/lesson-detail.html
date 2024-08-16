@@ -15,9 +15,9 @@
 			</div>
 			<div class="list-group" role="tablist">
 				<h4 class="list-group-item-heading" style="margin-top : 20px; margin-bottom: 20px;">التمارين</h4>
-				{% for ex in chapter.exercices.all|dictsort:'points' %}
+				{% for ex in exercices|dictsort:'points' %}
 				<a id="ex{{ex.pk}}"
-					class="list-group-item list-group-item-action {%if ex in solved_exercices%}list-group-item-success{%elif ex in wrong_exercices%}list-group-item-danger{%endif%}"
+					class="list-group-item list-group-item-action {%if ex.solved%}list-group-item-success{%elif ex.solved is False %}list-group-item-danger{%endif%}"
 					href="{% url 'lessons:exercice' chapter.topic chapter.slug ex.pk %}" role="tab">
 					تمرين {{forloop.counter}}</a>
 				{%endfor%}

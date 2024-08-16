@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Exists, OuterRef
 from django.db.models.query import QuerySet
 from django.conf import settings
 
@@ -122,6 +123,17 @@ EX_POINTS = (
 )
 
 
+class ExerciseManager(models.Manager):
+    def with_status(self, *, student):
+        return self.annotate(
+            solved=Exists(
+                ExerciceSolution.objects.filter(
+                    exercice=OuterRef("pk"), student=student
+                )
+            )
+        )
+
+
 class Exercice(models.Model):
     content = models.TextField(verbose_name="نص التمرين")
     choices = models.TextField(verbose_name="الاقتراحات", blank=True)
@@ -139,6 +151,8 @@ class Exercice(models.Model):
     explanation = models.TextField(verbose_name="شرح الحل", blank=True)
     image = models.ImageField(blank=True, upload_to="exercices_images")
     points = models.IntegerField(choices=EX_POINTS, default=3)
+
+    objects: ExerciseManager = ExerciseManager()
 
     def get_choices(self):
         # ? result

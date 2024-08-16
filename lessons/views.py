@@ -1,10 +1,10 @@
+from collections import defaultdict
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import View, ListView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
 from .models import Chapter, Lesson, ExerciceSolution, Exercice
 from django import forms
-from django.db.models import Prefetch
 
 
 class LessonsList(ListView):
@@ -21,21 +21,24 @@ class LessonsList(ListView):
             context["completed_chapters"] = self.request.user.completed_chapters.filter(
                 topic=topic
             )
-            context["solved_exercices"] = self.request.user.solved_exercices.filter(
+
+            exercises = Exercice.objects.with_status(student=self.request.user).filter(
                 chapter__topic=topic
             )
-            context["wrong_exercices"] = [
-                sol.exercice
-                for sol in self.request.user.exercicesolution_set.filter(correct=False)
-            ]
+
+            exercises_by_chapter = defaultdict(list)
+            for ex in exercises:
+                exercises_by_chapter[ex.chapter_id].append(ex)
+
+            for chapter in context["chapters"]:
+                chapter.exercices_with_status = exercises_by_chapter.get(chapter.id, [])
+
         return context
 
 
 class LessonDetail(DetailView):
     template_name = "lessons/lesson-detail.html"
     context_object_name = "lesson"
-    # the lesson will be token in automatic way
-    # bcz we have <slug:slug> in the url works with pk also
     model = Lesson
 
     def get_context_data(self, **kwargs):
@@ -53,15 +56,9 @@ class LessonDetail(DetailView):
             context["lesson"] = None
             return context
 
-        context["solved_exercices"] = self.request.user.solved_exercices.filter(
-            chapter=chapter
-        )
-        context["wrong_exercices"] = [
-            sol.exercice
-            for sol in self.request.user.exercicesolution_set.filter(
-                exercice__chapter=chapter
-            )
-        ]
+        context["exercices"] = Exercice.objects.with_status(
+            student=self.request.user
+        ).filter(chapter=chapter)
         return context
 
 
@@ -116,20 +113,11 @@ class ExerciceView(LoginRequiredMixin, View):
         self.category = exercice.category
         self.choices = exercice.get_choices()
         self.chapter = exercice.chapter
-        chapter_exercises = Exercice.objects.prefetch_related(
-            Prefetch(
-                "submissions",
-                queryset=ExerciceSolution.objects.filter(student=self.request.user),
-                to_attr="user_solutions",
-            )
-        ).filter(chapter=exercice.chapter)
-        for exercise in chapter_exercises:
-            if exercise.user_solutions and (
-                is_correct := exercise.user_solutions[0].correct
-            ):
-                exercise.solved = is_correct
-            else:
-                exercise.solved = None
+        from django.db.models import Exists, OuterRef
+
+        chapter_exercises = Exercice.objects.with_status(student=request.user).filter(
+            chapter=exercice.chapter, submissions__student_id=request.user.id
+        )
         self.chapter_exercises = chapter_exercises
         self.exercice = next(ex for ex in chapter_exercises if ex.pk == self.pk)
 
@@ -146,14 +134,11 @@ class ExerciceView(LoginRequiredMixin, View):
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self):
-        solved_exercises = [ex for ex in self.chapter_exercises if ex.solved]
-        wrong_exercises = [ex for ex in self.chapter_exercises if ex.solved is False]
         context = {
             "form": get_exercise_form(category=self.category, CHOICES=self.choices)(),
             "exercice": self.exercice,
             "chapter": self.exercice.chapter,
-            "solved_exercices": solved_exercises,
-            "wrong_exercices": wrong_exercises,
+            "exercices": self.chapter_exercises,
         }
         if self.exercice.solved:
             context["correct"] = True

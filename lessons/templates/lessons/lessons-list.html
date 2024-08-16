@@ -33,8 +33,8 @@
       </div>
       <div class="d-flex justify-content-center py-2 py-sm-2">
         <div dir="ltr" class="btn-group" role="group" aria-label="First group">
-          {% for ex in chapter.exercices.all %}
-          <a type="button" class="btn {%if ex in solved_exercices%}btn-success{%elif ex in wrong_exercices%}btn-danger"
+          {% for ex in chapter.exercices_with_status %}
+          <a type="button" class="btn {%if ex.solved %}btn-success{%elif ex.solved is False %}btn-danger"
             style="{%else%}background-color: #e0e6e1;{%endif%}"
             href="{% url 'lessons:exercice' chapter.topic chapter.slug ex.pk%}">
             {{forloop.counter}}
