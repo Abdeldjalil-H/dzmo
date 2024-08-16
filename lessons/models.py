@@ -126,7 +126,11 @@ class Exercice(models.Model):
     content = models.TextField(verbose_name="نص التمرين")
     choices = models.TextField(verbose_name="الاقتراحات", blank=True)
     chapter = models.ForeignKey(
-        Chapter, verbose_name="المحور", on_delete=models.SET_NULL, null=True
+        Chapter,
+        verbose_name="المحور",
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="exercices",
     )
     category = models.CharField(
         max_length=30, choices=EX_TYPES, verbose_name="نوع التمرين"
