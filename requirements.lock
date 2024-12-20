@@ -28,6 +28,8 @@ django==4.2.14
     # via dzmo
 django-crispy-forms==1.14.0
     # via dzmo
+django-environ==0.11.2
+    # via dzmo
 django-mathfilters==1.0.0
     # via dzmo
 django-redis==5.4.0
