@@ -6,4 +6,4 @@ class ControlConfig(AppConfig):
     verbose_name = "التحكم"
 
     def ready(self):
-        import control.signals
+        import control.signals  # noqa: F401
