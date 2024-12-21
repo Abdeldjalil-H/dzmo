@@ -76,8 +76,7 @@ def parent_file_path(instance):
 def answer_file_path(instance, *args, pb_num=None):
     if not pb_num:
         pb_num = instance.pb_num
-    # ext = filename.split('.')[-1]
-    # name = f'{instance.pb_pk}.{ext}'
+
     return join(parent_file_path(instance), f"{pb_num}")
 
 

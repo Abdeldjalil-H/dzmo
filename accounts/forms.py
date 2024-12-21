@@ -6,7 +6,7 @@ from .models import User
 class UserAdminCreationForm(forms.ModelForm):
     password1 = forms.CharField(widget=forms.PasswordInput)
     password2 = forms.CharField(widget=forms.PasswordInput)
-    # wilaya      = forms.IntegerField()
+
     class Meta:
         model = User
         fields = ["email", "password1", "password2"]

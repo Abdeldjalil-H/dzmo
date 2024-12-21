@@ -26,7 +26,6 @@ urlpatterns = [
         DeleteSubmission.as_view(),
         name="delete",
     ),
-    # path('correction/list/',name='correction-tasks-list'),
     path(
         "correction/task<int:task_pk>/", TaskSubsList.as_view(), name="task-subs-list"
     ),

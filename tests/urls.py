@@ -12,6 +12,7 @@ from .views import (
 )
 
 app_name = "tests"
+
 urlpatterns = [
     path(
         "<int:test_pk>/add-answer/",
