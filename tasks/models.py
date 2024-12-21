@@ -19,7 +19,7 @@ class TaskProblem(AbstractProblem):
     )
 
     def get_name(self):
-        return f"Problem"
+        return "Problem"
 
     @property
     def code(self):
