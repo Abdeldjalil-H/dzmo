@@ -33,8 +33,6 @@ class LessonsList(ListView):
 class LessonDetail(DetailView):
     template_name = "lessons/lesson-detail.html"
     context_object_name = "lesson"
-    # the lesson will be token in automatic way
-    # bcz we have <slug:slug> in the url works with pk also
     model = Lesson
 
     def get_context_data(self, **kwargs):
@@ -68,9 +66,6 @@ class ChapterPreview(DetailView):
     template_name = "lessons/chapter.html"
     context_object_name = "chapter"
 
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     context['access'] = context['chapter'].has_access()
     def get_object(self, **kwargs):
         return get_object_or_404(Chapter, slug=self.kwargs["chapter"])
 

@@ -3,8 +3,6 @@ from django.db import models
 from requests import post
 from json import dumps
 
-# Create your models here.
-
 
 class MainPagePost(models.Model):
     title = models.CharField(max_length=200, verbose_name="العنوان")

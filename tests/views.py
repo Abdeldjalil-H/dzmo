@@ -106,13 +106,9 @@ class TestAnswerView(FormView):
 
         if not self.test.is_over:
             context["form"] = self.get_form()
-            # media_storage = get_storage_class()()
-            # sub =
-            # url = media_storage.url(name=answer_file_path(sub,pb_pk=2))
             context["show_link"] = self.test.get_submission(
                 self.request.user
             ).get_files_status()
-            # context['link'] = url
         return context
 
 
