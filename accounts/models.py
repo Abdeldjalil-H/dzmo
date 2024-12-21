@@ -185,7 +185,7 @@ class User(AbstractBaseUser):
         return User.objects.filter(points__gt=self.points).count() + 1
 
     @property
-    def count_last_points(self, period=7):
+    def count_last_points(self):
         return 15 * (
             (
                 ProblemSubmission.correct.last_week()
