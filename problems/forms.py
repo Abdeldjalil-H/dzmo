@@ -1,7 +1,8 @@
 from django import forms
-from django.forms import ModelForm
 from django.core.exceptions import ValidationError
-from .models import ProblemSubmission, Comment
+from django.forms import ModelForm
+
+from .models import Comment, ProblemSubmission
 
 
 class SubmitForm(ModelForm):

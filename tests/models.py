@@ -1,10 +1,12 @@
-from django.db import models
+from os.path import join
+
 from django.contrib.postgres.fields import ArrayField
+from django.db import models
 from django.db.models.fields import SmallIntegerField
 from django.utils import timezone
+
 from accounts.models import User
 from problems.models import AbstractProblem
-from os.path import join
 
 
 class Test(models.Model):

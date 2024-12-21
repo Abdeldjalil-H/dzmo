@@ -1,10 +1,12 @@
 from datetime import timedelta
+from os.path import join
+
+from django.conf import settings
 from django.db import models
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from django.conf import settings
+
 from lessons.models import Chapter
-from os.path import join
 
 LEVELS = [(i, str(i)) for i in range(1, 6)]
 

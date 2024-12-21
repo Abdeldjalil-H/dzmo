@@ -1,9 +1,9 @@
+from django.contrib import messages
+from django.shortcuts import redirect, render
+from django.urls import reverse
+
 from .app_configurations import GetFieldFromSettings
 from .confirm import _verify_user
-from django.contrib import messages
-from django.urls import reverse
-from django.shortcuts import render, redirect
-
 
 success_redirect = GetFieldFromSettings().get("verification_success_redirect")
 

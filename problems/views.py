@@ -1,13 +1,14 @@
-from django.shortcuts import get_object_or_404, redirect
-from django.http import HttpResponseRedirect, HttpResponse
-from django.template.loader import render_to_string
 from django.contrib import messages
-from django.urls import reverse_lazy
-from django.views.generic import ListView, DeleteView, CreateView
-from django.views.generic.detail import DetailView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from .models import AbstractProblem, Problem, ProblemSubmission
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, redirect
+from django.template.loader import render_to_string
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, DeleteView, ListView
+from django.views.generic.detail import DetailView
+
 from .forms import CommentForm, SubmitForm
+from .models import AbstractProblem, Problem, ProblemSubmission
 
 
 # List of problems by section

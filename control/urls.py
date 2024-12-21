@@ -1,10 +1,10 @@
 from django.urls import path
 
 from .views import (
-    SubsList,
-    ProblemCorrection,
     AddProblems,
+    ProblemCorrection,
     SendMail,
+    SubsList,
 )
 
 app_name = "control"

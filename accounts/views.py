@@ -1,26 +1,25 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse_lazy
-from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import (
     LoginView,
-    PasswordResetView,
+    PasswordChangeView,
     PasswordResetConfirmView,
     PasswordResetDoneView,
-    PasswordChangeView,
+    PasswordResetView,
 )
-
-from .models import User
-from .decorators import cant_use_when_logged
-
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse_lazy
+from django.utils.decorators import method_decorator
 from django.views.generic import (
     DetailView,
-    UpdateView,
     ListView,
+    UpdateView,
 )
+
 from verify_email.email_handler import send_verification_email
 
+from .decorators import cant_use_when_logged
 from .forms import SignUpForm
+from .models import User
 
 
 @cant_use_when_logged

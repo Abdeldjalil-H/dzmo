@@ -1,9 +1,9 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import ListView, DetailView
-
-from django.urls import reverse
-from .models import Chapter, Lesson, ExerciceSolution, Exercice
 from django import forms
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.views.generic import DetailView, ListView
+
+from .models import Chapter, Exercice, ExerciceSolution, Lesson
 
 
 class LessonsList(ListView):

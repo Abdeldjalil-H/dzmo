@@ -1,6 +1,8 @@
 from django import forms
-from .models import TaskComment, TaskProblemSubmission, Task, TASKS_LEVELS
+
 from problems.forms import CommentForm, SubmitForm
+
+from .models import TASKS_LEVELS, Task, TaskComment, TaskProblemSubmission
 
 
 class SubmitForm(SubmitForm):

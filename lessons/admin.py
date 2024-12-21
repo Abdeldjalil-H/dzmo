@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Chapter, Lesson, Exercice, ExerciceSolution
+from .models import Chapter, Exercice, ExerciceSolution, Lesson
 
 
 class LessonInline(admin.StackedInline):

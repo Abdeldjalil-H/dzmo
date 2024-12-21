@@ -1,10 +1,9 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
-
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .forms import UserAdminCreationForm, UserAdminChangeForm
-from .models import Team, Corrector
+from .forms import UserAdminChangeForm, UserAdminCreationForm
+from .models import Corrector, Team
 
 User = get_user_model()
 

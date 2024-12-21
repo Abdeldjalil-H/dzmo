@@ -1,7 +1,9 @@
-from problems.models import ProblemSubmission
+from json import dumps
+
 from django.db import models
 from requests import post
-from json import dumps
+
+from problems.models import ProblemSubmission
 
 
 class MainPagePost(models.Model):

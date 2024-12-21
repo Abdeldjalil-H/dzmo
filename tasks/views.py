@@ -1,11 +1,13 @@
-from django.urls import reverse_lazy
-from django.views.generic import ListView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.shortcuts import get_list_or_404, get_object_or_404
+from django.urls import reverse_lazy
+from django.views.generic import ListView
+
+from control.views import AddProblems, ProblemCorrection, SubsList
+from problems.views import DeleteSubmission, _ProblemSubmit, _ProblemView
+
+from .forms import AddProblemsForm, CommentForm, SubmitForm
 from .models import Task, TaskComment, TaskProblem, TaskProblemSubmission
-from control.views import ProblemCorrection, SubsList, AddProblems
-from problems.views import _ProblemSubmit, _ProblemView, DeleteSubmission
-from .forms import SubmitForm, CommentForm, AddProblemsForm
 
 
 class CheckTeam(UserPassesTestMixin):

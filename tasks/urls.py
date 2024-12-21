@@ -1,15 +1,16 @@
 from django.urls import path
+
 from .views import (
-    TaskPbView,
-    TasksList,
-    TaskProblemsList,
-    TaskPbSubmit,
-    TaskSubsList,
-    TaskPbsCorrection,
-    DeleteSubmission,
     AddProblems,
-    LastCorrectedSubs,
     CorrectSolsByTask,
+    DeleteSubmission,
+    LastCorrectedSubs,
+    TaskPbsCorrection,
+    TaskPbSubmit,
+    TaskPbView,
+    TaskProblemsList,
+    TasksList,
+    TaskSubsList,
 )
 
 app_name = "tasks"

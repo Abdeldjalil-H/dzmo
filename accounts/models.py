@@ -1,7 +1,8 @@
-from django.db import models
-from django.db.models import Q, Subquery, Sum
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.contrib.postgres.fields import ArrayField
+from django.db import models
+from django.db.models import Q, Subquery, Sum
+
 from lessons.models import Chapter, Exercice, TopicField
 from problems.models import Problem, ProblemSubmission
 from tasks.models import TaskProblemSubmission
