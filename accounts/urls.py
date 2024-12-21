@@ -14,6 +14,7 @@ from .views import (
 )
 
 app_name = "accounts"
+
 urlpatterns = [
     path("signup/", signup, name="signup"),
     path("login/", LoginView.as_view(), name="login"),
