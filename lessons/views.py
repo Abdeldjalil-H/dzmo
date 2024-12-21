@@ -43,7 +43,7 @@ class LessonDetail(DetailView):
         context["chapter"] = chapter
 
         if not self.request.user.is_authenticated:
-            if chapter.prereq_chapters:
+            if chapter.prerequisites.exists():
                 context["lesson"] = None
             return context
 
