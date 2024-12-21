@@ -9,11 +9,7 @@ from django.contrib.auth.views import (
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
-from django.views.generic import (
-    DetailView,
-    ListView,
-    UpdateView,
-)
+from django.views.generic import DetailView, ListView, UpdateView
 
 from verify_email.email_handler import send_verification_email
 

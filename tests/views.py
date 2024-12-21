@@ -3,10 +3,7 @@ from django.core.files.storage import get_storage_class
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
-from django.views.generic import (
-    FormView,
-    ListView,
-)
+from django.views.generic import FormView, ListView
 from django.views.generic.base import TemplateView
 from rest_framework.parsers import MultiPartParser
 from rest_framework.request import Request

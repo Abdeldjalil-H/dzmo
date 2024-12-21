@@ -4,11 +4,7 @@ from django.core.mail import send_mail
 from django.http.response import HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
-from django.views.generic import (
-    CreateView,
-    FormView,
-    ListView,
-)
+from django.views.generic import CreateView, FormView, ListView
 
 from accounts.models import User
 from problems.models import Comment, Problem, ProblemSubmission
