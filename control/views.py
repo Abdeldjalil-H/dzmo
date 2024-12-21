@@ -1,18 +1,16 @@
+from django.conf import settings
+from django.contrib.auth.mixins import UserPassesTestMixin
+from django.core.mail import send_mail
 from django.http.response import HttpResponseForbidden
 from django.shortcuts import get_object_or_404
-from django.core.mail import send_mail
 from django.urls import reverse_lazy
-from django.conf import settings
-from django.views.generic import (
-    ListView,
-    CreateView,
-    FormView,
-)
-from django.contrib.auth.mixins import UserPassesTestMixin
-from problems.models import ProblemSubmission, Comment, Problem
+from django.views.generic import CreateView, FormView, ListView
+
 from accounts.models import User
-from .models import MainPagePost
+from problems.models import Comment, Problem, ProblemSubmission
+
 from .forms import AddProblemsForm, SendMailForm
+from .models import MainPagePost
 
 
 class StaffRequired(UserPassesTestMixin):

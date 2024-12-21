@@ -1,10 +1,6 @@
 from django.contrib import admin
-from .models import (
-    Task,
-    TaskProblem,
-    TaskProblemSubmission,
-    TaskComment,
-)
+
+from .models import Task, TaskComment, TaskProblem, TaskProblemSubmission
 
 admin.site.register(Task)
 admin.site.register(TaskProblem)

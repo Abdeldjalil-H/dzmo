@@ -1,7 +1,9 @@
 from django.urls import path
-from .views import LessonsList, LessonDetail, exercice_view, ChapterPreview
+
+from .views import ChapterPreview, LessonDetail, LessonsList, exercice_view
 
 app_name = "lessons"
+
 urlpatterns = [
     path("<slug:topic>/", LessonsList.as_view(), name="list"),
     path("<topic>/<chapter>/", ChapterPreview.as_view(), name="chapter"),

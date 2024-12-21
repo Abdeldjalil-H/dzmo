@@ -1,8 +1,9 @@
 from base64 import urlsafe_b64decode
 from binascii import Error as BASE64ERROR
+
 from django.contrib.auth import get_user_model
-from django.utils import timezone
 from django.contrib.auth.tokens import default_token_generator
+from django.utils import timezone
 
 
 class _UserActivationProcess:
@@ -35,7 +36,7 @@ class _UserActivationProcess:
                         return valid
                 return False
             return False
-        except:
+        except Exception:
             return False
 
 

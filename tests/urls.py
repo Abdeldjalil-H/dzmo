@@ -1,14 +1,15 @@
-from django.urls import path
 from django.contrib.auth.decorators import login_required
+from django.urls import path
+
 from .views import (
+    SolutionUploadView,
+    TestAnswersList,
     TestAnswerView,
+    TestCorrection,
     TestResult,
     TestsList,
-    TestAnswersList,
-    TestCorrection,
     TestSolution,
     create_test_answer,
-    SolutionUploadView,
 )
 
 app_name = "tests"

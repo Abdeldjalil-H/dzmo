@@ -1,11 +1,9 @@
 from os.path import join
+
 from django.conf import settings
 from django.db import models
-from problems.models import (
-    AbstractComment,
-    AbstractPbSubmission,
-    AbstractProblem,
-)
+
+from problems.models import AbstractComment, AbstractPbSubmission, AbstractProblem
 
 TASKS_MAX_LEVEL = 6
 TASKS_LEVELS = [(i, str(i)) for i in range(1, TASKS_MAX_LEVEL + 1)]

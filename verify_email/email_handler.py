@@ -1,10 +1,12 @@
-from django.core.mail import BadHeaderError, send_mail
-from django.contrib.sites.shortcuts import get_current_site
 from base64 import urlsafe_b64encode
+from smtplib import SMTPException
+
 from django.contrib.auth.tokens import default_token_generator
+from django.contrib.sites.shortcuts import get_current_site
+from django.core.mail import BadHeaderError, send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
-from smtplib import SMTPException
+
 from .app_configurations import GetFieldFromSettings
 
 
@@ -40,7 +42,7 @@ class _VerifyEmail:
             current_site = get_current_site(request)
             try:
                 useremail = form.cleaned_data[self.settings.get("email_field_name")]
-            except:
+            except Exception:
                 raise KeyError(
                     'No key named "email" in your form. Your field should be named as email in form OR set a variable'
                     ' "EMAIL_FIELD_NAME" with the name of current field in settings.py if you want to use current name '
