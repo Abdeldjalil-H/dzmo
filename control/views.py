@@ -132,16 +132,6 @@ class MainPage(ListView):
         return posts.filter(public=True)
 
 
-def mail(subject, msg, receivers):
-    res = send_mail(
-        subject=subject,
-        message=msg,
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=receivers,
-        fail_silently=False,
-    )
-
-
 class SendMail(StaffRequired, FormView):
     template_name = "control/send-emails.html"
     form_class = SendMailForm
