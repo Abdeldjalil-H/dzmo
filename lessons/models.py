@@ -2,13 +2,6 @@ from django.db import models
 from django.conf import settings
 
 
-class PrereqChapter(models.Model):
-    name = models.CharField(max_length=150)
-
-    def __str__(self):
-        return self.name
-
-
 class TopicField(models.CharField):
     def __init__(self, *args, **kwargs):
         TOPICS = (
@@ -28,15 +21,11 @@ class Chapter(models.Model):
     slug = models.SlugField(verbose_name="الرابط")
     topic = TopicField(verbose_name="المادة")
     descr = models.TextField(verbose_name="لمحة عن المحور")
-    prereq = models.ManyToManyField(
-        PrereqChapter, blank=True, verbose_name="المكتسبات اللازمة"
+    prerequisites = models.ManyToManyField(
+        "self", blank=True, verbose_name="المكتسبات اللازمة"
     )
     publish = models.BooleanField(default=False, verbose_name="نشر المحور")
     pub_date = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ النشر")
-
-    @property
-    def prereq_chapters(self):
-        return Chapter.objects.filter(id__in=[ch.pk for ch in self.prereq.all()])
 
     def get_topic(self):
         if self.topic == "a":
@@ -51,26 +40,12 @@ class Chapter(models.Model):
             return "أساسيات"
 
     def has_access(self, request):
-        for ch in self.prereq.all():
-            if (
-                Chapter.objects.get(id=ch.id)
-                not in request.user.completed_chapters.all()
-            ):
-                return False
-        return True
+        return not self.prerequisites.exclude(
+            id__in=request.user.completed_chapters.all()
+        ).exists()
 
     def __str__(self):
         return self.name
-
-    def save(self, **kwargs):
-        print(self.id)
-        if not self.id:
-            ch = PrereqChapter(name=self.name, id=self.id)
-        else:
-            ch = PrereqChapter.objects.get(id=self.id)
-            ch.name = self.name
-        ch.save()
-        return super().save(**kwargs)
 
     class Meta:
         verbose_name = "محور"
